@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import Button from '../components/Button';
 import useSWR from 'swr';
 import { fetcher } from '../utils/fetcher';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
 import {
   BarChart2,
   TrendingUp,
@@ -21,11 +21,12 @@ import ExportModal from '../components/ExportModal';
 import * as XLSX from 'xlsx';
 
 const CustomYAxisTick = ({ x, y, payload }) => {
-  const maxLength = 15;
+  const isMobile = window.innerWidth < 600;
+  const maxLength = isMobile ? 12 : 18;
   const displayText = payload.value.length > maxLength ? `${payload.value.substring(0, maxLength)}...` : payload.value;
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={4} textAnchor="end" fill="var(--text-secondary)" fontSize={12}>
+      <text x={0} y={0} dy={4} textAnchor="end" fill="var(--text-secondary)" fontSize={11}>
         {displayText}
         <title>{payload.value}</title>
       </text>
@@ -36,6 +37,16 @@ export default function UsageAnalytics() {
   const { data: borrows = [], isLoading: isLoadingBorrows } = useSWR(`${API_BASE_URL}/equipment-borrows`, fetcher);
   const { data: equipmentList = [], isLoading: isLoadingEquip } = useSWR(`${API_BASE_URL}/equipment`, fetcher);
   const isLoading = isLoadingBorrows || isLoadingEquip;
+
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const yAxisWidth = windowWidth < 600 ? 100 : 180;
   
   const today = new Date();
   const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
@@ -584,251 +595,342 @@ export default function UsageAnalytics() {
         <SkeletonLoader type="dashboard" count={4} />
       ) : (
         <>
-          {/* KPI Cards Grid */}
-          <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1.25rem',
-        marginBottom: '1.5rem'
-      }}>
-        {/* KPI 1: Phiếu mượn thiết bị */}
-        <div 
-          className="glass-card hover:bg-[rgba(255,255,255,0.02)] transition-colors" 
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderLeft: '4px solid var(--accent-blue)', cursor: 'pointer' }}
-          onClick={() => handleKpiClick('eq')}
-        >
-          <div style={{ background: 'rgba(59, 130, 246, 0.15)', padding: '0.75rem', borderRadius: '50%', color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Cpu size={24} />
-          </div>
-          <div>
-            <p className="text-label">Mượn Thiết Bị</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem' }}>{eqBorrows.length} <span className="stat-unit">phiếu</span></h2>
-          </div>
-        </div>
+          {/* KPI Summary Strip */}
+          <div className="glass-card kpi-status-summary" style={{ marginBottom: '1.5rem' }}>
+            <div className="kpi-group-static">
+              {/* KPI 1 */}
+              <div className="kpi-item-neutral" onClick={() => handleKpiClick('eq')}>
+                <span className="kpi-status-dot dot-blue"></span>
+                <div>
+                  <p className="kpi-label">Mượn Thiết Bị</p>
+                  <h4 className="kpi-value">
+                    {eqBorrows.length} <span className="kpi-unit">phiếu</span>
+                  </h4>
+                </div>
+              </div>
 
-        {/* KPI 2: Phiếu xuất tiêu hao */}
-        <div 
-          className="glass-card hover:bg-[rgba(255,255,255,0.02)] transition-colors" 
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderLeft: '4px solid var(--accent-purple)', cursor: 'pointer' }}
-          onClick={() => handleKpiClick('cons')}
-        >
-          <div style={{ background: 'rgba(168, 85, 247, 0.15)', padding: '0.75rem', borderRadius: '50%', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Package size={24} />
-          </div>
-          <div>
-            <p className="text-label">Xuất Tiêu Hao</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem' }}>{consBorrows.length} <span className="stat-unit">phiếu</span></h2>
-          </div>
-        </div>
-
-        {/* KPI 3: Lượt mượn trong tháng */}
-        <div 
-          className="glass-card hover:bg-[rgba(255,255,255,0.02)] transition-colors" 
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderLeft: '4px solid var(--accent-amber)', cursor: 'pointer' }}
-          onClick={() => handleKpiClick('month')}
-        >
-          <div style={{ background: 'rgba(245, 158, 11, 0.15)', padding: '0.75rem', borderRadius: '50%', color: 'var(--accent-amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <TrendingUp size={24} />
-          </div>
-          <div>
-            <p className="text-label">Lượt Mượn Tháng Này</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem' }}>{currentMonthBorrowsCount} <span className="stat-unit">lượt</span></h2>
-          </div>
-        </div>
-
-        {/* KPI 4: Thành viên hoạt động */}
-        <div 
-          className="glass-card hover:bg-[rgba(255,255,255,0.02)] transition-colors" 
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderLeft: '4px solid var(--accent-green)', cursor: 'pointer' }}
-          onClick={() => handleKpiClick('users')}
-        >
-          <div style={{ background: 'rgba(16, 185, 129, 0.15)', padding: '0.75rem', borderRadius: '50%', color: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={24} />
-          </div>
-          <div>
-            <p className="text-label">Thành Viên Mượn</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem' }}>{uniqueBorrowersCount} <span className="stat-unit">người</span></h2>
-          </div>
-        </div>
-      </div>
-
-      {/* Dashboard Grid Wrapper */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '1.5rem'
-      }}>
-        {/* Biểu đồ Xu hướng */}
-        <div className="glass-card flex flex-col" style={{ gridColumn: '1 / -1', padding: '1.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
-            {/* Hàng 1: Tiêu đề và Nút chuyển chế độ cố định */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-              <h3 className="font-semibold text-lg flex items-center gap-2" style={{ margin: 0 }}>
-                <TrendingUp size={20} className="text-green-400" />
-                Tần suất mượn & xuất linh kiện
-              </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                <span className="text-muted">(Bấm vào điểm để xem chi tiết)</span>
-                
-                {/* Segmented Control */}
-                <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-overlay)', padding: '2px', borderRadius: '6px', border: '1px solid var(--border-color)', height: '32px', alignItems: 'center' }}>
-                  <button 
-                    type="button"
-                    onClick={() => setViewMode('month')}
-                    style={{
-                      padding: '0 12px',
-                      height: '28px',
-                      borderRadius: '4px',
-                      fontSize: 'var(--text-xs)',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      border: 'none',
-                      backgroundColor: viewMode === 'month' ? 'var(--accent-blue)' : 'transparent',
-                      color: viewMode === 'month' ? '#fff' : 'var(--text-secondary)',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    Tháng
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => setViewMode('range')}
-                    style={{
-                      padding: '0 12px',
-                      height: '28px',
-                      borderRadius: '4px',
-                      fontSize: 'var(--text-xs)',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      border: 'none',
-                      backgroundColor: viewMode === 'range' ? 'var(--accent-blue)' : 'transparent',
-                      color: viewMode === 'range' ? '#fff' : 'var(--text-secondary)',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    Chọn tháng
-                  </button>
+              {/* KPI 2 */}
+              <div className="kpi-item-neutral" onClick={() => handleKpiClick('cons')}>
+                <span className="kpi-status-dot dot-purple"></span>
+                <div>
+                  <p className="kpi-label">Xuất Tiêu Hao</p>
+                  <h4 className="kpi-value">
+                    {consBorrows.length} <span className="kpi-unit">phiếu</span>
+                  </h4>
                 </div>
               </div>
             </div>
 
-            {/* Hàng 2: Bộ chọn chi tiết (Luôn nằm dưới và căn phải) */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', height: '32px' }}>
-              {viewMode === 'month' && (
-                <Select 
-                  className="small-select"
-                  options={monthOptions}
-                  value={selectedMonth}
-                  onChange={setSelectedMonth}
-                  width="150px"
-                />
-              )}
-
-              {viewMode === 'range' && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Select 
-                    className="small-select"
-                    options={monthOptions}
-                    value={startMonth}
-                    onChange={setStartMonth}
-                    width="140px"
-                  />
-                  <span className="text-muted">đến</span>
-                  <Select 
-                    className="small-select"
-                    options={monthOptions}
-                    value={endMonth}
-                    onChange={setEndMonth}
-                    width="140px"
-                  />
+            <div className="kpi-group-active">
+              {/* KPI 3 */}
+              <div className="kpi-item-active active-amber" onClick={() => handleKpiClick('month')}>
+                <div>
+                  <p className="kpi-label" style={{ color: 'var(--accent-amber)' }}>Tháng này</p>
+                  <h4 className="kpi-value" style={{ color: 'var(--accent-amber)' }}>
+                    {currentMonthBorrowsCount} <span className="kpi-unit" style={{ color: 'var(--accent-amber)', opacity: 0.8 }}>lượt</span>
+                  </h4>
                 </div>
-              )}
+              </div>
+
+              {/* KPI 4 */}
+              <div className="kpi-item-active active-green" onClick={() => handleKpiClick('users')}>
+                <div>
+                  <p className="kpi-label" style={{ color: 'var(--accent-green)' }}>Thành viên mượn</p>
+                  <h4 className="kpi-value" style={{ color: 'var(--accent-green)' }}>
+                    {uniqueBorrowersCount} <span className="kpi-unit" style={{ color: 'var(--accent-green)', opacity: 0.8 }}>người</span>
+                  </h4>
+                </div>
+              </div>
             </div>
           </div>
-          <div style={{ width: '100%', height: 320 }}>
-            <ResponsiveContainer debounce={50}>
-              <LineChart data={borrowTrend} margin={{ top: 10, right: 20, left: -20, bottom: 0 }} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey="date" stroke="var(--text-secondary)" tick={{ fontSize: 12 }} />
-                <YAxis stroke="var(--text-secondary)" allowDecimals={false} />
-                <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }} />
-                <Line type="monotone" name="Thiết bị" dataKey="Thiết bị" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
-                <Line type="monotone" name="Tiêu hao" dataKey="Tiêu hao" stroke="#a855f7" strokeWidth={3} dot={{ r: 4, fill: '#a855f7' }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
-        {/* Top Thiết Bị */}
-        <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-          <h3 className="section-heading" style={{ marginBottom: '1rem' }}>
-            <Cpu size={20} style={{ color: 'var(--accent-blue)' }} />
-            Thiết bị mượn nhiều nhất
-          </h3>
-          <div style={{ width: '100%', height: Math.max(280, topEquipments.length * 40 + 40) }}>
-            <ResponsiveContainer debounce={50}>
-              <BarChart
-                data={topEquipments}
-                layout="vertical"
-                margin={{ top: 10, right: 30, left: 10, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-                <XAxis type="number" stroke="var(--text-secondary)" allowDecimals={false} />
-                <YAxis dataKey="name" type="category" width={140} tick={<CustomYAxisTick />} />
-                <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }} />
-                <Bar dataKey="Số lần mượn" fill="var(--accent-blue)" radius={[0, 4, 4, 0]} barSize={20} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          <div className="usage-dashboard-layout" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* 1. Main Usage Trend */}
+            <div className="glass-card chart-card">
+              <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.04)', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <TrendingUp size={18} style={{ color: 'var(--accent-green)' }} />
+                  <span>Tần suất mượn & xuất linh kiện</span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>(Bấm vào điểm để xem chi tiết)</span>
+                  
+                  {/* Segmented Control */}
+                  <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-overlay)', padding: '2px', borderRadius: '6px', border: '1px solid var(--border-color)', height: '32px', alignItems: 'center' }}>
+                    <button 
+                      type="button"
+                      onClick={() => setViewMode('month')}
+                      style={{
+                        padding: '0 12px',
+                        height: '26px',
+                        borderRadius: '4px',
+                        fontSize: 'var(--text-xs)',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        border: 'none',
+                        backgroundColor: viewMode === 'month' ? 'var(--accent-blue)' : 'transparent',
+                        color: viewMode === 'month' ? '#fff' : 'var(--text-secondary)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      Tháng
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setViewMode('range')}
+                      style={{
+                        padding: '0 12px',
+                        height: '26px',
+                        borderRadius: '4px',
+                        fontSize: 'var(--text-xs)',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        border: 'none',
+                        backgroundColor: viewMode === 'range' ? 'var(--accent-blue)' : 'transparent',
+                        color: viewMode === 'range' ? '#fff' : 'var(--text-secondary)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      Chọn tháng
+                    </button>
+                  </div>
 
-        {/* Top Tiêu Hao */}
-        <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-          <h3 className="section-heading" style={{ marginBottom: '1rem' }}>
-            <Package size={20} style={{ color: 'var(--accent-purple)' }} />
-            Tiêu hao xuất nhiều nhất
-          </h3>
-          {topConsumables.length > 0 ? (
-            <div style={{ width: '100%', height: Math.max(280, topConsumables.length * 40 + 40) }}>
-              <ResponsiveContainer debounce={50}>
-                <BarChart
-                  data={topConsumables}
-                  layout="vertical"
-                  margin={{ top: 10, right: 30, left: 10, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-                  <XAxis type="number" stroke="var(--text-secondary)" allowDecimals={false} />
-                  <YAxis dataKey="name" type="category" width={140} tick={<CustomYAxisTick />} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }} />
-                  <Bar dataKey="Số lượng tiêu hao" fill="var(--accent-purple)" radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
+                  {viewMode === 'month' && (
+                    <Select 
+                      className="small-select"
+                      options={monthOptions}
+                      value={selectedMonth}
+                      onChange={setSelectedMonth}
+                      width="150px"
+                    />
+                  )}
+
+                  {viewMode === 'range' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Select 
+                        className="small-select"
+                        options={monthOptions}
+                        value={startMonth}
+                        onChange={setStartMonth}
+                        width="135px"
+                      />
+                      <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none' }}>đến</span>
+                      <Select 
+                        className="small-select"
+                        options={monthOptions}
+                        value={endMonth}
+                        onChange={setEndMonth}
+                        width="135px"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div style={{ width: '100%', height: 320 }}>
+                <ResponsiveContainer debounce={50}>
+                  <LineChart data={borrowTrend} margin={{ top: 10, right: 25, left: -20, bottom: 5 }} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="var(--text-secondary)" 
+                      tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      stroke="var(--text-secondary)" 
+                      tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
+                      allowDecimals={false} 
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <RechartsTooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'var(--bg-card)', 
+                        border: '1px solid var(--border-color)', 
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        color: '#fff',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+                      }} 
+                    />
+                    <Legend 
+                      verticalAlign="top" 
+                      height={36} 
+                      iconType="circle" 
+                      iconSize={8}
+                      wrapperStyle={{ fontSize: '0.75rem', color: 'var(--text-secondary)', paddingBottom: '1rem' }}
+                    />
+                    <Line type="monotone" name="Thiết bị" dataKey="Thiết bị" stroke="var(--accent-blue)" strokeWidth={2.5} dot={{ r: 3, fill: 'var(--accent-blue)', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                    <Line type="monotone" name="Tiêu hao" dataKey="Tiêu hao" stroke="var(--accent-purple)" strokeWidth={2.5} dot={{ r: 3, fill: 'var(--accent-purple)', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          ) : (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-              <Package size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-              <p>Chưa có dữ liệu tiêu hao</p>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Top Borrowers Table */}
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-          <h2 className="section-heading">
-            <Users size={20} style={{ color: 'var(--accent-blue)' }} />
-            Top Thành viên mượn đồ nhiều nhất
-          </h2>
-        </div>
-        
-        <DataTable
-          data={topBorrowers}
-          columns={topBorrowersColumns}
-        />
-      </div>
-      </>
+            {/* 2. Usage Ranking Grid (Top Devices & Top Consumables) */}
+            <div className="ranking-grid" style={topConsumables.length === 0 ? { gridTemplateColumns: windowWidth < 1024 ? '1fr' : '2.2fr 1fr' } : {}}>
+              {/* Top Thiết Bị */}
+              <div className="glass-card chart-card">
+                <h3 className="chart-header">
+                  <Cpu size={18} style={{ color: 'var(--accent-blue)' }} />
+                  Thiết bị mượn nhiều nhất
+                </h3>
+                <div style={{ width: '100%', height: Math.max(280, topEquipments.length * 40 + 40) }}>
+                  <ResponsiveContainer debounce={50}>
+                    <BarChart
+                      data={topEquipments}
+                      layout="vertical"
+                      margin={{ top: 10, right: 40, left: 10, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" width={yAxisWidth} tick={<CustomYAxisTick />} axisLine={false} tickLine={false} />
+                      <RechartsTooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'var(--bg-card)', 
+                          border: '1px solid var(--border-color)', 
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          color: '#fff',
+                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+                        }} 
+                      />
+                      <Bar 
+                        dataKey="Số lần mượn" 
+                        fill="var(--accent-blue)" 
+                        radius={[0, 4, 4, 0]} 
+                        barSize={16} 
+                        label={{ position: 'right', fill: 'var(--text-secondary)', fontSize: 11, offset: 8 }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Top Tiêu Hao */}
+              <div className="glass-card chart-card">
+                <h3 className="chart-header">
+                  <Package size={18} style={{ color: 'var(--accent-purple)' }} />
+                  Tiêu hao xuất nhiều nhất
+                </h3>
+                {topConsumables.length > 0 ? (
+                  <div style={{ width: '100%', height: Math.max(280, topConsumables.length * 40 + 40) }}>
+                    <ResponsiveContainer debounce={50}>
+                      <BarChart
+                        data={topConsumables}
+                        layout="vertical"
+                        margin={{ top: 10, right: 40, left: 10, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" width={yAxisWidth} tick={<CustomYAxisTick />} axisLine={false} tickLine={false} />
+                        <RechartsTooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'var(--bg-card)', 
+                            border: '1px solid var(--border-color)', 
+                            borderRadius: '8px',
+                            fontSize: '0.8rem',
+                            color: '#fff',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+                          }} 
+                        />
+                        <Bar 
+                          dataKey="Số lượng tiêu hao" 
+                          fill="var(--accent-purple)" 
+                          radius={[0, 4, 4, 0]} 
+                          barSize={16} 
+                          label={{ position: 'right', fill: 'var(--text-secondary)', fontSize: 11, offset: 8 }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', padding: '2rem 1.5rem', textAlign: 'center' }}>
+                    <Package size={40} style={{ opacity: 0.15, marginBottom: '0.75rem', color: 'var(--accent-purple)' }} />
+                    <h5 style={{ margin: 0, fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Không có dữ liệu xuất</h5>
+                    <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                      Chưa có phiếu cấp phát linh kiện tiêu hao nào được xuất trong khoảng thời gian đã chọn.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 3. Top Members Table */}
+            <div className="glass-card table-card" style={{ maxWidth: '800px', width: '100%', margin: '0 auto' }}>
+              <h2 className="table-header">
+                <Users size={18} style={{ color: 'var(--accent-blue)' }} />
+                Top Thành viên mượn đồ nhiều nhất
+              </h2>
+              <div style={{ marginTop: '0.5rem', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.825rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)' }}>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: '600', width: '60px' }}>Hạng</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: '600' }}>Mã sinh viên</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: '600' }}>Họ và Tên</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: '600', width: '140px' }}>Số lượt mượn</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topBorrowers.map((borrower, idx) => (
+                      <tr 
+                        key={borrower.mssv} 
+                        style={{ 
+                          borderBottom: idx === topBorrowers.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.03)',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.01)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '22px',
+                            height: '22px',
+                            lineHeight: '22px',
+                            borderRadius: '50%',
+                            background: idx === 0 ? 'rgba(251, 191, 36, 0.15)' : idx === 1 ? 'rgba(156, 163, 175, 0.15)' : idx === 2 ? 'rgba(180, 83, 9, 0.15)' : 'rgba(255,255,255,0.05)',
+                            color: idx === 0 ? '#fbbf24' : idx === 1 ? '#e5e7eb' : idx === 2 ? '#f59e0b' : 'var(--text-secondary)',
+                            fontWeight: '700',
+                            fontSize: '0.75rem',
+                            border: idx === 0 ? '1px solid rgba(251, 191, 36, 0.3)' : idx === 1 ? '1px solid rgba(156, 163, 175, 0.3)' : idx === 2 ? '1px solid rgba(180, 83, 9, 0.3)' : '1px solid rgba(255,255,255,0.1)'
+                          }}>
+                            {idx + 1}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', textAlign: 'left', fontFamily: 'monospace', color: 'var(--text-primary)', letterSpacing: '0.02em' }}>
+                          {borrower.mssv}
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: '500', color: 'var(--text-primary)' }}>
+                          {borrower.name}
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                          <span style={{ 
+                            fontWeight: '700', 
+                            color: 'var(--accent-blue)', 
+                            backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '4px',
+                            fontSize: '0.8rem',
+                            border: '1px solid rgba(59, 130, 246, 0.15)',
+                            display: 'inline-block',
+                            minWidth: '36px'
+                          }}>
+                            {borrower.count}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Modal chi tiết cho biểu đồ ngày */}
@@ -920,6 +1022,176 @@ export default function UsageAnalytics() {
         }}
         onExport={handleExportUsage}
       />
+      <style>{`
+        .kpi-status-summary {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 1rem 1.5rem !important;
+          gap: 2rem;
+        }
+        .kpi-group-static {
+          display: flex;
+          gap: 3.5rem;
+          align-items: center;
+        }
+        .kpi-group-active {
+          display: flex;
+          gap: 1.5rem;
+          align-items: center;
+        }
+        
+        .kpi-item-neutral {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+        .kpi-item-neutral:hover {
+          opacity: 0.8;
+        }
+        .kpi-status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+        .dot-blue {
+          background-color: var(--accent-blue);
+        }
+        .dot-purple {
+          background-color: var(--accent-purple);
+        }
+
+        .kpi-item-active {
+          display: flex;
+          align-items: center;
+          padding: 0.5rem 1.25rem;
+          border-radius: 8px;
+          min-width: 140px;
+          cursor: pointer;
+          transition: background-color 0.2s ease, border-color 0.2s ease !important;
+        }
+
+        .active-amber {
+          background: rgba(245, 158, 11, 0.06);
+          border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+        .active-amber:hover {
+          background: rgba(245, 158, 11, 0.12) !important;
+          border-color: rgba(245, 158, 11, 0.25) !important;
+        }
+
+        .active-green {
+          background: rgba(16, 185, 129, 0.06);
+          border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+        .active-green:hover {
+          background: rgba(16, 185, 129, 0.12) !important;
+          border-color: rgba(16, 185, 129, 0.25) !important;
+        }
+
+        .kpi-label {
+          margin: 0;
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: var(--text-secondary);
+        }
+        .kpi-value {
+          margin: 0.15rem 0 0 0;
+          font-size: 1.6rem;
+          font-weight: 700;
+          line-height: 1.1;
+          display: flex;
+          align-items: baseline;
+          gap: 0.2rem;
+          color: var(--text-primary);
+        }
+        .kpi-unit {
+          font-size: 0.8rem;
+          font-weight: normal;
+          color: var(--text-muted);
+          margin-left: 0.1rem;
+          text-transform: lowercase;
+        }
+
+        .glass-card {
+          background: var(--bg-card) !important;
+          border: 1px solid var(--border-color) !important;
+          box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.25) !important;
+          border-radius: 12px !important;
+          backdrop-filter: none !important;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+        }
+        .glass-card:hover {
+          transform: none !important;
+          border-color: rgba(59, 130, 246, 0.25) !important;
+          box-shadow: 0 6px 22px -3px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .chart-card, .table-card {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          padding: 1.5rem;
+        }
+        .chart-header, .table-header {
+          font-size: 0.85rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin: 0;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          padding-bottom: 0.75rem;
+        }
+
+        .ranking-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+          width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+          .kpi-status-summary {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 1.25rem;
+          }
+          .kpi-group-static {
+            gap: 1.5rem;
+            justify-content: space-between;
+            width: 100%;
+          }
+          .kpi-group-active {
+            gap: 1rem;
+            justify-content: space-between;
+            width: 100%;
+          }
+          .kpi-item-active {
+            flex: 1;
+            min-width: 0;
+          }
+          .ranking-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 600px) {
+          .kpi-group-static {
+            flex-direction: column;
+            gap: 1rem;
+          }
+          .kpi-group-active {
+            flex-direction: column;
+            gap: 1rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }
