@@ -1,13 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
-import { readCollection, writeCollection } from './db.js';
+import { readCollection, writeCollection, syncDatabase } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// Khởi tạo kết nối SQLite database và seed dữ liệu từ JSON cũ
+syncDatabase()
+  .then(() => console.log('SQLite sync initialization complete.'))
+  .catch(err => console.error('SQLite database initialization failed:', err));
 
 // Helper function: Tạo thông báo cho Manager
 function createNotification(type, title, content, details = {}) {
@@ -26,94 +31,6 @@ function createNotification(type, title, content, details = {}) {
   if (notifications.length > 500) notifications.pop();
   writeCollection('notifications', notifications);
 }
-
-// Khởi tạo dữ liệu mẫu nếu file trống
-const initDB = () => {
-  // 1. Members
-  readCollection('users', [
-    { id: '1', mssv: '20210001', name: 'Nguyễn Văn A', role: 'Chủ nhiệm', points: 150, active: false },
-    { id: '2', mssv: '20210002', name: 'Trần Thị B', role: 'Trưởng ban Kỹ thuật', points: 120, active: false },
-    { id: '3', mssv: '20220003', name: 'Lê Văn C', role: 'Thành viên', points: 80, active: false },
-    { id: '4', mssv: '20220004', name: 'Phạm Minh D', role: 'Thành viên', points: 45, active: false }
-  ]);
-
-  // 2. Equipment
-  readCollection('equipment', [
-    { id: 'eq1', name: 'Máy hiện sóng Rigol DS1054Z', code: 'RIG-01', totalQty: 2, borrowedQty: 0, location: 'Tủ A1', status: 'Sẵn sàng', category: 'Thiết bị đo lường', assetType: 'Thiết bị', lifespanHours: 20000, usedHours: 18500 },
-    { id: 'eq2', name: 'Mỏ hàn thiếc Quick 936A', code: 'MOH-01', totalQty: 5, borrowedQty: 1, location: 'Bàn kỹ thuật 1', status: 'Sẵn sàng', category: 'Dụng cụ', assetType: 'Dụng cụ', lifespanHours: 5000, usedHours: 250 },
-    { id: 'eq3', name: 'Kit phát triển Arduino Uno R3', code: 'ARD-01', totalQty: 15, borrowedQty: 4, location: 'Tủ B2', status: 'Sẵn sàng', category: 'Kit phát triển', assetType: 'Thiết bị', lifespanHours: 10000, usedHours: 9500 },
-    { id: 'eq4', name: 'Raspberry Pi 4 Model B (4GB)', code: 'RAS-01', totalQty: 3, borrowedQty: 2, location: 'Tủ B2', status: 'Sẵn sàng', category: 'Kit phát triển', assetType: 'Thiết bị', lifespanHours: 15000, usedHours: 15500 } // Quá khấu hao
-  ]);
-
-  // 3. Borrows
-  readCollection('borrows', [
-    { id: 'b1', equipmentId: 'eq3', mssv: '20220003', borrowerName: 'Lê Văn C', qty: 2, borrowDate: '2026-06-25T10:00:00.000Z', returnDate: null, status: 'Đang mượn' },
-    { id: 'b2', equipmentId: 'eq4', mssv: '20210002', borrowerName: 'Trần Thị B', qty: 1, borrowDate: '2026-06-24T14:30:00.000Z', returnDate: '2026-06-27T16:00:00.000Z', status: 'Đã trả' }
-  ]);
-
-  // 4. Schedules
-  readCollection('schedules', [
-    { id: 's1', day: 'Thứ 2', shift: 'Sáng (08:00 - 11:30)', members: [{ mssv: '20210001', name: 'Nguyễn Văn A' }] },
-    { id: 's2', day: 'Thứ 2', shift: 'Chiều (13:30 - 17:00)', members: [{ mssv: '20210002', name: 'Trần Thị B' }, { mssv: '20220003', name: 'Lê Văn C' }] },
-    { id: 's3', day: 'Thứ 3', shift: 'Tối (18:00 - 21:00)', members: [{ mssv: '20220004', name: 'Phạm Minh D' }] },
-    { id: 's4', day: 'Thứ 4', shift: 'Sáng (08:00 - 11:30)', members: [] },
-    { id: 's5', day: 'Thứ 4', shift: 'Chiều (13:30 - 17:00)', members: [{ mssv: '20210001', name: 'Nguyễn Văn A' }] },
-    { id: 's6', day: 'Thứ 5', shift: 'Tối (18:00 - 21:00)', members: [] }
-  ]);
-
-  // 5. Tasks
-  readCollection('tasks', [
-    { id: 't1', title: 'Thiết kế PCB mạch đo nhiệt độ độ ẩm', project: 'Trạm khí tượng IoT', status: 'todo', assignedTo: '20220003', assignedName: 'Lê Văn C', points: 25 },
-    { id: 't2', title: 'Viết Firmware ESP32 kết nối MQTT', project: 'Trạm khí tượng IoT', status: 'in_progress', assignedTo: '20210002', assignedName: 'Trần Thị B', points: 30 },
-    { id: 't3', title: 'Lập trình ứng dụng Mobile hiển thị dữ liệu', project: 'Trạm khí tượng IoT', status: 'todo', assignedTo: '20220004', assignedName: 'Phạm Minh D', points: 40 },
-    { id: 't4', title: 'Lắp ráp mô hình vỏ hộp 3D', project: 'Trạm khí tượng IoT', status: 'done', assignedTo: '20210001', assignedName: 'Nguyễn Văn A', points: 15 }
-  ]);
-
-  // 6. Attendance
-  readCollection('attendance', [
-    { id: 'a1', mssv: '20210002', name: 'Trần Thị B', checkInTime: '2026-06-27T08:15:00.000Z', checkOutTime: '2026-06-27T11:45:00.000Z', duration: 3.5 },
-    { id: 'a2', mssv: '20220003', name: 'Lê Văn C', checkInTime: '2026-06-27T13:40:00.000Z', checkOutTime: '2026-06-27T17:10:00.000Z', duration: 3.5 }
-  ]);
-
-  // 7. Room Bookings
-  readCollection('bookings', [
-    {
-      id: 'bk1',
-      date: '2026-06-28',
-      slotId: 3,
-      representativeMssv: '20210002',
-      representativeName: 'Trần Thị B',
-      participantsCount: 3,
-      members: [
-        { mssv: '20210002', name: 'Trần Thị B' },
-        { mssv: '20220003', name: 'Lê Văn C' },
-        { mssv: '20220004', name: 'Phạm Minh D' }
-      ]
-    }
-  ]);
-
-  // 8. Waitlist (Danh sách chờ mượn thiết bị)
-  readCollection('waitlist', []);
-
-  // 9. RFID Cards (Quản lý thẻ RFID)
-  readCollection('rfid_cards', [
-    { id: 'rc1', cardId: 'CARD-001', mssv: '20210001', userName: 'Nguyễn Văn A', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 },
-    { id: 'rc2', cardId: 'CARD-002', mssv: '20210002', userName: 'Trần Thị B', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 },
-    { id: 'rc3', cardId: 'CARD-003', mssv: '20220003', userName: 'Lê Văn C', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 },
-    { id: 'rc4', cardId: 'CARD-004', mssv: '20220004', userName: 'Phạm Minh D', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 }
-  ]);
-
-  // 10. RFID History (Lịch sử quét thẻ)
-  readCollection('rfid_history', []);
-
-  // 11. Notifications
-  readCollection('notifications', []);
-
-  // 12. Sessions (Phiên trực Lab thực tế)
-  readCollection('sessions', []);
-};
-
-initDB();
 
 // ==========================================
 // RFID CARD MAPPING (Đọc từ rfid_cards.json)

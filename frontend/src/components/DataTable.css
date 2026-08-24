@@ -212,3 +212,10 @@
   align-items: center;
   gap: 1.5rem;
 }
+
+/* Responsive Table Padding */
+@media (max-width: 1200px) {
+  .data-table th, .data-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}

@@ -188,21 +188,32 @@ export default function ComponentsInventory() {
     {
       accessorKey: 'code',
       header: 'Mã LK',
-      width: '12%',
+      width: '110px',
       sortable: true,
-      cell: (row) => <span style={{ fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{row.code}</span>
+      cell: (row) => {
+        const minThreshold = row.minThreshold || 0;
+        const isOutOfStock = row.totalQty <= 0;
+        const isLowStock = row.totalQty <= minThreshold && row.totalQty > 0;
+        return (
+          <div style={{ fontWeight: '700', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            {isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-red)' }} title="Hết hàng" />}
+            {isLowStock && !isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-amber)' }} title="Sắp hết hàng" />}
+            {row.code || 'N/A'}
+          </div>
+        );
+      }
     },
     {
       accessorKey: 'name',
       header: 'Tên linh kiện',
-      width: '28%',
+      width: 'auto',
       sortable: true,
-      cell: (row) => <div style={{ fontWeight: '500' }}>{row.name}</div>
+      cell: (row) => <div style={{ fontWeight: '600' }}>{row.name}</div>
     },
     {
       accessorKey: 'category',
       header: 'Danh mục',
-      width: '15%',
+      width: '130px',
       sortable: true,
       cell: (row) => (
         <span style={{ background: 'rgba(139, 92, 246, 0.1)', color: 'var(--accent-purple)', padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.85rem' }}>
@@ -213,32 +224,31 @@ export default function ComponentsInventory() {
     {
       accessorKey: 'totalQty',
       header: 'Tồn kho',
-      width: '10%',
+      width: '90px',
       sortable: true,
       align: 'right',
-      cell: (row) => (
-        <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>
-          {row.totalQty} {row.unit || 'Cái'}
-        </div>
-      )
+      cell: (row) => {
+        const minThreshold = row.minThreshold || 0;
+        const displayUnit = row.unit ? ` ${row.unit}` : '';
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ color: row.totalQty > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+              {row.totalQty}{displayUnit}
+            </span>
+          </div>
+        );
+      }
     },
     {
       accessorKey: 'location',
       header: 'Vị trí',
-      width: '10%',
+      width: '110px',
       sortable: true
-    },
-    {
-      accessorKey: 'status',
-      header: 'Trạng thái',
-      width: '10%',
-      sortable: false,
-      cell: (row) => getStatusBadge(row)
     },
     {
       accessorKey: 'actions',
       header: 'Thao tác',
-      width: '15%',
+      width: '210px',
       sortable: false,
       align: 'right',
       cell: (row) => (

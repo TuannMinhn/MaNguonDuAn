@@ -1,62 +1,377 @@
-import fs from 'fs';
+import { Sequelize, DataTypes } from 'sequelize';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
-
-// Đảm bảo thư mục data tồn tại
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+// Khởi tạo kết nối SQLite database
+export const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(DATA_DIR, 'lab.db'),
+  logging: false, // Tắt logging SQL thô để console sạch hơn
+});
+
+// ==========================================
+// ĐỊNH NGHĨA MODELS (KHUNG BẢNG SQLITE)
+// ==========================================
+
+// 1. Bảng User (Thành viên)
+export const User = sequelize.define('User', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  mssv: { type: DataTypes.TEXT, unique: true, allowNull: false },
+  name: { type: DataTypes.TEXT, allowNull: false },
+  role: { type: DataTypes.TEXT, defaultValue: 'Thành viên' },
+  points: { type: DataTypes.INTEGER, defaultValue: 0 },
+  active: { type: DataTypes.BOOLEAN, defaultValue: false }
+}, { tableName: 'users', timestamps: false });
+
+// 2. Bảng Equipment (Thiết bị & Linh kiện)
+export const Equipment = sequelize.define('Equipment', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  name: { type: DataTypes.TEXT, allowNull: false },
+  code: { type: DataTypes.TEXT, unique: true, allowNull: false },
+  totalQty: { type: DataTypes.INTEGER, defaultValue: 0 },
+  maxQty: { type: DataTypes.INTEGER, defaultValue: 0 },
+  borrowedQty: { type: DataTypes.INTEGER, defaultValue: 0 },
+  location: { type: DataTypes.TEXT, defaultValue: 'Kho Lab' },
+  status: { type: DataTypes.TEXT, defaultValue: 'Sẵn sàng' },
+  category: { type: DataTypes.TEXT, defaultValue: 'Khác' },
+  assetType: { type: DataTypes.TEXT, defaultValue: 'Thiết bị' },
+  unit: { type: DataTypes.TEXT, defaultValue: 'Cái' },
+  minThreshold: { type: DataTypes.INTEGER, defaultValue: 0 },
+  usedHours: { type: DataTypes.INTEGER, defaultValue: 0 },
+  lifespanHours: { type: DataTypes.INTEGER, defaultValue: 0 }
+}, { tableName: 'equipment', timestamps: false });
+
+// 3. Bảng Borrow (Phiếu mượn trả)
+export const Borrow = sequelize.define('Borrow', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  equipmentId: { type: DataTypes.TEXT, allowNull: false },
+  mssv: { type: DataTypes.TEXT, allowNull: false },
+  borrowerName: { type: DataTypes.TEXT, allowNull: false },
+  qty: { type: DataTypes.INTEGER, defaultValue: 1 },
+  borrowDate: { type: DataTypes.TEXT, allowNull: false },
+  returnDate: { type: DataTypes.TEXT },
+  status: { type: DataTypes.TEXT, defaultValue: 'Đang mượn' },
+  expectedReturnDate: { type: DataTypes.TEXT },
+  initialCondition: { type: DataTypes.TEXT },
+  borrowNotes: { type: DataTypes.TEXT },
+  returnNotes: { type: DataTypes.TEXT },
+  finalCondition: { type: DataTypes.TEXT }
+}, { tableName: 'borrows', timestamps: false });
+
+// 4. Bảng Schedule (Lịch trực)
+export const Schedule = sequelize.define('Schedule', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  day: { type: DataTypes.TEXT, allowNull: false },
+  shift: { type: DataTypes.TEXT, allowNull: false },
+  members: { type: DataTypes.TEXT, defaultValue: '[]' } // Lưu trữ JSON string của danh sách thành viên trực
+}, { tableName: 'schedules', timestamps: false });
+
+// 5. Bảng Task (Nhiệm vụ & Công việc)
+export const Task = sequelize.define('Task', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  title: { type: DataTypes.TEXT, allowNull: false },
+  project: { type: DataTypes.TEXT },
+  status: { type: DataTypes.TEXT, defaultValue: 'todo' },
+  assignedTo: { type: DataTypes.TEXT },
+  assignedName: { type: DataTypes.TEXT },
+  points: { type: DataTypes.INTEGER, defaultValue: 0 }
+}, { tableName: 'tasks', timestamps: false });
+
+// 6. Bảng Attendance (Lịch sử check-in Lab)
+export const Attendance = sequelize.define('Attendance', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  mssv: { type: DataTypes.TEXT, allowNull: false },
+  name: { type: DataTypes.TEXT, allowNull: false },
+  checkInTime: { type: DataTypes.TEXT, allowNull: false },
+  checkOutTime: { type: DataTypes.TEXT },
+  duration: { type: DataTypes.REAL, defaultValue: 0 },
+  checkInMethod: { type: DataTypes.TEXT, defaultValue: 'Manual' },
+  checkOutMethod: { type: DataTypes.TEXT, defaultValue: 'Manual' }
+}, { tableName: 'attendance', timestamps: false });
+
+// 7. Bảng Booking (Lịch đặt phòng Lab)
+export const Booking = sequelize.define('Booking', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  date: { type: DataTypes.TEXT, allowNull: false },
+  slotId: { type: DataTypes.TEXT, allowNull: false },
+  representativeName: { type: DataTypes.TEXT, allowNull: false },
+  representativeMssv: { type: DataTypes.TEXT, allowNull: false },
+  roomName: { type: DataTypes.TEXT },
+  purpose: { type: DataTypes.TEXT },
+  status: { type: DataTypes.TEXT, defaultValue: 'pending' },
+  members: { type: DataTypes.TEXT, defaultValue: '[]' }, // JSON string
+  checkedIn: { type: DataTypes.BOOLEAN, defaultValue: false },
+  checkedInAt: { type: DataTypes.TEXT },
+  checkedInBy: { type: DataTypes.TEXT },
+  checkedInByName: { type: DataTypes.TEXT },
+  checkedOut: { type: DataTypes.BOOLEAN, defaultValue: false },
+  checkedOutAt: { type: DataTypes.TEXT }
+}, { tableName: 'bookings', timestamps: false });
+
+// 8. Bảng RfidCard (Thẻ RFID thành viên)
+export const RfidCard = sequelize.define('RfidCard', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  cardId: { type: DataTypes.TEXT, unique: true, allowNull: false },
+  mssv: { type: DataTypes.TEXT, allowNull: false },
+  userName: { type: DataTypes.TEXT, allowNull: false },
+  status: { type: DataTypes.TEXT, defaultValue: 'active' },
+  registeredDate: { type: DataTypes.TEXT },
+  lastUsed: { type: DataTypes.TEXT },
+  usageCount: { type: DataTypes.INTEGER, defaultValue: 0 }
+}, { tableName: 'rfid_cards', timestamps: false });
+
+// 9. Bảng RfidHistory (Lịch sử quét thẻ RFID)
+export const RfidHistory = sequelize.define('RfidHistory', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  cardId: { type: DataTypes.TEXT, allowNull: false },
+  mssv: { type: DataTypes.TEXT },
+  userName: { type: DataTypes.TEXT },
+  action: { type: DataTypes.TEXT },
+  module: { type: DataTypes.TEXT },
+  timestamp: { type: DataTypes.TEXT, allowNull: false },
+  success: { type: DataTypes.BOOLEAN, defaultValue: true }
+}, { tableName: 'rfid_history', timestamps: false });
+
+// 10. Bảng Notification (Thông báo)
+export const Notification = sequelize.define('Notification', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  type: { type: DataTypes.TEXT, defaultValue: 'info' },
+  title: { type: DataTypes.TEXT, allowNull: false },
+  content: { type: DataTypes.TEXT },
+  details: { type: DataTypes.TEXT, defaultValue: '{}' }, // JSON string
+  timestamp: { type: DataTypes.TEXT, allowNull: false },
+  read: { type: DataTypes.BOOLEAN, defaultValue: false }
+}, { tableName: 'notifications', timestamps: false });
+
+// 11. Bảng Session (Phiên trực Lab thực tế)
+export const Session = sequelize.define('Session', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  date: { type: DataTypes.TEXT, allowNull: false },
+  slotId: { type: DataTypes.TEXT, allowNull: false },
+  bookingId: { type: DataTypes.TEXT },
+  attendees: { type: DataTypes.TEXT, defaultValue: '[]' } // JSON string
+}, { tableName: 'sessions', timestamps: false });
+
+// 12. Bảng Catalog (Danh mục thiết bị gốc)
+export const Catalog = sequelize.define('Catalog', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  name: { type: DataTypes.TEXT, allowNull: false },
+  codePrefix: { type: DataTypes.TEXT, allowNull: false },
+  category: { type: DataTypes.TEXT },
+  assetType: { type: DataTypes.TEXT, defaultValue: 'Thiết bị' },
+  unit: { type: DataTypes.TEXT, defaultValue: 'Cái' },
+  lifespanHours: { type: DataTypes.INTEGER, defaultValue: 0 },
+  description: { type: DataTypes.TEXT }
+}, { tableName: 'equipment_catalog', timestamps: false });
+
+// 13. Bảng Maintenance (Sửa chữa bảo trì)
+export const Maintenance = sequelize.define('Maintenance', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  equipmentId: { type: DataTypes.TEXT, allowNull: false },
+  equipmentName: { type: DataTypes.TEXT, allowNull: false },
+  issueDescription: { type: DataTypes.TEXT, allowNull: false },
+  status: { type: DataTypes.TEXT, defaultValue: 'Đang sửa' },
+  cost: { type: DataTypes.REAL, defaultValue: 0 },
+  reportedDate: { type: DataTypes.TEXT, allowNull: false },
+  resolvedDate: { type: DataTypes.TEXT },
+  notes: { type: DataTypes.TEXT, defaultValue: '[]' } // JSON string
+}, { tableName: 'maintenance', timestamps: false });
+
+// ==========================================
+// ĐỒNG BỘ & SEED DỮ LIỆU TỪ JSON CŨ SANG SQLITE
+// ==========================================
+export async function syncDatabase() {
+  await sequelize.sync();
+  console.log('Database SQLite & tables synced successfully.');
+
+  const seedIfEmpty = async (Model, fileName, defaultData = []) => {
+    try {
+      const count = await Model.count();
+      if (count === 0) {
+        console.log(`Bảng ${Model.tableName} rỗng. Đang seed dữ liệu...`);
+        const jsonPath = path.join(DATA_DIR, `${fileName}.json`);
+        let data = defaultData;
+        if (fs.existsSync(jsonPath)) {
+          try {
+            const content = fs.readFileSync(jsonPath, 'utf-8');
+            data = JSON.parse(content || '[]');
+          } catch (e) {
+            console.error(`Không thể đọc file JSON cũ ${fileName}.json:`, e);
+          }
+        }
+
+        const mappedData = data.map(item => {
+          const mapped = { ...item };
+          Object.keys(Model.rawAttributes).forEach(key => {
+            const attr = Model.rawAttributes[key];
+            if (attr.type instanceof DataTypes.TEXT && (typeof mapped[key] === 'object' && mapped[key] !== null)) {
+              mapped[key] = JSON.stringify(mapped[key]);
+            }
+          });
+          return mapped;
+        });
+
+        if (mappedData.length > 0) {
+          await Model.bulkCreate(mappedData);
+          console.log(`Đã seed thành công ${mappedData.length} dòng cho bảng ${Model.tableName}.`);
+        }
+      }
+    } catch (err) {
+      console.error(`Lỗi khi seed bảng ${Model.tableName}:`, err);
+    }
+  };
+
+  // Tiến hành seed lần lượt 13 bảng
+  await seedIfEmpty(User, 'users', [
+    { id: '1', mssv: '20210001', name: 'Nguyễn Văn A', role: 'Chủ nhiệm', points: 150, active: false },
+    { id: '2', mssv: '20210002', name: 'Trần Thị B', role: 'Trưởng ban Kỹ thuật', points: 120, active: false },
+    { id: '3', mssv: '20220003', name: 'Lê Văn C', role: 'Thành viên', points: 80, active: false },
+    { id: '4', mssv: '20220004', name: 'Phạm Minh D', role: 'Thành viên', points: 45, active: false }
+  ]);
+
+  await seedIfEmpty(Equipment, 'equipment', [
+    { id: 'eq1', name: 'Máy hiện sóng Rigol DS1054Z', code: 'RIG-01', totalQty: 2, maxQty: 2, borrowedQty: 0, location: 'Tủ A1', status: 'Sẵn sàng', category: 'Thiết bị đo lường', assetType: 'Thiết bị', lifespanHours: 20000, usedHours: 18500 },
+    { id: 'eq2', name: 'Mỏ hàn thiếc Quick 936A', code: 'MOH-01', totalQty: 5, maxQty: 5, borrowedQty: 1, location: 'Bàn kỹ thuật 1', status: 'Sẵn sàng', category: 'Dụng cụ', assetType: 'Dụng cụ', lifespanHours: 5000, usedHours: 250 },
+    { id: 'eq3', name: 'Kit phát triển Arduino Uno R3', code: 'ARD-01', totalQty: 15, maxQty: 15, borrowedQty: 4, location: 'Tủ B2', status: 'Sẵn sàng', category: 'Kit phát triển', assetType: 'Thiết bị', lifespanHours: 10000, usedHours: 9500 },
+    { id: 'eq4', name: 'Raspberry Pi 4 Model B (4GB)', code: 'RAS-01', totalQty: 3, maxQty: 3, borrowedQty: 2, location: 'Tủ B2', status: 'Sẵn sàng', category: 'Kit phát triển', assetType: 'Thiết bị', lifespanHours: 15000, usedHours: 15500 }
+  ]);
+
+  await seedIfEmpty(Borrow, 'borrows', [
+    { id: 'b1', equipmentId: 'eq3', mssv: '20220003', borrowerName: 'Lê Văn C', qty: 2, borrowDate: '2026-06-25T10:00:00.000Z', returnDate: null, status: 'Đang mượn' },
+    { id: 'b2', equipmentId: 'eq4', mssv: '20210002', borrowerName: 'Trần Thị B', qty: 1, borrowDate: '2026-06-24T14:30:00.000Z', returnDate: '2026-06-27T16:00:00.000Z', status: 'Đã trả' }
+  ]);
+
+  await seedIfEmpty(Schedule, 'schedules', [
+    { id: 's1', day: 'Thứ 2', shift: 'Sáng (08:00 - 11:30)', members: [{ mssv: '20210001', name: 'Nguyễn Văn A' }] },
+    { id: 's2', day: 'Thứ 2', shift: 'Chiều (13:30 - 17:00)', members: [{ mssv: '20210002', name: 'Trần Thị B' }, { mssv: '20220003', name: 'Lê Văn C' }] },
+    { id: 's3', day: 'Thứ 3', shift: 'Tối (18:00 - 21:00)', members: [{ mssv: '20220004', name: 'Phạm Minh D' }] },
+    { id: 's4', day: 'Thứ 4', shift: 'Sáng (08:00 - 11:30)', members: [] },
+    { id: 's5', day: 'Thứ 4', shift: 'Chiều (13:30 - 17:00)', members: [{ mssv: '20210001', name: 'Nguyễn Văn A' }] },
+    { id: 's6', day: 'Thứ 5', shift: 'Tối (18:00 - 21:00)', members: [] }
+  ]);
+
+  await seedIfEmpty(Task, 'tasks', [
+    { id: 't1', title: 'Thiết kế PCB mạch đo nhiệt độ độ ẩm', project: 'Trạm khí tượng IoT', status: 'todo', assignedTo: '20220003', assignedName: 'Lê Văn C', points: 25 },
+    { id: 't2', title: 'Viết Firmware ESP32 kết nối MQTT', project: 'Trạm khí tượng IoT', status: 'in_progress', assignedTo: '20210002', assignedName: 'Trần Thị B', points: 30 },
+    { id: 't3', title: 'Lập trình ứng dụng Mobile hiển thị dữ liệu', project: 'Trạm khí tượng IoT', status: 'todo', assignedTo: '20220004', assignedName: 'Phạm Minh D', points: 40 },
+    { id: 't4', title: 'Lắp ráp mô hình vỏ hộp 3D', project: 'Trạm khí tượng IoT', status: 'done', assignedTo: '20210001', assignedName: 'Nguyễn Văn A', points: 15 }
+  ]);
+
+  await seedIfEmpty(Attendance, 'attendance', [
+    { id: 'a1', mssv: '20210002', name: 'Trần Thị B', checkInTime: '2026-06-27T08:15:00.000Z', checkOutTime: '2026-06-27T11:45:00.000Z', duration: 3.5 },
+    { id: 'a2', mssv: '20220003', name: 'Lê Văn C', checkInTime: '2026-06-27T13:40:00.000Z', checkOutTime: '2026-06-27T17:10:00.000Z', duration: 3.5 }
+  ]);
+
+  await seedIfEmpty(Booking, 'bookings', [
+    { id: 'b_bk1', date: '2026-06-27', slotId: 'afternoon_1', representativeName: 'Nguyễn Văn A', representativeMssv: '20210001', roomName: 'Phòng thực hành IoT', purpose: 'Nghiên cứu khoa học', status: 'approved', members: [], checkedIn: false }
+  ]);
+
+  await seedIfEmpty(RfidCard, 'rfid_cards', [
+    { id: 'rc1', cardId: 'CARD-001', mssv: '20210001', userName: 'Nguyễn Văn A', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 },
+    { id: 'rc2', cardId: 'CARD-002', mssv: '20210002', userName: 'Trần Thị B', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 },
+    { id: 'rc3', cardId: 'CARD-003', mssv: '20220003', userName: 'Lê Văn C', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 },
+    { id: 'rc4', cardId: 'CARD-004', mssv: '20220004', userName: 'Phạm Minh D', status: 'active', registeredDate: '2026-06-01T08:00:00.000Z', lastUsed: null, usageCount: 0 }
+  ]);
+
+  await seedIfEmpty(RfidHistory, 'rfid_history', []);
+  await seedIfEmpty(Notification, 'notifications', []);
+  await seedIfEmpty(Session, 'sessions', []);
+  await seedIfEmpty(Catalog, 'equipment_catalog', []);
+  await seedIfEmpty(Maintenance, 'maintenance', []);
+
+  // Load dữ liệu từ SQLite vào Cache sau khi đã đồng bộ & seed xong
+  const collections = Object.keys(collectionToModelMap);
+  for (const colName of collections) {
+    const Model = collectionToModelMap[colName];
+    const rows = await Model.findAll();
+    cache[colName] = rows.map(row => {
+      const data = row.get({ plain: true });
+      Object.keys(Model.rawAttributes).forEach(key => {
+        const attr = Model.rawAttributes[key];
+        if (attr.type instanceof DataTypes.TEXT && typeof data[key] === 'string') {
+          if (data[key].startsWith('[') || data[key].startsWith('{')) {
+            try {
+              data[key] = JSON.parse(data[key]);
+            } catch (e) {}
+          }
+        }
+      });
+      return data;
+    });
+  }
+  console.log('Cache populated from SQLite database.');
+}
+
+// Map các collection name sang Model tương ứng
+const collectionToModelMap = {
+  users: User,
+  equipment: Equipment,
+  borrows: Borrow,
+  schedules: Schedule,
+  tasks: Task,
+  attendance: Attendance,
+  bookings: Booking,
+  rfid_cards: RfidCard,
+  rfid_history: RfidHistory,
+  notifications: Notification,
+  sessions: Session,
+  equipment_catalog: Catalog,
+  maintenance: Maintenance
+};
+
+function getModelByCollectionName(colName) {
+  const model = collectionToModelMap[colName];
+  if (!model) {
+    throw new Error(`Unknown collection name: ${colName}`);
+  }
+  return model;
+}
+
 const cache = {};
 
-/**
- * Đọc dữ liệu từ file JSON. Nếu file chưa tồn tại, tạo mới với nội dung [] hoặc dữ liệu mặc định.
- */
+// Giao diện đọc collection đồng bộ giống hệt file db.js cũ (drop-in replacement)
 export function readCollection(collectionName, defaultData = []) {
   if (cache[collectionName]) {
     return cache[collectionName];
   }
-  
-  const filePath = path.join(DATA_DIR, `${collectionName}.json`);
-  if (!fs.existsSync(filePath)) {
-    writeCollection(collectionName, defaultData);
-    return defaultData;
-  }
-  try {
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const parsedData = JSON.parse(content || '[]');
-    cache[collectionName] = parsedData;
-    return parsedData;
-  } catch (error) {
-    console.error(`Lỗi khi đọc collection ${collectionName}:`, error);
-    return defaultData;
-  }
+  return defaultData;
 }
 
-/**
- * Ghi dữ liệu nguyên tử (atomic write) vào file JSON nhằm tránh hỏng file khi ghi gián đoạn.
- */
+// Giao diện ghi collection đồng bộ, tự động ghi xuống SQLite bất đồng bộ dưới background
 export function writeCollection(collectionName, data) {
-  // Cập nhật Cache ngay lập tức để các request sau đọc được tức thì (O(1))
   cache[collectionName] = data;
 
-  const filePath = path.join(DATA_DIR, `${collectionName}.json`);
-  const tempPath = `${filePath}.tmp`;
-  try {
-    const content = JSON.stringify(data, null, 2);
-    fs.writeFileSync(tempPath, content, 'utf-8');
-    fs.renameSync(tempPath, filePath);
-    return true;
-  } catch (error) {
-    console.error(`Lỗi khi ghi collection ${collectionName}:`, error);
-    if (fs.existsSync(tempPath)) {
-      try { fs.unlinkSync(tempPath); } catch (_) {}
-    }
-    return false;
-  }
+  const Model = getModelByCollectionName(collectionName);
+  const mappedData = data.map(item => {
+    const mapped = { ...item };
+    Object.keys(Model.rawAttributes).forEach(key => {
+      const attr = Model.rawAttributes[key];
+      if (attr.type instanceof DataTypes.TEXT && (typeof mapped[key] === 'object' && mapped[key] !== null)) {
+        mapped[key] = JSON.stringify(mapped[key]);
+      }
+    });
+    return mapped;
+  });
+
+  // Ghi xuống SQLite bất đồng bộ
+  Model.destroy({ truncate: true })
+    .then(() => {
+      if (mappedData.length > 0) {
+        return Model.bulkCreate(mappedData);
+      }
+    })
+    .catch(err => {
+      console.error(`Lỗi ghi collection ${collectionName} xuống SQLite dưới background:`, err);
+    });
+
+  return true;
 }
