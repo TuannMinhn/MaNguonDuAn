@@ -1,0 +1,6469 @@
+[
+  {
+    "id": "eq-mrbve89uzqvmqo9y17n",
+    "name": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "code": "MEA-01",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 1,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-egilmakay",
+        "serialNumber": "MEA-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-r3ckjju8t",
+        "serialNumber": "MEA-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2un165ak2",
+        "serialNumber": "MEA-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-267t3q1vl",
+        "serialNumber": "MEA-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fyn31wf9g",
+        "serialNumber": "MEA-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-e2qgxhrvb",
+        "serialNumber": "MEA-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-w0sc1xw72",
+        "serialNumber": "MEA-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yu3f17q9y",
+        "serialNumber": "MEA-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-z87wkub9m",
+        "serialNumber": "MEA-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6p7q0m8jg",
+        "serialNumber": "MEA-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u8j3urg5p6j3",
+    "name": "Đồng hồ vạn năng kỹ thuật số UNI-T UT61E",
+    "code": "MEA-02",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 1,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-qr5pcyiry",
+        "serialNumber": "MEA-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-04zw0moxz",
+        "serialNumber": "MEA-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-46x7qhc3g",
+        "serialNumber": "MEA-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3bpxt236q",
+        "serialNumber": "MEA-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mszgl6sf4",
+        "serialNumber": "MEA-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6e5fjcpry",
+        "serialNumber": "MEA-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vfsa0xvzj",
+        "serialNumber": "MEA-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pwo4d9x49",
+        "serialNumber": "MEA-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-b4ueyhkce",
+        "serialNumber": "MEA-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3aqwr2fwe",
+        "serialNumber": "MEA-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uj5ptfqyxn0l",
+    "name": "Máy phát xung/hàm Siglent SDG1032X",
+    "code": "MEA-03",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-x4xnhji5k",
+        "serialNumber": "MEA-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9fssn7wb2",
+        "serialNumber": "MEA-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vtirhzbgy",
+        "serialNumber": "MEA-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-t3zxdhhxj",
+        "serialNumber": "MEA-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2vk8f9v6t",
+        "serialNumber": "MEA-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-g066jfqvp",
+        "serialNumber": "MEA-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jaq8hmg8i",
+        "serialNumber": "MEA-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mo2y5roc5",
+        "serialNumber": "MEA-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mt661ciyq",
+        "serialNumber": "MEA-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3bkd6skum",
+        "serialNumber": "MEA-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uc7cwedmc5kj",
+    "name": "Nguồn DC biến đổi Korad KA3005D (30V/5A)",
+    "code": "MEA-04",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-s3j7od9qu",
+        "serialNumber": "MEA-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kx24mdfd4",
+        "serialNumber": "MEA-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2td886fyo",
+        "serialNumber": "MEA-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4siri89bq",
+        "serialNumber": "MEA-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jyn0eh590",
+        "serialNumber": "MEA-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0e5n88eex",
+        "serialNumber": "MEA-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mbsfqiml0",
+        "serialNumber": "MEA-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-03qmzm1gy",
+        "serialNumber": "MEA-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ctab127pa",
+        "serialNumber": "MEA-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wa9p9r4qh",
+        "serialNumber": "MEA-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uydhsba7w068",
+    "name": "Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+    "code": "MEA-05",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 2,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-melrv3akb",
+        "serialNumber": "MEA-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qhajermzz",
+        "serialNumber": "MEA-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mruj3ic7t",
+        "serialNumber": "MEA-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gjqlw1jrn",
+        "serialNumber": "MEA-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gr70fnba0",
+        "serialNumber": "MEA-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0twubuxbx",
+        "serialNumber": "MEA-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-744j1bgvb",
+        "serialNumber": "MEA-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vec50zjlw",
+        "serialNumber": "MEA-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ikwx95dt8",
+        "serialNumber": "MEA-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9b56wquy5",
+        "serialNumber": "MEA-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ui8xbh2tw00o",
+    "name": "Máy phân tích phổ cầm tay (TinySA) để đo tần số sóng RF (433MHz, 2.4GHz)",
+    "code": "MEA-06",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-h0knrkn94",
+        "serialNumber": "MEA-06-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2jgyc5sov",
+        "serialNumber": "MEA-06-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-te1jx2f48",
+        "serialNumber": "MEA-06-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-txneukvu0",
+        "serialNumber": "MEA-06-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-zqhfopa5j",
+        "serialNumber": "MEA-06-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-03zrvca36",
+        "serialNumber": "MEA-06-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jubw1pc76",
+        "serialNumber": "MEA-06-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-04p9zerad",
+        "serialNumber": "MEA-06-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3las479o8",
+        "serialNumber": "MEA-06-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-eqgfo766f",
+        "serialNumber": "MEA-06-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uq5uypex4vak",
+    "name": "Camera nhiệt cầm tay (Thermal Imager) kiểm tra độ nóng của chip và linh kiện trên mạch",
+    "code": "MEA-07",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-tvdgflqh2",
+        "serialNumber": "MEA-07-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kijl6peul",
+        "serialNumber": "MEA-07-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-eb3pkdg9k",
+        "serialNumber": "MEA-07-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-p1his7mf5",
+        "serialNumber": "MEA-07-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dmy8t9qm0",
+        "serialNumber": "MEA-07-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-26m4bm9zb",
+        "serialNumber": "MEA-07-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-8zkpn4bqy",
+        "serialNumber": "MEA-07-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c7lygxvde",
+        "serialNumber": "MEA-07-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ry2g4vcj1",
+        "serialNumber": "MEA-07-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vuvepepxo",
+        "serialNumber": "MEA-07-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ui49kzcxid7",
+    "name": "Kit phát triển Arduino Uno R3",
+    "code": "DEV-01",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-636medr3v",
+        "serialNumber": "DEV-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c1zbvv6ed",
+        "serialNumber": "DEV-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-73tu0fck1",
+        "serialNumber": "DEV-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-juk79zaet",
+        "serialNumber": "DEV-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-we907lsaq",
+        "serialNumber": "DEV-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qgfo64azj",
+        "serialNumber": "DEV-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1ltfz6pf0",
+        "serialNumber": "DEV-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-w821jvrot",
+        "serialNumber": "DEV-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1boi2re49",
+        "serialNumber": "DEV-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fkvfqv985",
+        "serialNumber": "DEV-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uqktrxe10otj",
+    "name": "Kit phát triển Arduino Nano / Mega 2560",
+    "code": "DEV-02",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-cc72qd2lq",
+        "serialNumber": "DEV-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gmgr97ncu",
+        "serialNumber": "DEV-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kz6nte909",
+        "serialNumber": "DEV-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-toaxt2ref",
+        "serialNumber": "DEV-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wj5i17dy6",
+        "serialNumber": "DEV-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-iu13mvhz9",
+        "serialNumber": "DEV-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lled54ofn",
+        "serialNumber": "DEV-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-olo1quakz",
+        "serialNumber": "DEV-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5mug4ogkk",
+        "serialNumber": "DEV-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-77upryqe0",
+        "serialNumber": "DEV-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uzgwnucprete",
+    "name": "Raspberry Pi 4 Model B (4GB) / Raspberry Pi 5 (8GB)",
+    "code": "DEV-03",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 1,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-keg4o6g7g",
+        "serialNumber": "DEV-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qjgououwd",
+        "serialNumber": "DEV-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gsqcfac4n",
+        "serialNumber": "DEV-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dpspqbfoc",
+        "serialNumber": "DEV-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-szqy1nvjo",
+        "serialNumber": "DEV-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ntdq2av6e",
+        "serialNumber": "DEV-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-bhej4k85i",
+        "serialNumber": "DEV-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-oh960tkd4",
+        "serialNumber": "DEV-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-z8v34ymuu",
+        "serialNumber": "DEV-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-m02y5ygqr",
+        "serialNumber": "DEV-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u19llplxuci",
+    "name": "Kit IoT ESP32-WROOM-32E (Wi-Fi + Bluetooth)",
+    "code": "DEV-04",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-gsylparfk",
+        "serialNumber": "DEV-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k2wxzgmuq",
+        "serialNumber": "DEV-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dq6uw2yuc",
+        "serialNumber": "DEV-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-oq8gby79h",
+        "serialNumber": "DEV-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ntd3pp46k",
+        "serialNumber": "DEV-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-sq4acy58t",
+        "serialNumber": "DEV-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-q0z0kklsh",
+        "serialNumber": "DEV-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-x97gpma03",
+        "serialNumber": "DEV-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4m8qw6pdm",
+        "serialNumber": "DEV-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tpvsi4jsc",
+        "serialNumber": "DEV-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u34np94r3vbi",
+    "name": "Kit AI Edge ESP32-CAM (Tích hợp camera nhận diện khuôn mặt)",
+    "code": "DEV-05",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-2totmfwvj",
+        "serialNumber": "DEV-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dfeyxwc19",
+        "serialNumber": "DEV-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pn31wan74",
+        "serialNumber": "DEV-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5tiy0qtba",
+        "serialNumber": "DEV-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-cn6ubi7lo",
+        "serialNumber": "DEV-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fvice45ae",
+        "serialNumber": "DEV-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tud3mjd6x",
+        "serialNumber": "DEV-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5a9ktgj70",
+        "serialNumber": "DEV-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kiv3w6k52",
+        "serialNumber": "DEV-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5dlupqxy5",
+        "serialNumber": "DEV-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u73arev8dfqq",
+    "name": "Kit STM32F103C8T6 (Blue Pill) & STM32F407 Discovery (Dòng ARM Cortex-M)",
+    "code": "DEV-06",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-37713yn93",
+        "serialNumber": "DEV-06-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ibewf9309",
+        "serialNumber": "DEV-06-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-igq028dbi",
+        "serialNumber": "DEV-06-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6u19h3vl2",
+        "serialNumber": "DEV-06-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-exn9nvgnh",
+        "serialNumber": "DEV-06-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-eiok2fex1",
+        "serialNumber": "DEV-06-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6qgln0xoj",
+        "serialNumber": "DEV-06-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lr4pw0kxx",
+        "serialNumber": "DEV-06-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ba9b30zri",
+        "serialNumber": "DEV-06-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k1h24smbm",
+        "serialNumber": "DEV-06-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89un3ov7fcmsje",
+    "name": "Kit học tập vi mạch FPGA (Xilinx Spartan-7 hoặc Cyclone IV)",
+    "code": "DEV-07",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 1,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-ru8vu0pyq",
+        "serialNumber": "DEV-07-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-epfewp3v3",
+        "serialNumber": "DEV-07-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7nm5e90yd",
+        "serialNumber": "DEV-07-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-p257h48l4",
+        "serialNumber": "DEV-07-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-d74g2kpia",
+        "serialNumber": "DEV-07-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k19cync8l",
+        "serialNumber": "DEV-07-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-bk2x3k0h2",
+        "serialNumber": "DEV-07-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-sg3l67wdl",
+        "serialNumber": "DEV-07-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3ozrwhn25",
+        "serialNumber": "DEV-07-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wu29as76x",
+        "serialNumber": "DEV-07-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u5ewvujpuqs7",
+    "name": "Kit máy tính nhúng NVIDIA Jetson Nano Developer Kit (Phục vụ làm Robot AI, OpenCV)",
+    "code": "DEV-08",
+    "category": "Kit phát triển",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-wtw3tpqmz",
+        "serialNumber": "DEV-08-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-hsraih5in",
+        "serialNumber": "DEV-08-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4gnl52hpb",
+        "serialNumber": "DEV-08-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lu2l0oqij",
+        "serialNumber": "DEV-08-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-s9h4j66ci",
+        "serialNumber": "DEV-08-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pcb2xdk7c",
+        "serialNumber": "DEV-08-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7f2hfshwj",
+        "serialNumber": "DEV-08-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ljq2bg3g2",
+        "serialNumber": "DEV-08-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4f9ur5qnt",
+        "serialNumber": "DEV-08-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fj33evhsw",
+        "serialNumber": "DEV-08-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ulm4vn6z20b",
+    "name": "Module mạng không dây LoRa SX1278 (Truyền khoảng cách xa)",
+    "code": "MOD-01",
+    "category": "Module chức năng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-na18cefvh",
+        "serialNumber": "MOD-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gpaf9pnaw",
+        "serialNumber": "MOD-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vm634u6ij",
+        "serialNumber": "MOD-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kp5qtp4vw",
+        "serialNumber": "MOD-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-oxojpw34o",
+        "serialNumber": "MOD-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-8m7vvowge",
+        "serialNumber": "MOD-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-zwds03fpv",
+        "serialNumber": "MOD-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-izgkabxlf",
+        "serialNumber": "MOD-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6y27dmx5v",
+        "serialNumber": "MOD-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-088sztfb3",
+        "serialNumber": "MOD-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u9t4us76lixd",
+    "name": "Module định vị toàn cầu GPS Neo-6M V2",
+    "code": "MOD-02",
+    "category": "Module chức năng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-uleljd76g",
+        "serialNumber": "MOD-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-75q0i50zd",
+        "serialNumber": "MOD-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dmjp5lufy",
+        "serialNumber": "MOD-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tlgmpsg6c",
+        "serialNumber": "MOD-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qe1vxbtv9",
+        "serialNumber": "MOD-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-m3hdrrk7r",
+        "serialNumber": "MOD-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ov5o70b2r",
+        "serialNumber": "MOD-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4x7g1fql1",
+        "serialNumber": "MOD-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lz7zypin8",
+        "serialNumber": "MOD-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5z08sqbmx",
+        "serialNumber": "MOD-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89up0k3ggggci9",
+    "name": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+    "code": "MOD-03",
+    "category": "Module chức năng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-clt74vuti",
+        "serialNumber": "MOD-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nbrlof064",
+        "serialNumber": "MOD-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-myc3cpuwg",
+        "serialNumber": "MOD-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-t2pccptgh",
+        "serialNumber": "MOD-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-xufrcj0gu",
+        "serialNumber": "MOD-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-01r2t5hob",
+        "serialNumber": "MOD-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rgvgpedol",
+        "serialNumber": "MOD-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gemqopue6",
+        "serialNumber": "MOD-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-d4vhlij4q",
+        "serialNumber": "MOD-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-48vrbdgle",
+        "serialNumber": "MOD-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ugr808zlpw7v",
+    "name": "Module kết nối Bluetooth HC-05 / BLE HM-10",
+    "code": "MOD-04",
+    "category": "Module chức năng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-4zgf6vx4e",
+        "serialNumber": "MOD-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4s8adm7ik",
+        "serialNumber": "MOD-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rqqhmte6a",
+        "serialNumber": "MOD-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-a681nm9tt",
+        "serialNumber": "MOD-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0auo6a74e",
+        "serialNumber": "MOD-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yqzlr5cml",
+        "serialNumber": "MOD-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tpwmxxxur",
+        "serialNumber": "MOD-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-m51yf6hko",
+        "serialNumber": "MOD-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pjzirmdh3",
+        "serialNumber": "MOD-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nu01v6uo5",
+        "serialNumber": "MOD-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u96cqzs534av",
+    "name": "Module quẹt thẻ từ RFID RC522 (Kèm thẻ từ và móc khóa)",
+    "code": "MOD-05",
+    "category": "Module chức năng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-w1rn3ehpk",
+        "serialNumber": "MOD-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-e27uzhy8j",
+        "serialNumber": "MOD-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-la1amuoi5",
+        "serialNumber": "MOD-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-l0lliyr0t",
+        "serialNumber": "MOD-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-evoqpovt7",
+        "serialNumber": "MOD-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-u3qf5orem",
+        "serialNumber": "MOD-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ccutn1t5j",
+        "serialNumber": "MOD-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6jyn8zujq",
+        "serialNumber": "MOD-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-culhf13cs",
+        "serialNumber": "MOD-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4pru10lwz",
+        "serialNumber": "MOD-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u5xf1s4lkgn",
+    "name": "Mạch nạp chương trình ST-Link V2 (cho STM32) và USB-to-UART CP2102",
+    "code": "MOD-06",
+    "category": "Module chức năng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-0xptdrid8",
+        "serialNumber": "MOD-06-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wt897499f",
+        "serialNumber": "MOD-06-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nqj75fz9i",
+        "serialNumber": "MOD-06-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-52p3j6q2i",
+        "serialNumber": "MOD-06-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-itzfmwc8n",
+        "serialNumber": "MOD-06-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ey8zc0fiy",
+        "serialNumber": "MOD-06-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c336bqy9k",
+        "serialNumber": "MOD-06-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wygn1wbqe",
+        "serialNumber": "MOD-06-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vtpk6umuu",
+        "serialNumber": "MOD-06-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-np7qhs0dn",
+        "serialNumber": "MOD-06-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uwlusyuohq4h",
+    "name": "Mạch chuyển đổi analog sang digital tích hợp ADC/DAC ADS1115 (16-bit)",
+    "code": "MOD-07",
+    "category": "Module chức năng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-znes52otu",
+        "serialNumber": "MOD-07-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-f86wyaof8",
+        "serialNumber": "MOD-07-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-e9cuza30k",
+        "serialNumber": "MOD-07-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0f9cwwdjj",
+        "serialNumber": "MOD-07-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tkowtxchh",
+        "serialNumber": "MOD-07-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-hypqnp9gm",
+        "serialNumber": "MOD-07-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c5qkumxj5",
+        "serialNumber": "MOD-07-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ptu4aiwqf",
+        "serialNumber": "MOD-07-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-y1iil1mh4",
+        "serialNumber": "MOD-07-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dvc4bpdnx",
+        "serialNumber": "MOD-07-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uqlgpu9zclt",
+    "name": "Cảm biến nhiệt độ, độ ẩm không khí DHT22 / AM2302",
+    "code": "SEN-01",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-yg73pk4lz",
+        "serialNumber": "SEN-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-s51lvb8cl",
+        "serialNumber": "SEN-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-os7lhadja",
+        "serialNumber": "SEN-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5n4zlgchz",
+        "serialNumber": "SEN-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9arpigntg",
+        "serialNumber": "SEN-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-zbkbe8390",
+        "serialNumber": "SEN-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mgmp885u9",
+        "serialNumber": "SEN-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7277ftcal",
+        "serialNumber": "SEN-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-x7ftuxvpw",
+        "serialNumber": "SEN-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7iyd1njcb",
+        "serialNumber": "SEN-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u516oxtb87rc",
+    "name": "Cảm biến nhiệt độ dây bọc chống nước DS18B20",
+    "code": "SEN-02",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-w1axgn4qc",
+        "serialNumber": "SEN-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-epfqn4m7k",
+        "serialNumber": "SEN-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-loyprr9ml",
+        "serialNumber": "SEN-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mqz6zk3q8",
+        "serialNumber": "SEN-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-usup7taed",
+        "serialNumber": "SEN-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7o8gu9b9f",
+        "serialNumber": "SEN-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-028a8ufoc",
+        "serialNumber": "SEN-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fghcanxrn",
+        "serialNumber": "SEN-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-077ff2smb",
+        "serialNumber": "SEN-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yecv9edm0",
+        "serialNumber": "SEN-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u9nk1ejj1q2",
+    "name": "Cảm biến khoảng cách siêu âm HC-SR04 / JSN-SR04T (Chống nước)",
+    "code": "SEN-03",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-vxfszhdoq",
+        "serialNumber": "SEN-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c2xczvmt1",
+        "serialNumber": "SEN-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gzghcgv6y",
+        "serialNumber": "SEN-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0zxlcvatc",
+        "serialNumber": "SEN-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k40sb7mkz",
+        "serialNumber": "SEN-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-es0n8p0wj",
+        "serialNumber": "SEN-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rgdh5wfdg",
+        "serialNumber": "SEN-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jwh34eilh",
+        "serialNumber": "SEN-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qj48if80s",
+        "serialNumber": "SEN-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-hq5thb4mw",
+        "serialNumber": "SEN-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u55ug3xb4gfx",
+    "name": "Cảm biến gia tốc, góc nghiêng 6 trục MPU6050 (Làm cân bằng robot)",
+    "code": "SEN-04",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-93jnvv92l",
+        "serialNumber": "SEN-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mkksow7jh",
+        "serialNumber": "SEN-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0i7kzvyen",
+        "serialNumber": "SEN-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-50ep7iabz",
+        "serialNumber": "SEN-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-45vtqkcvx",
+        "serialNumber": "SEN-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ghouh0pdq",
+        "serialNumber": "SEN-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pfwnyo0nu",
+        "serialNumber": "SEN-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rlg5eh5gw",
+        "serialNumber": "SEN-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-otjq2oomh",
+        "serialNumber": "SEN-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2ts8985i8",
+        "serialNumber": "SEN-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uib98mpm4lq",
+    "name": "Cảm biến đo khoảng cách bằng Laser ToF (VL53L0X)",
+    "code": "SEN-05",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-ls84knoz7",
+        "serialNumber": "SEN-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5i7lgohfb",
+        "serialNumber": "SEN-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9n9i77v2e",
+        "serialNumber": "SEN-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-z7b3s47l7",
+        "serialNumber": "SEN-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-h6jyb8j15",
+        "serialNumber": "SEN-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3i5livg3f",
+        "serialNumber": "SEN-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dtxdfn74m",
+        "serialNumber": "SEN-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fjble5kkl",
+        "serialNumber": "SEN-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-bj73s1zsb",
+        "serialNumber": "SEN-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4liu67nj0",
+        "serialNumber": "SEN-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89urw8ulyyaws7",
+    "name": "Cảm biến quét bản đồ 360 độ Lidar (Ứng dụng cho xe tự hành Robot ROS)",
+    "code": "SEN-06",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-kk1hwy8ph",
+        "serialNumber": "SEN-06-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-et5eaijqm",
+        "serialNumber": "SEN-06-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nsvte8q05",
+        "serialNumber": "SEN-06-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dtkn1kwzn",
+        "serialNumber": "SEN-06-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2qpjnlug2",
+        "serialNumber": "SEN-06-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-hdnhjiq2n",
+        "serialNumber": "SEN-06-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-hbvtd3w90",
+        "serialNumber": "SEN-06-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1832nar0e",
+        "serialNumber": "SEN-06-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ju4rv7eip",
+        "serialNumber": "SEN-06-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-d6i3d252n",
+        "serialNumber": "SEN-06-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ul82ufuwukkl",
+    "name": "Cảm biến sinh học: Nhịp tim & Oxy trong máu (MAX30102)",
+    "code": "SEN-07",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-zoucq6f00",
+        "serialNumber": "SEN-07-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ool9oveb0",
+        "serialNumber": "SEN-07-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vmybkvu0u",
+        "serialNumber": "SEN-07-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ywscmi7gj",
+        "serialNumber": "SEN-07-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-brd2at3ku",
+        "serialNumber": "SEN-07-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pb5vhpjpo",
+        "serialNumber": "SEN-07-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-y0g0f3iiw",
+        "serialNumber": "SEN-07-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mq1e4m7io",
+        "serialNumber": "SEN-07-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-cr4vjfpfp",
+        "serialNumber": "SEN-07-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-xe9b6y78c",
+        "serialNumber": "SEN-07-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u2jdp0x1v92n",
+    "name": "Cảm biến vân tay quang học AS608",
+    "code": "SEN-08",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-98awxgndf",
+        "serialNumber": "SEN-08-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7t2dd2vrw",
+        "serialNumber": "SEN-08-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rvns0lv8n",
+        "serialNumber": "SEN-08-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3crpb8e8h",
+        "serialNumber": "SEN-08-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fmx7dzl58",
+        "serialNumber": "SEN-08-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2s2aqzvq0",
+        "serialNumber": "SEN-08-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-y8ame567h",
+        "serialNumber": "SEN-08-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7ywgjh78l",
+        "serialNumber": "SEN-08-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fvf1ej821",
+        "serialNumber": "SEN-08-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1c5s8z5zf",
+        "serialNumber": "SEN-08-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ukpi0qk7ldf8",
+    "name": "Dòng cảm biến khí gas, khói, khí độc (MQ-2, MQ-7, MQ-135)",
+    "code": "SEN-09",
+    "category": "Cảm biến",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-vukdotjpp",
+        "serialNumber": "SEN-09-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wktu607vk",
+        "serialNumber": "SEN-09-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yxloo6112",
+        "serialNumber": "SEN-09-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dw8upywy6",
+        "serialNumber": "SEN-09-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-faapkspxt",
+        "serialNumber": "SEN-09-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1iwm27cls",
+        "serialNumber": "SEN-09-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5v8z1ummn",
+        "serialNumber": "SEN-09-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-u9z9n7wz3",
+        "serialNumber": "SEN-09-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5268uzp0a",
+        "serialNumber": "SEN-09-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-09dupjv4n",
+        "serialNumber": "SEN-09-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89upksr75pk9fe",
+    "name": "Màn hình LCD văn bản 16x2 / 20x4 kèm mạch chuyển I2C",
+    "code": "DSP-01",
+    "category": "Thiết bị hiển thị",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-tudh1a6ow",
+        "serialNumber": "DSP-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ua5bwhnct",
+        "serialNumber": "DSP-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-grvqsv9ru",
+        "serialNumber": "DSP-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k9e7ewzw5",
+        "serialNumber": "DSP-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1u57o2qmd",
+        "serialNumber": "DSP-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6suf8d9mr",
+        "serialNumber": "DSP-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7wfh5vvgv",
+        "serialNumber": "DSP-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2cgn2w2gc",
+        "serialNumber": "DSP-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0dnqed83q",
+        "serialNumber": "DSP-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-woe7d4v3z",
+        "serialNumber": "DSP-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uiujjkjwawx",
+    "name": "Màn hình đồ họa OLED 0.96 inch / 1.3 inch (Giao tiếp I2C/SPI)",
+    "code": "DSP-02",
+    "category": "Thiết bị hiển thị",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-jd47bifmc",
+        "serialNumber": "DSP-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-n8eka08wm",
+        "serialNumber": "DSP-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qss8ytncu",
+        "serialNumber": "DSP-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9eg9lelef",
+        "serialNumber": "DSP-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qtxarsfj5",
+        "serialNumber": "DSP-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lzs91san6",
+        "serialNumber": "DSP-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-y45dl0613",
+        "serialNumber": "DSP-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-r4x6xi2dn",
+        "serialNumber": "DSP-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wd6v5p0mq",
+        "serialNumber": "DSP-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-59jno1ajv",
+        "serialNumber": "DSP-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u48w0pvdwfc9",
+    "name": "Màn hình cảm ứng thông minh HMI Nextion (Tự thiết kế giao diện nút bấm)",
+    "code": "DSP-03",
+    "category": "Thiết bị hiển thị",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-c5ulj8cmq",
+        "serialNumber": "DSP-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tqukez26x",
+        "serialNumber": "DSP-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-j2galxhcm",
+        "serialNumber": "DSP-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nktrcedc4",
+        "serialNumber": "DSP-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-q988se9yb",
+        "serialNumber": "DSP-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ojuw3mktw",
+        "serialNumber": "DSP-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-goy1wa51v",
+        "serialNumber": "DSP-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6q8j2tjod",
+        "serialNumber": "DSP-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ie18hhtvz",
+        "serialNumber": "DSP-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-u56y5j9z5",
+        "serialNumber": "DSP-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89untnoi1nwwb",
+    "name": "Màn hình màu TFT LCD 2.4 inch / 3.5 inch SPI",
+    "code": "DSP-04",
+    "category": "Thiết bị hiển thị",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-cmfva26bo",
+        "serialNumber": "DSP-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-u5b8auwax",
+        "serialNumber": "DSP-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ke09jkvzk",
+        "serialNumber": "DSP-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-axiaes3sj",
+        "serialNumber": "DSP-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-uikhta0lw",
+        "serialNumber": "DSP-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4or4m3r53",
+        "serialNumber": "DSP-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kqzq6mufy",
+        "serialNumber": "DSP-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fuaqrua83",
+        "serialNumber": "DSP-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4el60coci",
+        "serialNumber": "DSP-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-z7q7l9yv0",
+        "serialNumber": "DSP-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u1l7yseg7exo",
+    "name": "Led ma trận Max7219 (8x8 hoặc thanh 4 số)",
+    "code": "DSP-05",
+    "category": "Thiết bị hiển thị",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-pc7cnown9",
+        "serialNumber": "DSP-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3wyrx5cgw",
+        "serialNumber": "DSP-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yydrojiqc",
+        "serialNumber": "DSP-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ckghwzr9l",
+        "serialNumber": "DSP-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-acussmgze",
+        "serialNumber": "DSP-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ej62to8ny",
+        "serialNumber": "DSP-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-h9cgwlj71",
+        "serialNumber": "DSP-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dfdmf49ar",
+        "serialNumber": "DSP-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yqru97axb",
+        "serialNumber": "DSP-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-84sf3bukl",
+        "serialNumber": "DSP-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89usjtq310tc8g",
+    "name": "Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+    "code": "ACT-01",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-7fgsrbky9",
+        "serialNumber": "ACT-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 72.63904055555555,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-xtlut4ds8",
+        "serialNumber": "ACT-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 7.109248611111111,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-92cj4vm4y",
+        "serialNumber": "ACT-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 65.52979194444444,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-aqp21iaea",
+        "serialNumber": "ACT-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 65.52979194444444,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-8ko4mou2g",
+        "serialNumber": "ACT-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-veqvkxw9d",
+        "serialNumber": "ACT-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-70lx0cmbx",
+        "serialNumber": "ACT-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lz0pjndgr",
+        "serialNumber": "ACT-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 65.52979194444444,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pi867uchu",
+        "serialNumber": "ACT-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-b9j7h338s",
+        "serialNumber": "ACT-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 210.05992666666666,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ugydnjwvqhgq",
+    "name": "Động cơ bước (Stepper Motor) Nema 17 kèm mạch điều khiển A4988 / TB6600",
+    "code": "ACT-02",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-o076hjfxr",
+        "serialNumber": "ACT-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-937w1tza0",
+        "serialNumber": "ACT-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dh8mtwu2j",
+        "serialNumber": "ACT-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-glvet58kk",
+        "serialNumber": "ACT-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wnn681en7",
+        "serialNumber": "ACT-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-a30asf9po",
+        "serialNumber": "ACT-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7rhan6dc6",
+        "serialNumber": "ACT-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pydkrfem6",
+        "serialNumber": "ACT-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jeu4pppof",
+        "serialNumber": "ACT-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-b1gbgrkey",
+        "serialNumber": "ACT-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uv1fta2at7zm",
+    "name": "Động cơ DC giảm tốc (Vàng) kèm bánh xe làm robot basic",
+    "code": "ACT-03",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-ndmyq170s",
+        "serialNumber": "ACT-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-g083ejphh",
+        "serialNumber": "ACT-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9dv9zlvdk",
+        "serialNumber": "ACT-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6v2pykgs7",
+        "serialNumber": "ACT-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-utv5w625z",
+        "serialNumber": "ACT-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ewbygml0g",
+        "serialNumber": "ACT-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-g2mdc5p2n",
+        "serialNumber": "ACT-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-03l8gv8qi",
+        "serialNumber": "ACT-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1uaee9k9n",
+        "serialNumber": "ACT-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pf35jyjfa",
+        "serialNumber": "ACT-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u2gkcllnwoqm",
+    "name": "Module Relay kích H/L cách ly quang 2 kênh / 4 kênh / 8 kênh (Bật tắt điện 220V)",
+    "code": "ACT-04",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-w6ytrnu8t",
+        "serialNumber": "ACT-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vfphyn8gb",
+        "serialNumber": "ACT-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1u8w2sm3r",
+        "serialNumber": "ACT-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ktwhlx9bu",
+        "serialNumber": "ACT-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wldyvgedc",
+        "serialNumber": "ACT-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pg3j8pyb0",
+        "serialNumber": "ACT-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2aqz0cetl",
+        "serialNumber": "ACT-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7r5y6g1xx",
+        "serialNumber": "ACT-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ntllaegwv",
+        "serialNumber": "ACT-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-z33qzv6px",
+        "serialNumber": "ACT-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uwe17232rbha",
+    "name": "Van điện từ (Solenoid Valve) 12V kiểm soát dòng nước",
+    "code": "ACT-05",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-akck6satr",
+        "serialNumber": "ACT-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-587fmi8lm",
+        "serialNumber": "ACT-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c1vg1v7vy",
+        "serialNumber": "ACT-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-m0fxiq5cw",
+        "serialNumber": "ACT-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nmq7t585s",
+        "serialNumber": "ACT-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kua0105rr",
+        "serialNumber": "ACT-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-r9w2nmd3t",
+        "serialNumber": "ACT-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wtp39mk8m",
+        "serialNumber": "ACT-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vsgsggn31",
+        "serialNumber": "ACT-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jw8wgowuq",
+        "serialNumber": "ACT-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uq9n7qiw6lwa",
+    "name": "Mỏ hàn thiếc Quick 936A / Trạm hàn khò nhiệt Quick 857DW+",
+    "code": "TOO-01",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-ghud9axcf",
+        "serialNumber": "TOO-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-s520g7gvq",
+        "serialNumber": "TOO-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-zzfdtc98o",
+        "serialNumber": "TOO-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6hctbmyg5",
+        "serialNumber": "TOO-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-f05miafuv",
+        "serialNumber": "TOO-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-l80ucx9g1",
+        "serialNumber": "TOO-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-stcbjtnjk",
+        "serialNumber": "TOO-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-a0pjvruhy",
+        "serialNumber": "TOO-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-uig7i1a7m",
+        "serialNumber": "TOO-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2sa1w2eau",
+        "serialNumber": "TOO-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u5938w656hve",
+    "name": "Máy in 3D (Ender-3 V2 hoặc Bambu Lab) để sinh viên in vỏ hộp, cánh tay robot",
+    "code": "TOO-02",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-zchr9zhoh",
+        "serialNumber": "TOO-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-zyit23hou",
+        "serialNumber": "TOO-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-zezkootkj",
+        "serialNumber": "TOO-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0e7pzdusb",
+        "serialNumber": "TOO-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-m19lf3tuk",
+        "serialNumber": "TOO-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qxf925lm5",
+        "serialNumber": "TOO-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0pbqg76x6",
+        "serialNumber": "TOO-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-i7iu1jnn0",
+        "serialNumber": "TOO-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-w67cut36u",
+        "serialNumber": "TOO-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ig3q4abaq",
+        "serialNumber": "TOO-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u4xyj2pphnf5",
+    "name": "Kính hiển vi kỹ thuật số kết nối màn hình HDMI (Soi chân IC dán SMD)",
+    "code": "TOO-03",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-mqi1zcfxm",
+        "serialNumber": "TOO-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nmse4ordg",
+        "serialNumber": "TOO-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-cgcbtgj4q",
+        "serialNumber": "TOO-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-juj6cmpyx",
+        "serialNumber": "TOO-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6ryakl346",
+        "serialNumber": "TOO-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5y8l2rcju",
+        "serialNumber": "TOO-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-j0stbc6l4",
+        "serialNumber": "TOO-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k630rioud",
+        "serialNumber": "TOO-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6f4e9m67j",
+        "serialNumber": "TOO-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0dl7l7cvt",
+        "serialNumber": "TOO-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uvyct34itla",
+    "name": "Máy hút khói hàn để bảo vệ sức khỏe sinh viên trong phòng lab",
+    "code": "TOO-04",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-rnuw23ezk",
+        "serialNumber": "TOO-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tlgfmgo9n",
+        "serialNumber": "TOO-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2mpwnolza",
+        "serialNumber": "TOO-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-irqee5eya",
+        "serialNumber": "TOO-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1xc69vgk7",
+        "serialNumber": "TOO-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-p5k84pm3c",
+        "serialNumber": "TOO-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-bnklvx3td",
+        "serialNumber": "TOO-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9km4glj7f",
+        "serialNumber": "TOO-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tl4n23jy5",
+        "serialNumber": "TOO-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4pi1vivoe",
+        "serialNumber": "TOO-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ut8ibp0h58j",
+    "name": "Máy mài, cắt cầm tay đa năng mini (Dremel)",
+    "code": "TOO-05",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-fruj54ajm",
+        "serialNumber": "TOO-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ma56ofee5",
+        "serialNumber": "TOO-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-h1nbpdjnu",
+        "serialNumber": "TOO-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-21ob9xq51",
+        "serialNumber": "TOO-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0iort2o5u",
+        "serialNumber": "TOO-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qyumgjwpe",
+        "serialNumber": "TOO-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wzht9gj9o",
+        "serialNumber": "TOO-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ytzvxhe1m",
+        "serialNumber": "TOO-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-f9dq4uyu4",
+        "serialNumber": "TOO-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-e710dtrbc",
+        "serialNumber": "TOO-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89usyt7a68d36",
+    "name": "Bộ kìm kỹ thuật: Kìm cắt chân linh kiện, kìm nhọn, kìm tuốt dây tự động",
+    "code": "TOO-06",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-i91abcrb0",
+        "serialNumber": "TOO-06-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-iuj2i4rn9",
+        "serialNumber": "TOO-06-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3z920l7kg",
+        "serialNumber": "TOO-06-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rjpl2xy92",
+        "serialNumber": "TOO-06-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-05osotjjj",
+        "serialNumber": "TOO-06-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wk9qkj5s8",
+        "serialNumber": "TOO-06-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7nha1g1nt",
+        "serialNumber": "TOO-06-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-anicph1jc",
+        "serialNumber": "TOO-06-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-45dg7vkbm",
+        "serialNumber": "TOO-06-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6284312n3",
+        "serialNumber": "TOO-06-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u4j7llhpb7y7",
+    "name": "Bộ tuốc nơ vít sửa chữa điện tử chính xác cao (Xiaomi Wiha / iFixit)",
+    "code": "TOO-07",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-btxe9my13",
+        "serialNumber": "TOO-07-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-xflzgsx54",
+        "serialNumber": "TOO-07-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yl5zydidc",
+        "serialNumber": "TOO-07-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-fjjfzkz89",
+        "serialNumber": "TOO-07-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-qpyj5hhjf",
+        "serialNumber": "TOO-07-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-sf6t1mqon",
+        "serialNumber": "TOO-07-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mugzeblx8",
+        "serialNumber": "TOO-07-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-35fep6g6g",
+        "serialNumber": "TOO-07-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wdf9zxikp",
+        "serialNumber": "TOO-07-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k3omq8dc0",
+        "serialNumber": "TOO-07-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u2bnfh0kn1gm",
+    "name": "Máy chủ vật lý (Server Rack) Dell PowerEdge R740 (Chạy Proxmox ảo hóa chia VPS)",
+    "code": "CMP-01",
+    "category": "Máy tính & Máy chủ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-z7e2p1wnj",
+        "serialNumber": "CMP-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rdssihuqv",
+        "serialNumber": "CMP-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rsunrri32",
+        "serialNumber": "CMP-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6stpwtjxn",
+        "serialNumber": "CMP-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yghp28xg6",
+        "serialNumber": "CMP-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-dfr7u9usk",
+        "serialNumber": "CMP-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pobqqhjs6",
+        "serialNumber": "CMP-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jt1jydmgs",
+        "serialNumber": "CMP-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0jt7ej8h2",
+        "serialNumber": "CMP-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ek237n5h3",
+        "serialNumber": "CMP-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ujmi7nz5lc8o",
+    "name": "Máy trạm PC sinh viên (Core i5/i7, 16GB RAM, SSD 512GB NVMe)",
+    "code": "CMP-02",
+    "category": "Máy tính & Máy chủ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-jobhr9q24",
+        "serialNumber": "CMP-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-p3g7vf5a1",
+        "serialNumber": "CMP-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-10d5lsk4e",
+        "serialNumber": "CMP-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-a6s6c1eii",
+        "serialNumber": "CMP-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-s2ht6bpnq",
+        "serialNumber": "CMP-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1kl10ikt6",
+        "serialNumber": "CMP-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-81n96bhwp",
+        "serialNumber": "CMP-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-q6r6cvxi4",
+        "serialNumber": "CMP-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yh216h0e5",
+        "serialNumber": "CMP-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rhmfo4cr7",
+        "serialNumber": "CMP-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u39ldedsxl2h",
+    "name": "Máy tính đồ họa cao cấp (Cắm card đồ họa NVIDIA RTX 4060 trở lên để train AI/Machine Learning)",
+    "code": "CMP-03",
+    "category": "Máy tính & Máy chủ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-w657uvtz7",
+        "serialNumber": "CMP-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-q0sx9xy6h",
+        "serialNumber": "CMP-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-d9loxerup",
+        "serialNumber": "CMP-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gr3f9v9yr",
+        "serialNumber": "CMP-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4rl7mg3a3",
+        "serialNumber": "CMP-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k40poutwx",
+        "serialNumber": "CMP-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-bwuuo1rhz",
+        "serialNumber": "CMP-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c1z0nsyox",
+        "serialNumber": "CMP-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-saa37edmx",
+        "serialNumber": "CMP-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-y7n0eqjce",
+        "serialNumber": "CMP-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ulbp4rw4xvfh",
+    "name": "Core Router / Router cân bằng tải (MikroTik RB5009)",
+    "code": "NET-01",
+    "category": "Thiết bị mạng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-r8plqaavg",
+        "serialNumber": "NET-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-r9pjkz4hg",
+        "serialNumber": "NET-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-twmp33kiw",
+        "serialNumber": "NET-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nk9cmo6xo",
+        "serialNumber": "NET-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-2wv3yp5fg",
+        "serialNumber": "NET-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-11o100j88",
+        "serialNumber": "NET-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-plzsu28yo",
+        "serialNumber": "NET-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-xbd17q5s1",
+        "serialNumber": "NET-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3vm7xlvxs",
+        "serialNumber": "NET-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-gcx7choc5",
+        "serialNumber": "NET-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ui7t0esjdrsp",
+    "name": "Switch Managed 24-Port / 48-Port Gigabit (Cisco hoặc Aruba) để cấu hình VLAN",
+    "code": "NET-02",
+    "category": "Thiết bị mạng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-4ra4tt52m",
+        "serialNumber": "NET-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3wedabc66",
+        "serialNumber": "NET-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-12amtqcts",
+        "serialNumber": "NET-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-48719q2jm",
+        "serialNumber": "NET-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-teqkqsudc",
+        "serialNumber": "NET-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jxgcz4alg",
+        "serialNumber": "NET-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rzcolgj3l",
+        "serialNumber": "NET-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-13bbiys37",
+        "serialNumber": "NET-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k9gwcl0i6",
+        "serialNumber": "NET-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-wggfgcoas",
+        "serialNumber": "NET-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uxo4l71u9oeg",
+    "name": "Switch PoE cấp nguồn trực tiếp qua dây mạng cho Access Point/Camera",
+    "code": "NET-03",
+    "category": "Thiết bị mạng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-7k1i3qiut",
+        "serialNumber": "NET-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-61a0zwefb",
+        "serialNumber": "NET-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5h3l5g119",
+        "serialNumber": "NET-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-a5fxtxegw",
+        "serialNumber": "NET-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-icfuywnz6",
+        "serialNumber": "NET-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-nvavqsz7v",
+        "serialNumber": "NET-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-y51eovgpf",
+        "serialNumber": "NET-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-njaz4k2jr",
+        "serialNumber": "NET-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4k8hk61be",
+        "serialNumber": "NET-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1c23rcfom",
+        "serialNumber": "NET-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u3w6ym6qemqv",
+    "name": "Bộ phát Wi-Fi 6 chuyên dụng chịu tải cao (UniFi U6 Pro hoặc Aruba AP)",
+    "code": "NET-04",
+    "category": "Thiết bị mạng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-d1s2drcfz",
+        "serialNumber": "NET-04-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-uxus9el5l",
+        "serialNumber": "NET-04-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jwcvj3tts",
+        "serialNumber": "NET-04-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5fyk4sv4d",
+        "serialNumber": "NET-04-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-8iq4v9mo4",
+        "serialNumber": "NET-04-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-y9bgk4ie4",
+        "serialNumber": "NET-04-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-axibpe8pa",
+        "serialNumber": "NET-04-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rgv3jqojh",
+        "serialNumber": "NET-04-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5ko1gch5s",
+        "serialNumber": "NET-04-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-pa0f9alu4",
+        "serialNumber": "NET-04-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89un1vf479xxsm",
+    "name": "Tường lửa cứng (Hardware Firewall - Fortinet FortiGate)",
+    "code": "NET-05",
+    "category": "Thiết bị mạng",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-5ffeeh6wr",
+        "serialNumber": "NET-05-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-v14xepdvn",
+        "serialNumber": "NET-05-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-bmjeq02dq",
+        "serialNumber": "NET-05-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-8z817bmqk",
+        "serialNumber": "NET-05-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-o4kc5t7cw",
+        "serialNumber": "NET-05-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-niiq80vg0",
+        "serialNumber": "NET-05-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6maaxr65j",
+        "serialNumber": "NET-05-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4kdg015jq",
+        "serialNumber": "NET-05-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7aypmnyyc",
+        "serialNumber": "NET-05-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-b4qyghxiz",
+        "serialNumber": "NET-05-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ustcnf0nvsyn",
+    "name": "Ổ cứng mạng NAS (Synology DS923+ 4 khay ổ cứng) làm kho lưu trữ file ISO, source code nội bộ",
+    "code": "INF-01",
+    "category": "Hạ tầng nguồn & Lưu trữ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-y109xsmky",
+        "serialNumber": "INF-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-xy216da0w",
+        "serialNumber": "INF-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-l5850ukgw",
+        "serialNumber": "INF-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-xwcsjmvyd",
+        "serialNumber": "INF-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4vmu6myt2",
+        "serialNumber": "INF-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-idgtcjraa",
+        "serialNumber": "INF-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-w2cksqu0c",
+        "serialNumber": "INF-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-4x5ale64u",
+        "serialNumber": "INF-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-3n542gkg7",
+        "serialNumber": "INF-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-egfq0dkeo",
+        "serialNumber": "INF-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89u06ypgrr25wy7",
+    "name": "Bộ lưu điện UPS công suất lớn (APC Smart-UPS 2KVA-3KVA) bảo vệ Server và NAS",
+    "code": "INF-02",
+    "category": "Hạ tầng nguồn & Lưu trữ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-8trgqg0ld",
+        "serialNumber": "INF-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-jh8artw9g",
+        "serialNumber": "INF-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-22afxrkqx",
+        "serialNumber": "INF-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-juo6v2w80",
+        "serialNumber": "INF-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1crkl96aj",
+        "serialNumber": "INF-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-hspwr4ks9",
+        "serialNumber": "INF-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-hd570i257",
+        "serialNumber": "INF-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-q0iiqpu1o",
+        "serialNumber": "INF-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lzw1lps74",
+        "serialNumber": "INF-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-t1pp4rqj2",
+        "serialNumber": "INF-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89usc2podeony",
+    "name": "Tủ Rack chứa thiết bị (Tủ Rack 27U hoặc 42U kèm quạt tản nhiệt)",
+    "code": "INF-03",
+    "category": "Hạ tầng nguồn & Lưu trữ",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-m5vp8vuvr",
+        "serialNumber": "INF-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-bjgah9i34",
+        "serialNumber": "INF-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-g4fjzchc0",
+        "serialNumber": "INF-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-iq0n5rwhf",
+        "serialNumber": "INF-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9cav4gpiq",
+        "serialNumber": "INF-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ju2dtu8o4",
+        "serialNumber": "INF-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-rton764l6",
+        "serialNumber": "INF-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-yt54wj7w4",
+        "serialNumber": "INF-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-styhetx64",
+        "serialNumber": "INF-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vemk1qx7t",
+        "serialNumber": "INF-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ufncl70omxs7",
+    "name": "Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+    "code": "CON-01",
+    "category": "Vật tư hàn",
+    "location": "Kho Lab",
+    "totalQty": 9,
+    "borrowedQty": 0,
+    "assetType": "Vật tư tiêu hao",
+    "status": "Sẵn sàng"
+  },
+  {
+    "id": "eq-mrbve89uol0c1t1bat",
+    "name": "Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+    "code": "CON-02",
+    "category": "Vật tư mạng",
+    "location": "Kho Lab",
+    "totalQty": 0,
+    "borrowedQty": 0,
+    "assetType": "Vật tư tiêu hao",
+    "status": "Sẵn sàng"
+  },
+  {
+    "id": "eq-mrbve89u4g4g13pp7is",
+    "name": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "code": "CON-03",
+    "category": "Dụng cụ thực hành",
+    "location": "Kho Lab",
+    "totalQty": 3,
+    "borrowedQty": 4,
+    "assetType": "Vật tư tiêu hao",
+    "status": "Sẵn sàng"
+  },
+  {
+    "id": "eq-mrbve89uw8lqr4m83vm",
+    "name": "Dây cắm testboard (Đực-Đực, Cái-Cái, Đực-Cái)",
+    "code": "CON-04",
+    "category": "Dụng cụ thực hành",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 1,
+    "assetType": "Vật tư tiêu hao",
+    "status": "Sẵn sàng"
+  },
+  {
+    "id": "eq-mrbve89uakbdnomsi2a",
+    "name": "Khay/Hộp linh kiện thụ động hỗn hợp: Điện trở, Tụ điện, Thạch anh, Transistor, LED đơn đủ màu",
+    "code": "CON-05",
+    "category": "Linh kiện điện tử",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Vật tư tiêu hao",
+    "status": "Sẵn sàng"
+  },
+  {
+    "id": "eq-mrbve89ugjpyb6rbbf5",
+    "name": "Tivi cường lực thông minh 75 inch hoặc Máy chiếu full HD phục vụ thuyết trình, training",
+    "code": "MUL-01",
+    "category": "Thiết bị đa phương tiện & Giảng dạy",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-qshxkhug6",
+        "serialNumber": "MUL-01-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-kcrgosukf",
+        "serialNumber": "MUL-01-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-7qs0imv4l",
+        "serialNumber": "MUL-01-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ckmael9n5",
+        "serialNumber": "MUL-01-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-mfxq68htu",
+        "serialNumber": "MUL-01-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-l61i5sn06",
+        "serialNumber": "MUL-01-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-vvnujz5ph",
+        "serialNumber": "MUL-01-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-k42ozw4ef",
+        "serialNumber": "MUL-01-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ax05w2p10",
+        "serialNumber": "MUL-01-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-uukss77nx",
+        "serialNumber": "MUL-01-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89uksertcbp04c",
+    "name": "Bảng kính văn phòng cỡ lớn viết bút dạ để brainstorm giải thuật, vẽ kiến trúc hệ thống",
+    "code": "MUL-02",
+    "category": "Thiết bị đa phương tiện & Giảng dạy",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-1sz43hgmc",
+        "serialNumber": "MUL-02-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-c6g4e4nn4",
+        "serialNumber": "MUL-02-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lsdt3tsbv",
+        "serialNumber": "MUL-02-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-82agx1nk6",
+        "serialNumber": "MUL-02-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1ik1h9ay5",
+        "serialNumber": "MUL-02-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-1li0p043z",
+        "serialNumber": "MUL-02-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-0r8zmvps3",
+        "serialNumber": "MUL-02-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-6curjtmun",
+        "serialNumber": "MUL-02-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-lkr959m8r",
+        "serialNumber": "MUL-02-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9u05nalb8",
+        "serialNumber": "MUL-02-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "eq-mrbve89ubhphgzy6w4",
+    "name": "Hệ thống KVM Switch (Quản lý nhiều Server chỉ bằng 1 bộ màn hình, phím, chuột)",
+    "code": "MUL-03",
+    "category": "Thiết bị đa phương tiện & Giảng dạy",
+    "location": "Kho Lab",
+    "totalQty": 10,
+    "borrowedQty": 0,
+    "assetType": "Thiết bị",
+    "status": "Sẵn sàng",
+    "instances": [
+      {
+        "id": "inst-hcfpvyqax",
+        "serialNumber": "MUL-03-01",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-9koyqsagc",
+        "serialNumber": "MUL-03-02",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-5s31zbdd3",
+        "serialNumber": "MUL-03-03",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-sxofrz7sw",
+        "serialNumber": "MUL-03-04",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ieo8j0igy",
+        "serialNumber": "MUL-03-05",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-13jgnkdzz",
+        "serialNumber": "MUL-03-06",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-ni66as898",
+        "serialNumber": "MUL-03-07",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-75eu6igce",
+        "serialNumber": "MUL-03-08",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-8udnimx83",
+        "serialNumber": "MUL-03-09",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      },
+      {
+        "id": "inst-tgglog2hh",
+        "serialNumber": "MUL-03-10",
+        "status": "Sẵn sàng",
+        "usedHours": 0,
+        "lifespanHours": 10000,
+        "borrowedBy": null,
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "bec4d691-c7e0-498e-bdf6-94317d0d9998",
+    "name": "Bộ tuốc nơ vít sửa chữa điện tử chính xác cao (Xiaomi Wiha / iFixit)",
+    "code": "TOO-07-02",
+    "totalQty": 1,
+    "borrowedQty": 0,
+    "location": "Kho Lab",
+    "status": "Sẵn sàng",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "minThreshold": 0
+  },
+  {
+    "id": "25ac563b-f1e2-41bf-85bb-efbca3cf8613",
+    "name": "Bộ tuốc nơ vít sửa chữa điện tử chính xác cao (Xiaomi Wiha / iFixit)",
+    "code": "TOO-07-03",
+    "totalQty": 1,
+    "borrowedQty": 0,
+    "location": "Kho Lab",
+    "status": "Sẵn sàng",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "minThreshold": 0
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "dee167dd-861c-465a-b1c4-550cd26d7992",
+    "equipmentId": "eq1",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z",
+    "equipmentCode": "RIG-01",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "qty": 1,
+    "notes": "",
+    "registeredDate": "2026-07-02T05:13:25.469Z",
+    "status": "notified",
+    "notifiedDate": "2026-07-02T05:13:40.624Z",
+    "fulfilledDate": null
+  }
+]

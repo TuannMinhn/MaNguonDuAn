@@ -1,0 +1,219 @@
+/* =============================================================
+   Carbon Button Design System — Lab Manage
+   4 variants: primary | secondary | danger(-primary) | ghost
+   3 sizes: sm (32px) | md (40px) | lg (44px)
+   ============================================================= */
+
+/* ── Design Tokens ────────────────────────────────────────── */
+:root {
+  --button-primary:        var(--accent-blue);
+  --button-primary-hover:  #60A5FA;
+  --button-primary-active: #93C5FD;
+
+  --button-secondary:        rgba(255, 255, 255, 0.08);
+  --button-secondary-border: var(--border-color);
+  --button-secondary-hover:  rgba(255, 255, 255, 0.12);
+  --button-secondary-text:   var(--text-primary);
+
+  --button-danger-primary:  var(--accent-red);
+  --button-danger-hover:    #F87171;
+  --button-danger-active:   #FCA5A5;
+
+  --button-ghost-text:   var(--text-secondary);
+  --button-ghost-hover:  rgba(255, 255, 255, 0.06);
+
+  --button-disabled-bg:   rgba(255, 255, 255, 0.06);
+  --button-disabled-text: rgba(255, 255, 255, 0.25);
+
+  --text-on-color:  #FFFFFF;
+  --text-inverse:   #0F172A;
+  --link-primary:   var(--accent-blue);
+  --background-hover: rgba(255, 255, 255, 0.07);
+  --focus: #60A5FA;
+
+  /* Legacy tokens — kept for backward compat */
+  --button-tertiary:        #FFFFFF;
+  --button-tertiary-hover:  rgba(255, 255, 255, 0.1);
+  --button-tertiary-active: rgba(255, 255, 255, 0.2);
+  --button-secondary-old:   var(--text-secondary);
+  --button-danger-secondary: var(--accent-red);
+  --text-on-color-disabled:  rgba(255, 255, 255, 0.3);
+  --icon-disabled:           rgba(255, 255, 255, 0.3);
+  --link-primary-hover:      #FFFFFF;
+}
+
+[data-theme="light"] {
+  --button-primary:        var(--accent-blue);
+  --button-primary-hover:  #1D4ED8;
+  --button-primary-active: #1E40AF;
+
+  --button-secondary:        rgba(0, 0, 0, 0.05);
+  --button-secondary-border: #CBD5E1;
+  --button-secondary-hover:  rgba(0, 0, 0, 0.09);
+  --button-secondary-text:   #0F172A;
+
+  --button-danger-primary: var(--accent-red);
+  --button-danger-hover:   #DC2626;
+  --button-danger-active:  #B91C1C;
+
+  --button-ghost-text:  #475569;
+  --button-ghost-hover: rgba(0, 0, 0, 0.06);
+
+  --button-disabled-bg:   #E2E8F0;
+  --button-disabled-text: #94A3B8;
+
+  --text-on-color:    #FFFFFF;
+  --text-inverse:     #0F172A;
+  --link-primary:     var(--accent-blue);
+  --background-hover: rgba(15, 23, 42, 0.05);
+  --focus:            #2563EB;
+
+  /* Legacy */
+  --button-tertiary:        #0F172A;
+  --button-tertiary-hover:  rgba(15, 23, 42, 0.05);
+  --button-tertiary-active: rgba(15, 23, 42, 0.1);
+  --button-secondary-old:   #475569;
+  --button-danger-secondary: var(--accent-red);
+  --text-on-color-disabled: #94A3B8;
+  --icon-disabled:          #94A3B8;
+  --link-primary-hover:     #0F172A;
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+.carbon-btn {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  border-radius:   8px;
+  font-family:     var(--font-family, inherit);
+  font-weight:     500;
+  font-size:       var(--text-md);
+  cursor:          pointer;
+  transition:      background-color 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+  border:          1px solid transparent;
+  white-space:     nowrap;
+  box-sizing:      border-box;
+  user-select:     none;
+  line-height:     1;
+}
+
+/* ── Sizes ────────────────────────────────────────────────── */
+.carbon-btn--sm { height: 32px; font-size: var(--text-sm); }
+.carbon-btn--md { height: 40px; font-size: var(--text-md); }
+.carbon-btn--lg { height: 44px; font-size: 15px; }
+
+/* ── Spacing ──────────────────────────────────────────────── */
+/* Text only */
+.carbon-btn--no-icon  { padding: 0 16px; }
+/* Icon + text */
+.carbon-btn--has-icon { padding: 0 12px; gap: 8px; }
+/* Ghost icon */
+.carbon-btn--ghost-icon { padding: 0 10px; gap: 6px; }
+
+/* ── Focus ────────────────────────────────────────────────── */
+.carbon-btn:focus-visible {
+  outline:    2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ── Label ────────────────────────────────────────────────── */
+.carbon-btn__label {
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── Icon wrapper ─────────────────────────────────────────── */
+.carbon-btn__icon-wrapper {
+  display:     flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Loading spinner ──────────────────────────────────────── */
+@keyframes carbon-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.carbon-btn--loading { opacity: 0.75; cursor: wait; }
+
+/* ── Variants ─────────────────────────────────────────────── */
+
+/* Primary */
+.carbon-btn--primary {
+  background-color: var(--button-primary);
+  color:            var(--text-on-color);
+  border-color:     var(--button-primary);
+}
+.carbon-btn--primary:not(:disabled):hover  { background-color: var(--button-primary-hover); border-color: var(--button-primary-hover); }
+.carbon-btn--primary:not(:disabled):active { background-color: var(--button-primary-active); border-color: var(--button-primary-active); }
+
+/* Secondary */
+.carbon-btn--secondary {
+  background-color: var(--button-secondary);
+  color:            var(--button-secondary-text);
+  border-color:     var(--button-secondary-border);
+}
+.carbon-btn--secondary:not(:disabled):hover  { background-color: var(--button-secondary-hover); }
+.carbon-btn--secondary:not(:disabled):active { background-color: var(--button-secondary-hover); }
+
+/* Danger Primary (mapped from variant="danger") */
+.carbon-btn--danger-primary {
+  background-color: var(--button-danger-primary);
+  color:            var(--text-on-color);
+  border-color:     var(--button-danger-primary);
+}
+.carbon-btn--danger-primary:not(:disabled):hover  { background-color: var(--button-danger-hover); border-color: var(--button-danger-hover); }
+.carbon-btn--danger-primary:not(:disabled):active { background-color: var(--button-danger-active); border-color: var(--button-danger-active); }
+
+/* Ghost */
+.carbon-btn--ghost {
+  background-color: transparent;
+  color:            var(--button-ghost-text);
+  border-color:     transparent;
+}
+.carbon-btn--ghost:not(:disabled):hover {
+  background-color: var(--button-ghost-hover);
+  color:            var(--text-primary);
+}
+
+/* Tertiary (legacy) */
+.carbon-btn--tertiary {
+  background-color: transparent;
+  border-color:     var(--button-tertiary);
+  color:            var(--button-tertiary);
+}
+.carbon-btn--tertiary:not(:disabled):hover  { background-color: var(--button-tertiary-hover); }
+.carbon-btn--tertiary:not(:disabled):active { background-color: var(--button-tertiary-active); }
+
+/* Danger Tertiary (legacy) */
+.carbon-btn--danger-tertiary {
+  background-color: transparent;
+  border-color:     var(--button-danger-secondary);
+  color:            var(--button-danger-secondary);
+}
+.carbon-btn--danger-tertiary:not(:disabled):hover {
+  background-color: var(--button-danger-hover);
+  color:            var(--text-on-color);
+  border-color:     var(--button-danger-hover);
+}
+
+/* Danger Ghost (legacy) */
+.carbon-btn--danger-ghost {
+  background-color: transparent;
+  color:            var(--button-danger-secondary);
+  border-color:     transparent;
+}
+.carbon-btn--danger-ghost:not(:disabled):hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color:            var(--button-danger-hover);
+}
+
+/* ── Disabled ─────────────────────────────────────────────── */
+.carbon-btn:disabled {
+  background-color: var(--button-disabled-bg);
+  color:            var(--button-disabled-text);
+  border-color:     transparent;
+  cursor:           not-allowed;
+  box-shadow:       none;
+  opacity:          1;
+}

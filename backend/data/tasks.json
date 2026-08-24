@@ -1,0 +1,38 @@
+[
+  {
+    "id": "t1",
+    "title": "Thiết kế PCB mạch đo nhiệt độ độ ẩm",
+    "project": "Trạm khí tượng IoT",
+    "status": "todo",
+    "assignedTo": "20220003",
+    "assignedName": "Lê Văn C",
+    "points": 25
+  },
+  {
+    "id": "t2",
+    "title": "Viết Firmware ESP32 kết nối MQTT",
+    "project": "Trạm khí tượng IoT",
+    "status": "in_progress",
+    "assignedTo": "20210002",
+    "assignedName": "Trần Thị B",
+    "points": 30
+  },
+  {
+    "id": "t3",
+    "title": "Lập trình ứng dụng Mobile hiển thị dữ liệu",
+    "project": "Trạm khí tượng IoT",
+    "status": "in_progress",
+    "assignedTo": "20220004",
+    "assignedName": "Phạm Minh D",
+    "points": 40
+  },
+  {
+    "id": "t4",
+    "title": "Lắp ráp mô hình vỏ hộp 3D",
+    "project": "Trạm khí tượng IoT",
+    "status": "done",
+    "assignedTo": "20210001",
+    "assignedName": "Nguyễn Văn A",
+    "points": 15
+  }
+]

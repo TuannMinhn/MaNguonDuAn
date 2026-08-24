@@ -1,0 +1,1099 @@
+[
+  {
+    "id": "1ae7afb2-bca8-4f9f-8b33-c8e3ba4a6394",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 19 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 5,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20220003",
+          "name": "Lê Văn C"
+        },
+        {
+          "mssv": "20220004",
+          "name": "Phạm Minh D"
+        },
+        {
+          "mssv": "SV001",
+          "name": "Sinh vien Test"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-17",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-08-17",
+          "slotId": "afternoon_2"
+        },
+        {
+          "date": "2026-08-18",
+          "slotId": "morning_2"
+        },
+        {
+          "date": "2026-08-18",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-08-18",
+          "slotId": "afternoon_2"
+        },
+        {
+          "date": "2026-08-19",
+          "slotId": "afternoon_2"
+        },
+        {
+          "date": "2026-08-19",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-08-20",
+          "slotId": "evening_2"
+        },
+        {
+          "date": "2026-08-20",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-08-20",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-08-20",
+          "slotId": "morning_2"
+        },
+        {
+          "date": "2026-08-21",
+          "slotId": "morning_2"
+        },
+        {
+          "date": "2026-08-21",
+          "slotId": "afternoon_2"
+        },
+        {
+          "date": "2026-08-21",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-08-22",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-08-22",
+          "slotId": "evening_2"
+        },
+        {
+          "date": "2026-08-22",
+          "slotId": "afternoon_2"
+        },
+        {
+          "date": "2026-08-22",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-08-21",
+          "slotId": "evening_2"
+        }
+      ]
+    },
+    "timestamp": "2026-08-21T04:24:43.835Z",
+    "read": false
+  },
+  {
+    "id": "1a18a384-9a9e-409b-acfa-03470ce3222f",
+    "type": "equipment_borrow",
+    "title": "Xuất linh kiện",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 2x Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "details": {
+      "borrowId": "8509a642-1805-40af-a79c-1d02e33c9000",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 2,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-21T02:51:18.210Z"
+    },
+    "timestamp": "2026-08-21T02:51:18.213Z",
+    "read": false
+  },
+  {
+    "id": "c806ed3e-34f5-47cc-9c5d-222f28b217df",
+    "type": "danger",
+    "title": "Cảnh báo thiết bị trả lại bị hỏng/mất",
+    "content": "Sinh viên Nguyễn Văn A (20210001) đã hoàn trả thiết bị \"Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)\" (MEA-01) trong tình trạng: Bị hỏng hóc bộ phận / Lỗi chức năng. Ghi chú: Không có.",
+    "details": {
+      "borrowId": "e2727673-5d84-46bb-b435-971238c8bf84",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "maintenanceId": "5b343fbe-6a32-4e77-9437-8a27ea2b78b9"
+    },
+    "timestamp": "2026-08-21T02:50:47.394Z",
+    "read": false
+  },
+  {
+    "id": "28bb49ab-0ba8-431b-be95-c1200329be26",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 1x Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "details": {
+      "borrowId": "fcffdd6c-6831-4ea1-b294-167be718ddc4",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-21T02:49:13.734Z"
+    },
+    "timestamp": "2026-08-21T02:49:13.737Z",
+    "read": false
+  },
+  {
+    "id": "a8d36dfd-ed88-42e3-9fdc-3e836684f2e5",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 1x Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "details": {
+      "borrowId": "3e4c99fa-c72a-461f-9f18-c30da72d139a",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-21T02:48:58.570Z"
+    },
+    "timestamp": "2026-08-21T02:48:58.572Z",
+    "read": false
+  },
+  {
+    "id": "502a8830-6275-413c-9e52-353eb4070e5a",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Trần Thị B (20210002) vừa mượn/xuất 1x Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "details": {
+      "borrowId": "c9e873d1-a27c-4fcb-a09b-ce9e8d9ec8c2",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 1,
+      "userName": "Trần Thị B",
+      "mssv": "20210002",
+      "date": "2026-08-21T02:38:56.544Z"
+    },
+    "timestamp": "2026-08-21T02:38:56.546Z",
+    "read": false
+  },
+  {
+    "id": "9fa7449a-d257-4a4c-b3f8-1b1a4d159a54",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 1x Dây cắm testboard (Đực-Đực, Cái-Cái, Đực-Cái)",
+    "details": {
+      "borrowId": "f6e25e3b-14c7-4608-bb04-20cf277c17fa",
+      "equipmentId": "eq-mrbve89uw8lqr4m83vm",
+      "equipmentName": "Dây cắm testboard (Đực-Đực, Cái-Cái, Đực-Cái)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-21T02:38:33.750Z"
+    },
+    "timestamp": "2026-08-21T02:38:33.752Z",
+    "read": false
+  },
+  {
+    "id": "a0efdfcd-f2bc-4fa9-84fa-674d34382da3",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 1x Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "details": {
+      "borrowId": "adc7fee3-a549-4d0d-91d0-6a0616002049",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-21T02:37:40.293Z"
+    },
+    "timestamp": "2026-08-21T02:37:40.295Z",
+    "read": false
+  },
+  {
+    "id": "38b3a827-58d1-478a-ab9b-335d22d19925",
+    "type": "danger",
+    "title": "Cảnh báo thiết bị trả lại bị hỏng/mất",
+    "content": "Sinh viên Nguyễn Văn A (20210001) đã hoàn trả thiết bị \"Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R\" (ACT-01) trong tình trạng: Mất phụ kiện đi kèm (dây, adapter...). Ghi chú: Không có.",
+    "details": {
+      "borrowId": "8f4439a4-5ddc-400e-befb-55b97cab192d",
+      "equipmentId": "eq-mrbve89usjtq310tc8g",
+      "maintenanceId": "d1080423-1985-4998-8ed7-2082390791d6"
+    },
+    "timestamp": "2026-08-21T02:14:48.268Z",
+    "read": false
+  },
+  {
+    "id": "b3b20be7-9831-483e-8687-43756e832e31",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Lê Văn C (20220003) vừa mượn/xuất 1x Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "details": {
+      "borrowId": "195c511f-63a8-4272-9c6b-d7a122a7901d",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "qty": 1,
+      "userName": "Lê Văn C",
+      "mssv": "20220003",
+      "date": "2026-08-12T08:17:56.352Z"
+    },
+    "timestamp": "2026-08-12T08:17:56.356Z",
+    "read": true
+  },
+  {
+    "id": "276d7291-5734-4b4d-a991-9fc54111e27a",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "details": {
+      "borrowId": "e2727673-5d84-46bb-b435-971238c8bf84",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-12T08:12:31.999Z"
+    },
+    "timestamp": "2026-08-12T08:12:32.002Z",
+    "read": true
+  },
+  {
+    "id": "96caad5f-58f1-4a0e-865b-1b886010ba0e",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 1x Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+    "details": {
+      "borrowId": "8f4439a4-5ddc-400e-befb-55b97cab192d",
+      "equipmentId": "eq-mrbve89usjtq310tc8g",
+      "equipmentName": "Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-12T08:11:12.522Z"
+    },
+    "timestamp": "2026-08-12T08:11:12.531Z",
+    "read": true
+  },
+  {
+    "id": "67bc5c56-ae65-4fbe-ab63-2f7688eaa7aa",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Trần Thị B (20210002) vừa đăng ký 7 buổi phòng Lab",
+    "details": {
+      "representativeName": "Trần Thị B",
+      "participantsCount": 3,
+      "members": [
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20220004",
+          "name": "Phạm Minh D"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-11",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-08-12",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-08-13",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-08-13",
+          "slotId": "morning_2"
+        },
+        {
+          "date": "2026-08-12",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-08-12",
+          "slotId": "evening_2"
+        },
+        {
+          "date": "2026-08-12",
+          "slotId": "afternoon_2"
+        }
+      ]
+    },
+    "timestamp": "2026-08-11T08:27:59.453Z",
+    "read": true
+  },
+  {
+    "id": "d6808ccf-5752-4e7a-a88f-cc638192e33a",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 3,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20220003",
+          "name": "Lê Văn C"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-14",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-08-14",
+          "slotId": "afternoon_2"
+        }
+      ]
+    },
+    "timestamp": "2026-08-11T08:27:17.832Z",
+    "read": true
+  },
+  {
+    "id": "2ced16ce-1ca9-47ad-a717-c913c0cc5885",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 2,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-14",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-08-14",
+          "slotId": "morning_2"
+        }
+      ]
+    },
+    "timestamp": "2026-08-11T08:27:02.473Z",
+    "read": true
+  },
+  {
+    "id": "e82e5d79-9b82-4577-a5bb-9c4deb4d6802",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 2,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-10",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-08-10",
+          "slotId": "morning_2"
+        }
+      ]
+    },
+    "timestamp": "2026-08-11T08:26:50.078Z",
+    "read": true
+  },
+  {
+    "id": "15aa9ee8-053a-41f3-a64c-8ac0cf9bcfe5",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 1 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 1,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-11",
+          "slotId": "morning_1"
+        }
+      ]
+    },
+    "timestamp": "2026-08-11T07:41:55.094Z",
+    "read": true
+  },
+  {
+    "id": "b57e0dec-6de8-4367-8524-c6e282e8cb2f",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 1 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 1,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-11",
+          "slotId": "afternoon_2"
+        }
+      ]
+    },
+    "timestamp": "2026-08-11T07:41:00.385Z",
+    "read": true
+  },
+  {
+    "id": "61800118-6bbd-400b-bb65-95c2f9d437fc",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 5x Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "details": {
+      "borrowId": "d48aed63-c738-4387-a9d0-86841355458f",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 5,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T02:58:02.697Z"
+    },
+    "timestamp": "2026-08-10T02:58:02.699Z",
+    "read": true
+  },
+  {
+    "id": "ddf0d078-8847-4dc3-98b9-7fdf0086f9f9",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 10x Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+    "details": {
+      "borrowId": "48e9240f-90ea-4da5-8176-19cdd82d1338",
+      "equipmentId": "eq-mrbve89uol0c1t1bat",
+      "equipmentName": "Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+      "qty": 10,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T02:38:49.846Z"
+    },
+    "timestamp": "2026-08-10T02:38:49.848Z",
+    "read": true
+  },
+  {
+    "id": "acccf139-e959-4581-83c8-10283b67c468",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+    "details": {
+      "borrowId": "b8293196-d65d-40c1-8a1c-48e8fdf69298",
+      "equipmentId": "eq-mrbve89ufncl70omxs7",
+      "equipmentName": "Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:26:25.800Z"
+    },
+    "timestamp": "2026-08-10T00:26:25.801Z",
+    "read": true
+  },
+  {
+    "id": "c5695197-7e2f-409c-a555-e949f0131b79",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 1x Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+    "details": {
+      "borrowId": "d9bab524-2a34-4a02-b3d4-f292ae4af52f",
+      "equipmentId": "eq-mrbve89ufncl70omxs7",
+      "equipmentName": "Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:21:33.436Z"
+    },
+    "timestamp": "2026-08-10T00:21:33.438Z",
+    "read": true
+  },
+  {
+    "id": "0222d10c-ce4f-4d57-82b0-611156690a60",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+    "details": {
+      "borrowId": "9501a05b-2e36-4404-9552-7e7669f11aba",
+      "equipmentId": "eq-mrbve89ufncl70omxs7",
+      "equipmentName": "Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:18:03.459Z"
+    },
+    "timestamp": "2026-08-10T00:18:03.460Z",
+    "read": true
+  },
+  {
+    "id": "c247d06b-5f56-4d93-bf09-01060290dede",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Kit học tập vi mạch FPGA (Xilinx Spartan-7 hoặc Cyclone IV)",
+    "details": {
+      "borrowId": "6760ba57-2561-4561-96f0-14e679e5f146",
+      "equipmentId": "eq-mrbve89un3ov7fcmsje",
+      "equipmentName": "Kit học tập vi mạch FPGA (Xilinx Spartan-7 hoặc Cyclone IV)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:17:16.076Z"
+    },
+    "timestamp": "2026-08-10T00:17:16.077Z",
+    "read": true
+  },
+  {
+    "id": "71f0f314-9b78-4acd-8841-b4021043ca1b",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Raspberry Pi 4 Model B (4GB) / Raspberry Pi 5 (8GB)",
+    "details": {
+      "borrowId": "599ad1ef-6bb4-4df9-9e55-4588d9fd2c5d",
+      "equipmentId": "eq-mrbve89uzgwnucprete",
+      "equipmentName": "Raspberry Pi 4 Model B (4GB) / Raspberry Pi 5 (8GB)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:17:13.693Z"
+    },
+    "timestamp": "2026-08-10T00:17:13.694Z",
+    "read": true
+  },
+  {
+    "id": "e6791974-f0da-4a02-8481-fe3ae7fb1d3b",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+    "details": {
+      "borrowId": "303bf5b1-0bcf-4855-ac38-c6e37a632cb1",
+      "equipmentId": "eq-mrbve89uydhsba7w068",
+      "equipmentName": "Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:17:10.762Z"
+    },
+    "timestamp": "2026-08-10T00:17:10.763Z",
+    "read": true
+  },
+  {
+    "id": "a885e352-0169-4608-8fe1-2b87ce990056",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+    "details": {
+      "borrowId": "8e591233-8fa4-4bc1-bd50-f60cecc29f79",
+      "equipmentId": "eq-mrbve89uydhsba7w068",
+      "equipmentName": "Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:17:08.821Z"
+    },
+    "timestamp": "2026-08-10T00:17:08.822Z",
+    "read": true
+  },
+  {
+    "id": "7a723e48-d05a-4315-a4e2-cef194699d98",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Đồng hồ vạn năng kỹ thuật số UNI-T UT61E",
+    "details": {
+      "borrowId": "452514f3-1444-4196-8c9d-6a12bf2cf4f2",
+      "equipmentId": "eq-mrbve89u8j3urg5p6j3",
+      "equipmentName": "Đồng hồ vạn năng kỹ thuật số UNI-T UT61E",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:17:06.420Z"
+    },
+    "timestamp": "2026-08-10T00:17:06.422Z",
+    "read": true
+  },
+  {
+    "id": "087f195a-1157-4379-8b3e-ca922d7ab7e2",
+    "type": "equipment_reserve",
+    "title": "Yêu cầu đặt trước thiết bị",
+    "content": "Nguyễn Văn A (20210001) đã đặt trước 1x Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "details": {
+      "borrowId": "a2c505ed-dc86-4d13-a5bb-df00558fd0e0",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-10T00:17:04.026Z"
+    },
+    "timestamp": "2026-08-10T00:17:04.028Z",
+    "read": true
+  },
+  {
+    "id": "bde83ec9-a9b0-472e-a276-3a6535f0d96b",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 4x Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+    "details": {
+      "borrowId": "ffae6883-2a9c-4039-8c10-5a22f67f7c8e",
+      "equipmentId": "eq-mrbve89usjtq310tc8g",
+      "equipmentName": "Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+      "qty": 4,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-06T02:53:04.801Z"
+    },
+    "timestamp": "2026-08-06T02:53:04.808Z",
+    "read": true
+  },
+  {
+    "id": "d93a4d30-43f7-4d7a-ac11-0b090e053297",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 2x Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+    "details": {
+      "borrowId": "e7b4f310-66fb-4b31-8fe9-ef9c42179fd6",
+      "equipmentId": "eq-mrbve89usjtq310tc8g",
+      "equipmentName": "Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+      "qty": 2,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-05T19:05:35.141Z"
+    },
+    "timestamp": "2026-08-05T19:05:35.147Z",
+    "read": true
+  },
+  {
+    "id": "a77a24dc-70eb-41be-b4ee-e8fb9f5bbe2f",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 4,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20220003",
+          "name": "Lê Văn C"
+        },
+        {
+          "mssv": "20220004",
+          "name": "Phạm Minh D"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-06",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-08-06",
+          "slotId": "morning_2"
+        }
+      ]
+    },
+    "timestamp": "2026-08-05T16:44:49.721Z",
+    "read": true
+  },
+  {
+    "id": "238c9786-f78b-4e23-a5b9-002eba33daf7",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 4 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 3,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20220004",
+          "name": "Phạm Minh D"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-08-03",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-08-03",
+          "slotId": "morning_2"
+        },
+        {
+          "date": "2026-08-03",
+          "slotId": "afternoon_2"
+        },
+        {
+          "date": "2026-08-03",
+          "slotId": "afternoon_1"
+        }
+      ]
+    },
+    "timestamp": "2026-08-05T15:26:48.013Z",
+    "read": true
+  },
+  {
+    "id": "cd63e10a-c6fe-420f-a7fd-ad2511099131",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Nguyễn Văn A (20210001) vừa mượn/xuất 1x Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "details": {
+      "borrowId": "9771ab3b-f024-4714-b182-2ffb7b9ce9ce",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "qty": 1,
+      "userName": "Nguyễn Văn A",
+      "mssv": "20210001",
+      "date": "2026-08-05T13:10:25.719Z"
+    },
+    "timestamp": "2026-08-05T13:10:25.725Z",
+    "read": true
+  },
+  {
+    "id": "755a9aea-2bfc-4d49-94d6-aae8b47e56c7",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 4,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20220003",
+          "name": "Lê Văn C"
+        },
+        {
+          "mssv": "20220004",
+          "name": "Phạm Minh D"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-07-21",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-07-21",
+          "slotId": "evening_2"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T09:53:47.914Z",
+    "read": true
+  },
+  {
+    "id": "1e6559d6-b634-494d-b277-334c8bc2f5cb",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 4,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20220003",
+          "name": "Lê Văn C"
+        },
+        {
+          "mssv": "20220004",
+          "name": "Phạm Minh D"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-07-22",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-07-22",
+          "slotId": "evening_2"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T09:53:37.546Z",
+    "read": true
+  },
+  {
+    "id": "0d612a96-b20a-431c-a568-d3ec69fa5f60",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 4,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20220003",
+          "name": "Lê Văn C"
+        },
+        {
+          "mssv": "20220004",
+          "name": "Phạm Minh D"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-07-28",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-07-28",
+          "slotId": "evening_2"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T09:28:29.978Z",
+    "read": true
+  },
+  {
+    "id": "77493f75-edae-4006-97c4-6600bd0b8406",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Trần Thị B (20210002) vừa đăng ký 6 buổi phòng Lab",
+    "details": {
+      "representativeName": "Trần Thị B",
+      "participantsCount": 2,
+      "members": [
+        {
+          "mssv": "20210002",
+          "name": "Trần Thị B"
+        },
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-07-27",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-07-27",
+          "slotId": "afternoon_2"
+        },
+        {
+          "date": "2026-07-27",
+          "slotId": "morning_2"
+        },
+        {
+          "date": "2026-07-27",
+          "slotId": "afternoon_1"
+        },
+        {
+          "date": "2026-07-27",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-07-27",
+          "slotId": "evening_2"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T09:27:01.264Z",
+    "read": true
+  },
+  {
+    "id": "efdbb91c-4bce-4ae3-b100-b05c0380a681",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 1,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-07-27",
+          "slotId": "evening_1"
+        },
+        {
+          "date": "2026-07-27",
+          "slotId": "evening_2"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T08:20:43.964Z",
+    "read": true
+  },
+  {
+    "id": "a9c8c0da-64b2-43f1-b962-1d0818e11a8e",
+    "type": "room_booking",
+    "title": "Lịch đăng ký phòng mới",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký phòng vào 2026-07-27, ca afternoon_2",
+    "details": {
+      "bookingId": "3d45e7e0-cf9f-44e5-b32a-6b6f73fd8cfc",
+      "date": "2026-07-27",
+      "slotId": "afternoon_2",
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 1,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T08:09:59.329Z",
+    "read": true
+  },
+  {
+    "id": "baef9e05-6831-4b23-9175-519e497a5299",
+    "type": "room_booking",
+    "title": "Lịch đăng ký phòng mới",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký phòng vào 2026-07-27, ca afternoon_1",
+    "details": {
+      "bookingId": "8207ad09-9113-4ca8-ae86-77212fa12448",
+      "date": "2026-07-27",
+      "slotId": "afternoon_1",
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 1,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T08:09:59.324Z",
+    "read": true
+  },
+  {
+    "id": "0a3ebfdc-248c-42ed-ba60-52936c2e962c",
+    "type": "room_booking",
+    "title": "Lịch đăng ký phòng mới",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký phòng vào 2026-07-27, ca morning_2",
+    "details": {
+      "bookingId": "df375169-0564-420f-a918-fff7b399c230",
+      "date": "2026-07-27",
+      "slotId": "morning_2",
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 1,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T08:09:59.319Z",
+    "read": true
+  },
+  {
+    "id": "97aa70d8-5861-4509-b59b-f1ea6aea5086",
+    "type": "room_booking",
+    "title": "Lịch đăng ký phòng mới",
+    "content": "Nguyễn Văn A (20210001) vừa đăng ký phòng vào 2026-07-27, ca morning_1",
+    "details": {
+      "bookingId": "9f70c39d-6dbf-4f6c-a691-e52eb78223ba",
+      "date": "2026-07-27",
+      "slotId": "morning_1",
+      "representativeName": "Nguyễn Văn A",
+      "participantsCount": 1,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Nguyễn Văn A"
+        }
+      ]
+    },
+    "timestamp": "2026-07-28T08:09:59.314Z",
+    "read": true
+  }
+]

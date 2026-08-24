@@ -1,0 +1,58 @@
+[
+  {
+    "id": "daf91e08-902e-4dd0-a406-28658bdad773",
+    "date": "2026-07-28",
+    "slotId": "evening_1",
+    "bookingId": "538b3c5e-5ffc-471e-85b8-82f13ef2e551",
+    "attendees": [
+      {
+        "mssv": "20210001",
+        "name": "Nguyễn Văn A",
+        "type": "registered",
+        "checkInAt": "2026-07-28T09:28:44.339Z",
+        "checkOutAt": "2026-07-28T09:37:14.474Z",
+        "activity": "Họp nhóm"
+      },
+      {
+        "mssv": "20220003",
+        "name": "Lê Văn C",
+        "type": "registered",
+        "checkInAt": "2026-07-28T09:28:54.602Z",
+        "checkOutAt": "2026-07-28T09:40:36.735Z",
+        "activity": "Lấy đồ để quên"
+      },
+      {
+        "mssv": "20220004",
+        "name": "Phạm Minh D",
+        "type": "registered",
+        "checkInAt": "2026-07-28T09:40:33.152Z",
+        "checkOutAt": null,
+        "activity": "Sử dụng Lab"
+      },
+      {
+        "mssv": "20220003",
+        "name": "Lê Văn C",
+        "type": "registered",
+        "checkInAt": "2026-07-28T09:40:40.117Z",
+        "checkOutAt": null,
+        "activity": "Sử dụng Lab"
+      }
+    ]
+  },
+  {
+    "id": "bba56db0-8023-4269-b031-2c03358e9a01",
+    "date": "2026-08-11",
+    "slotId": "afternoon_2",
+    "bookingId": "dcf474ec-2419-4998-903c-b8a6e19dd175",
+    "attendees": [
+      {
+        "mssv": "20210001",
+        "name": "Nguyễn Văn A",
+        "type": "registered",
+        "checkInAt": "2026-08-11T07:44:49.360Z",
+        "checkOutAt": null,
+        "activity": "Sử dụng Lab"
+      }
+    ]
+  }
+]

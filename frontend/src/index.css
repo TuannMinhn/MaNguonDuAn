@@ -1,0 +1,6 @@
+/* Reset default Vite index styles to let App.css handle everything */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0b0f19;
+}

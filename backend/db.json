@@ -1,0 +1,14 @@
+{
+  "maintenance": [
+    {
+      "id": "93523309-7815-4264-88d1-13f625200ab8",
+      "equipmentId": "eq2",
+      "equipmentName": "Mỏ hàn thiếc Quick 936A",
+      "issueDescription": "Lỗi nguồn, không nóng",
+      "status": "Đang sửa",
+      "cost": 0,
+      "reportedDate": "2026-06-20T08:00:00.000Z",
+      "resolvedDate": null
+    }
+  ]
+}

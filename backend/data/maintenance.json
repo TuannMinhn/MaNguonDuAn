@@ -1,0 +1,99 @@
+[
+  {
+    "id": "469c603b-b0d3-4ca4-85c8-de7ca84668ef",
+    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "issueDescription": "qưeq",
+    "status": "Đã sửa",
+    "cost": 1111111,
+    "reportedDate": "2026-08-11T08:35:13.391Z",
+    "resolvedDate": "2026-08-12T08:06:27.813Z",
+    "notes": [
+      {
+        "id": "6747224f-c79c-4290-a0c2-c4827fc9989f",
+        "text": "Đang kiểm tra nguồn máy, nghi hỏng ic nguồn",
+        "date": "2026-08-12T07:47:15.164Z"
+      },
+      {
+        "id": "6ada6055-ee1d-459f-9b1f-8b0264038da2",
+        "text": "sdasdada",
+        "date": "2026-08-12T07:48:34.986Z"
+      }
+    ]
+  },
+  {
+    "id": "ddc44048-bcaa-48d7-821a-dd57af9b9449",
+    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "issueDescription": "qưeq (Báo cáo từ ca trực: Nguyễn Văn A - 2026-08-10)",
+    "status": "Đã sửa",
+    "cost": 0,
+    "reportedDate": "2026-08-11T09:04:27.950Z",
+    "resolvedDate": "2026-08-12T07:38:56.596Z"
+  },
+  {
+    "id": "2655d503-9bcc-496f-9252-b13030ab54ee",
+    "equipmentId": "eq-mrbve89u8j3urg5p6j3",
+    "equipmentName": "Đồng hồ vạn năng kỹ thuật số UNI-T UT61E",
+    "issueDescription": "Hong man hinh",
+    "status": "Đã sửa",
+    "cost": 0,
+    "reportedDate": "2026-08-12T07:59:53.736Z",
+    "resolvedDate": "2026-08-12T08:06:08.281Z",
+    "notes": []
+  },
+  {
+    "id": "6ac54d75-f8d5-48e7-886e-b535bd3630b4",
+    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "issueDescription": "qưeqweqw",
+    "status": "Đang sửa",
+    "cost": 0,
+    "reportedDate": "2026-08-21T01:43:24.803Z",
+    "resolvedDate": null
+  },
+  {
+    "id": "07b3c5e6-59f2-4ac8-adbf-08c6d25cbb17",
+    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "issueDescription": "[Mức độ: Khẩn cấp] ahiwhr ",
+    "status": "Đang sửa",
+    "cost": 0,
+    "reportedDate": "2026-08-21T02:07:45.404Z",
+    "resolvedDate": null
+  },
+  {
+    "id": "d1080423-1985-4998-8ed7-2082390791d6",
+    "equipmentId": "eq-mrbve89usjtq310tc8g",
+    "equipmentName": "Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+    "issueDescription": "[Trả máy hỏng - mượn bởi Nguyễn Văn A] Tình trạng: Mất phụ kiện đi kèm (dây, adapter...). Chi tiết: Không có ghi chú thêm.",
+    "status": "Đang sửa",
+    "cost": 0,
+    "reportedDate": "2026-08-21T02:14:48.265Z",
+    "resolvedDate": null,
+    "notes": [
+      {
+        "id": "fbc099e5-0548-4afe-8048-c1816497c39a",
+        "text": "Hệ thống tự động tạo do người trả Nguyễn Văn A (20210001) hoàn trả thiết bị trong tình trạng không nguyên vẹn.",
+        "date": "2026-08-21T02:14:48.265Z"
+      }
+    ]
+  },
+  {
+    "id": "5b343fbe-6a32-4e77-9437-8a27ea2b78b9",
+    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "issueDescription": "[Trả máy hỏng - mượn bởi Nguyễn Văn A] Tình trạng: Bị hỏng hóc bộ phận / Lỗi chức năng. Chi tiết: Không có ghi chú thêm.",
+    "status": "Đang sửa",
+    "cost": 0,
+    "reportedDate": "2026-08-21T02:50:47.392Z",
+    "resolvedDate": null,
+    "notes": [
+      {
+        "id": "9fe33561-cccd-43c2-9661-01a992ec5416",
+        "text": "Hệ thống tự động tạo do người trả Nguyễn Văn A (20210001) hoàn trả thiết bị trong tình trạng không nguyên vẹn.",
+        "date": "2026-08-21T02:50:47.392Z"
+      }
+    ]
+  }
+]

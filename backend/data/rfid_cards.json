@@ -1,0 +1,42 @@
+[
+  {
+    "id": "rc1",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "status": "active",
+    "registeredDate": "2026-06-01T08:00:00.000Z",
+    "lastUsed": "2026-08-21T02:51:24.607Z",
+    "usageCount": 77
+  },
+  {
+    "id": "rc2",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "status": "active",
+    "registeredDate": "2026-06-01T08:00:00.000Z",
+    "lastUsed": "2026-07-16T01:45:08.895Z",
+    "usageCount": 7
+  },
+  {
+    "id": "rc3",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "status": "active",
+    "registeredDate": "2026-06-01T08:00:00.000Z",
+    "lastUsed": "2026-08-21T02:11:06.922Z",
+    "usageCount": 13
+  },
+  {
+    "id": "rc4",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "status": "active",
+    "registeredDate": "2026-06-01T08:00:00.000Z",
+    "lastUsed": "2026-07-28T09:40:33.162Z",
+    "usageCount": 8
+  }
+]

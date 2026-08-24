@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "mssv": "20210001",
+    "name": "Nguyễn Văn A",
+    "role": "Chủ nhiệm",
+    "points": 150,
+    "active": true
+  },
+  {
+    "id": "2",
+    "mssv": "20210002",
+    "name": "Trần Thị B",
+    "role": "Trưởng ban Kỹ thuật",
+    "points": 120,
+    "active": false
+  },
+  {
+    "id": "3",
+    "mssv": "20220003",
+    "name": "Lê Văn C",
+    "role": "Thành viên",
+    "points": 82,
+    "active": true
+  },
+  {
+    "id": "4",
+    "mssv": "20220004",
+    "name": "Phạm Minh D",
+    "role": "Thành viên",
+    "points": 45,
+    "active": true
+  },
+  {
+    "id": "a773fadf-cb6d-4787-848c-11a2fba3cd63",
+    "mssv": "SV001",
+    "name": "Sinh vien Test",
+    "role": "Thành viên",
+    "points": 0,
+    "active": false
+  }
+]

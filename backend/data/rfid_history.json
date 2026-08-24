@@ -1,0 +1,1332 @@
+[
+  {
+    "id": "c01ef924-be4b-4ccc-b390-aeebc87fe5ab",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-02T06:22:28.905Z",
+    "success": true
+  },
+  {
+    "id": "d4a21ecd-ae69-4737-94c3-d70cdb5c2e78",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-02T06:22:54.668Z",
+    "success": true
+  },
+  {
+    "id": "1b8878a3-67a1-4be8-bd00-ac90dc863fd5",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-02T06:28:11.843Z",
+    "success": true
+  },
+  {
+    "id": "79790c7c-8588-41fb-af2c-d1a9981cfbc6",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:45:20.064Z",
+    "success": true
+  },
+  {
+    "id": "798f3748-bac9-4a19-85f3-f10642fe646a",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.217Z",
+    "success": true
+  },
+  {
+    "id": "b4248d79-123a-434b-a315-92b8e54a103f",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.222Z",
+    "success": true
+  },
+  {
+    "id": "3cbd9258-40ac-420f-8acf-d9018c0e1def",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.227Z",
+    "success": true
+  },
+  {
+    "id": "6604da4b-c5e7-4a55-a140-1e12ad9f9394",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.232Z",
+    "success": true
+  },
+  {
+    "id": "2bcf8598-eec2-4771-8a40-155a70a741dd",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.245Z",
+    "success": true
+  },
+  {
+    "id": "60710522-490c-40a1-a7c9-cdcf08f91bea",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.251Z",
+    "success": true
+  },
+  {
+    "id": "0073d583-897e-43c2-aad1-2428907c25a1",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.257Z",
+    "success": true
+  },
+  {
+    "id": "2da57da3-c767-4b5b-aa6c-826f732e3f7c",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.262Z",
+    "success": true
+  },
+  {
+    "id": "80fed600-2d71-416f-971d-f7687e619c29",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.274Z",
+    "success": true
+  },
+  {
+    "id": "d0d77a25-9ec5-44a3-ac5a-61a1cbb0092a",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.281Z",
+    "success": true
+  },
+  {
+    "id": "26bcf7d2-692d-4bcd-8537-a46c60e6c664",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.288Z",
+    "success": true
+  },
+  {
+    "id": "b3a9bd51-2fb0-403f-be5f-80abea5919c5",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.294Z",
+    "success": true
+  },
+  {
+    "id": "da86b15c-5062-43f3-8eec-8e68a97c39ef",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.319Z",
+    "success": true
+  },
+  {
+    "id": "b7be72dc-3344-4bbb-a71c-ef6473032b78",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.331Z",
+    "success": true
+  },
+  {
+    "id": "b44dab73-1fed-4557-98c1-94322ae794cd",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.344Z",
+    "success": true
+  },
+  {
+    "id": "9a6c4159-cdb0-42e6-b4c2-7079bf73c8f3",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-02T06:47:19.358Z",
+    "success": true
+  },
+  {
+    "id": "dfe94531-bf41-44a7-af05-38ea3d02d441",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-09T03:47:46.228Z",
+    "success": true
+  },
+  {
+    "id": "eee139f4-aba0-4527-9653-3b8bd9ff2d44",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-09T03:47:46.268Z",
+    "success": true
+  },
+  {
+    "id": "01414c07-949e-4c8a-8e57-61e61db36f5b",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.702Z",
+    "success": true
+  },
+  {
+    "id": "ada7f282-cc85-42df-9319-4b9abf62c568",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.712Z",
+    "success": true
+  },
+  {
+    "id": "e45d23f7-3a1f-45d7-847d-fdc27941137b",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.721Z",
+    "success": true
+  },
+  {
+    "id": "d28c2f4e-70ba-4376-9c01-1369fafc41d3",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.731Z",
+    "success": true
+  },
+  {
+    "id": "e38ebb01-1376-4140-a754-ed987e96bcb0",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.750Z",
+    "success": true
+  },
+  {
+    "id": "fe300358-c107-4e5f-9c5d-ab04923af532",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.759Z",
+    "success": true
+  },
+  {
+    "id": "4c0e880d-889e-40de-afcb-824d3456c10c",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.767Z",
+    "success": true
+  },
+  {
+    "id": "2f5674ee-3f48-4e5e-baa6-94eb4bf77326",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T00:59:56.776Z",
+    "success": true
+  },
+  {
+    "id": "15846187-579e-4136-8b38-bf065f0a3d38",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:41:36.494Z",
+    "success": false
+  },
+  {
+    "id": "d5648f42-2d6a-4acc-9b06-b29da32ffcf4",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:42:47.942Z",
+    "success": false
+  },
+  {
+    "id": "be5db8c0-c3e6-437b-9ef4-b579e04371fb",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:42:53.651Z",
+    "success": false
+  },
+  {
+    "id": "dd587fc6-dd64-4334-b753-e245366756da",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:42:54.509Z",
+    "success": false
+  },
+  {
+    "id": "68eb544b-22e6-4b19-ac22-240d8b21f987",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:42:55.408Z",
+    "success": false
+  },
+  {
+    "id": "99929418-9b8f-4565-9b3f-c2fd1e7cb136",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:42:56.224Z",
+    "success": false
+  },
+  {
+    "id": "5baaae68-98be-4f74-b403-3dc205cdf1d5",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:23.644Z",
+    "success": false
+  },
+  {
+    "id": "d3945c26-cc07-425b-b88e-4fb32efab0c6",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:39.399Z",
+    "success": true
+  },
+  {
+    "id": "0fdfe414-c09c-4c7c-8071-ba5775b5ba45",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:46.572Z",
+    "success": false
+  },
+  {
+    "id": "885fc104-8c93-42b3-8926-c5d2bee69e3a",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:47.810Z",
+    "success": false
+  },
+  {
+    "id": "0628564d-3aba-471b-b4b4-ac9cd89719e0",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:48.005Z",
+    "success": false
+  },
+  {
+    "id": "d75794c4-2d98-4ca1-a5a3-22e28eada924",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:48.797Z",
+    "success": false
+  },
+  {
+    "id": "2cce0f3d-5e34-4521-97b0-eff7babe9e9f",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:48.865Z",
+    "success": false
+  },
+  {
+    "id": "b5f902d7-19cc-4f9b-9671-8820587c3f63",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:43:49.813Z",
+    "success": false
+  },
+  {
+    "id": "6f654b66-c80a-49f5-a2a2-a1681e7a6d67",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:08.881Z",
+    "success": true
+  },
+  {
+    "id": "19f741db-45e1-4d0b-b1f4-d9e382919704",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:08.891Z",
+    "success": true
+  },
+  {
+    "id": "c32a6d5d-b170-4053-b306-c3dee4e92f41",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:08.899Z",
+    "success": true
+  },
+  {
+    "id": "6bbd5e09-f56c-494a-b25b-bbee106d0fa2",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "book_member",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:08.908Z",
+    "success": true
+  },
+  {
+    "id": "9a7a672c-e5fb-42e2-98b8-0760c2ff74af",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:18.303Z",
+    "success": false
+  },
+  {
+    "id": "2951f29f-7b19-4226-b1bf-e6573f56cc5b",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:48.079Z",
+    "success": true
+  },
+  {
+    "id": "138bcd6c-3597-446f-9c71-c51c338e449f",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:51.565Z",
+    "success": false
+  },
+  {
+    "id": "e1d25c7f-d5e6-4947-9e06-635ebe33c246",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:45:55.124Z",
+    "success": true
+  },
+  {
+    "id": "7b3e5411-fa5a-4072-b8da-9ad3a1a51158",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkout",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T01:46:34.694Z",
+    "success": true
+  },
+  {
+    "id": "60bbbb08-1140-4de7-9509-62506318e2b6",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:04:33.788Z",
+    "success": false
+  },
+  {
+    "id": "7b543c8d-b008-4574-8f59-417014ad18ab",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:11:23.644Z",
+    "success": true
+  },
+  {
+    "id": "4e64eb6c-832d-4f03-8ff5-0e281120b2bb",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:11:59.815Z",
+    "success": true
+  },
+  {
+    "id": "3fbbf3f7-06ec-4294-a1c4-dae3dc3be0de",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:12:10.833Z",
+    "success": true
+  },
+  {
+    "id": "c98e21c6-02b0-431c-be3d-86d15b86cd41",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:15:49.430Z",
+    "success": false
+  },
+  {
+    "id": "58efe4e8-6aac-45f5-85ec-5cff5538141a",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:18:38.466Z",
+    "success": true
+  },
+  {
+    "id": "cfea7849-4952-4036-ac9b-f09c03f36066",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:18:44.992Z",
+    "success": false
+  },
+  {
+    "id": "6959ab0b-4618-4030-a871-972e26f21987",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "book_representative",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:25:37.279Z",
+    "success": true
+  },
+  {
+    "id": "f668c265-9d63-4939-967c-42c2646af70e",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T02:25:53.914Z",
+    "success": true
+  },
+  {
+    "id": "348a093e-f0ac-42f8-a194-c364f979473d",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkout",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T03:06:16.649Z",
+    "success": true
+  },
+  {
+    "id": "2f7dc06e-1d3e-425f-8909-b92c7fad2409",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:12:48.713Z",
+    "success": true
+  },
+  {
+    "id": "7425849e-65dd-4c8d-864f-aeb1f473fb3f",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:13:31.774Z",
+    "success": true
+  },
+  {
+    "id": "b5998126-cf2e-44e7-a934-a2eb75691549",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:27:22.182Z",
+    "success": true
+  },
+  {
+    "id": "10d57d9f-1622-469a-834e-bcafed2771ea",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:27:38.362Z",
+    "success": true
+  },
+  {
+    "id": "f79e2860-131c-4eea-9a55-f4e7a4d04a73",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:27:46.836Z",
+    "success": true
+  },
+  {
+    "id": "1852337f-3e41-45a5-a029-96c4b5528f31",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:31:05.544Z",
+    "success": true
+  },
+  {
+    "id": "6bf314b2-7bac-44a5-aa58-a905f0ccf099",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:36:09.719Z",
+    "success": true
+  },
+  {
+    "id": "ad9ccd11-aa19-461e-a3c4-55f58d09b4aa",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:36:28.020Z",
+    "success": true
+  },
+  {
+    "id": "23ad66af-1796-4491-b6c9-a3df7b0dc39a",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:36:41.186Z",
+    "success": true
+  },
+  {
+    "id": "9fc6440d-494d-466c-8e11-ac0c8107711e",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:36:48.316Z",
+    "success": true
+  },
+  {
+    "id": "dc406bff-f206-4e2a-8bfa-425fd7e03049",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:41:49.483Z",
+    "success": true
+  },
+  {
+    "id": "260390f7-8383-474a-93a1-90deb27032c7",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:54:56.447Z",
+    "success": true
+  },
+  {
+    "id": "2d66d203-6ee0-47f3-88a5-46d61f606f41",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T03:55:00.669Z",
+    "success": true
+  },
+  {
+    "id": "381c8d31-5c9d-4b37-b7d4-b1127abda139",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T04:34:20.340Z",
+    "success": true
+  },
+  {
+    "id": "fabb6e46-149a-4ec7-83b3-9188ccbef0e1",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T04:34:23.211Z",
+    "success": true
+  },
+  {
+    "id": "378a3a79-3a85-452b-99fe-21c0ad19ef2d",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T06:58:04.733Z",
+    "success": true
+  },
+  {
+    "id": "fcd99099-cc34-4479-8a32-ab3031e83e09",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T07:16:57.074Z",
+    "success": true
+  },
+  {
+    "id": "e13d0ba9-4e3f-4fa9-9842-6dcd232cf22a",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T08:19:37.859Z",
+    "success": true
+  },
+  {
+    "id": "607f4994-4b93-4263-85b4-7f7f0f9ffab6",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkout",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T08:19:44.548Z",
+    "success": true
+  },
+  {
+    "id": "7a42a349-0f95-41a5-b823-fe7bfe168459",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T08:20:54.421Z",
+    "success": false
+  },
+  {
+    "id": "f38e1999-a7cf-400b-8c33-76ec7170cabc",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T08:22:23.409Z",
+    "success": true
+  },
+  {
+    "id": "c97bfd2a-c737-4859-8b25-352e576066d2",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkout",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T08:23:08.487Z",
+    "success": true
+  },
+  {
+    "id": "4035961d-af83-45d2-bb25-4411c780ba2e",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T08:23:55.568Z",
+    "success": true
+  },
+  {
+    "id": "f5f07ed7-0bc5-4aca-8f97-72a60e9b9d8e",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T08:25:26.307Z",
+    "success": true
+  },
+  {
+    "id": "05218d6c-82e0-4968-81b5-516e95317946",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T08:32:21.613Z",
+    "success": true
+  },
+  {
+    "id": "4988b709-9548-4a88-b9a7-8455de57d0b2",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T08:32:32.859Z",
+    "success": true
+  },
+  {
+    "id": "6524353e-aaa1-42a2-b568-4621adc17d04",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T08:58:01.049Z",
+    "success": true
+  },
+  {
+    "id": "b880a733-be69-48bc-aa2f-4e51783b79fd",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T08:58:03.739Z",
+    "success": true
+  },
+  {
+    "id": "33665a7d-7ebf-47a9-b971-23dd9e99e091",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T09:00:34.428Z",
+    "success": true
+  },
+  {
+    "id": "c77279a2-bae4-462a-8f9f-a2d252f3f846",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T09:00:38.807Z",
+    "success": true
+  },
+  {
+    "id": "f198cd7d-3426-4e14-880b-64920568a4d5",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T09:00:57.125Z",
+    "success": true
+  },
+  {
+    "id": "4e808e3f-da3e-4f5f-81f1-4f4ba014057d",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T09:01:00.374Z",
+    "success": true
+  },
+  {
+    "id": "673d7335-a601-479d-99c8-fe9f138b7eab",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T09:01:11.776Z",
+    "success": false
+  },
+  {
+    "id": "138cb23b-106e-458f-b184-f36dfc17a09a",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-07-16T09:04:58.909Z",
+    "success": true
+  },
+  {
+    "id": "df736ca5-28b9-4222-a75e-fe1babdc9d16",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-07-16T09:05:17.109Z",
+    "success": true
+  },
+  {
+    "id": "164ace0a-38db-4721-8970-8d739731468f",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T09:05:53.255Z",
+    "success": true
+  },
+  {
+    "id": "3aa635e3-d9ca-4e60-ab77-d5763a2a9d95",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T09:07:22.011Z",
+    "success": true
+  },
+  {
+    "id": "43355fcb-265a-4b62-9711-0af9fd089727",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "room-checkout-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-16T09:07:27.446Z",
+    "success": false
+  },
+  {
+    "id": "92f2f849-3198-4e34-b6a1-8eca3c19f465",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T08:03:07.584Z",
+    "success": false
+  },
+  {
+    "id": "d2b49565-4c2d-4c01-b835-62cf53649127",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:28:00.131Z",
+    "success": false
+  },
+  {
+    "id": "73d68420-c768-49c0-8b26-53e11b39a306",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:28:44.347Z",
+    "success": true
+  },
+  {
+    "id": "8d29ef61-63b9-4a55-b738-5c1c09db75aa",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:28:54.611Z",
+    "success": true
+  },
+  {
+    "id": "f0ddc77a-a1f6-4bb6-b652-ae9a096757b9",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkout",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:37:14.480Z",
+    "success": true
+  },
+  {
+    "id": "00884b7c-140d-4a98-8724-0e086cb2a3f1",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:40:33.160Z",
+    "success": true
+  },
+  {
+    "id": "59e8406b-a10b-4957-bd47-adf2c21da3ab",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "room-checkout",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:40:36.741Z",
+    "success": true
+  },
+  {
+    "id": "ebe42a17-8970-403b-a611-b39ef269f36f",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:40:40.123Z",
+    "success": true
+  },
+  {
+    "id": "799a1511-5e8d-4b16-97c9-a50e36ea1a67",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:53:54.679Z",
+    "success": false
+  },
+  {
+    "id": "99f62e26-96fe-4a96-aa1c-438425c62ff5",
+    "cardId": "CARD-004",
+    "mssv": "20220004",
+    "userName": "Phạm Minh D",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-07-28T09:53:57.898Z",
+    "success": false
+  },
+  {
+    "id": "0a447117-2fb5-40c4-a280-fce2b8908c29",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-05T13:10:25.721Z",
+    "success": true
+  },
+  {
+    "id": "e8aa5400-2aed-4dd4-a7b2-ef187559e267",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-05T19:05:35.144Z",
+    "success": true
+  },
+  {
+    "id": "070df503-8ec5-4714-9174-98c0a942c23a",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-08-06T02:12:08.446Z",
+    "success": true
+  },
+  {
+    "id": "f3a09427-d32f-4605-bbb0-46ed6b7ee6a1",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-06T02:53:04.804Z",
+    "success": true
+  },
+  {
+    "id": "5a22cfa6-a1f0-44f6-9f88-ee2afbc77d4e",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-08-08T20:24:52.061Z",
+    "success": true
+  },
+  {
+    "id": "fe8fa70e-245f-4103-885c-1967138af258",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-08-10T00:13:55.361Z",
+    "success": false
+  },
+  {
+    "id": "f48d1167-d93c-4ee1-bf6c-d3da3df6e923",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-10T00:17:28.583Z",
+    "success": true
+  },
+  {
+    "id": "fe26f247-e25b-4a37-860d-73bac064f82d",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-10T00:17:40.224Z",
+    "success": true
+  },
+  {
+    "id": "f6b701d4-f020-4454-9995-af0a07600e94",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-10T00:18:15.736Z",
+    "success": true
+  },
+  {
+    "id": "96832a15-decd-4958-888f-83a7fba4e265",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-08-10T00:21:57.699Z",
+    "success": true
+  },
+  {
+    "id": "f2f5a318-44e2-4f3a-9704-03bd87e2de57",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-10T02:58:19.070Z",
+    "success": true
+  },
+  {
+    "id": "7261bfdd-0f8b-4f52-ac46-e1a654c4e71f",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-checkin",
+    "module": "room_booking",
+    "timestamp": "2026-08-11T07:44:49.373Z",
+    "success": true
+  },
+  {
+    "id": "7891a63f-4975-4dff-a4fc-762d7491b66f",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-08-11T08:28:06.313Z",
+    "success": false
+  },
+  {
+    "id": "7991a201-e884-4467-9c48-bc7d0bce6bc1",
+    "cardId": "CARD-002",
+    "mssv": "20210002",
+    "userName": "Trần Thị B",
+    "action": "room-access-denied",
+    "module": "room_booking",
+    "timestamp": "2026-08-11T08:28:12.218Z",
+    "success": false
+  },
+  {
+    "id": "86386970-c48a-4cf5-a8c9-c45dbc6bc7f3",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-12T08:11:12.525Z",
+    "success": true
+  },
+  {
+    "id": "f3e998fa-1c12-4a6f-a0bd-15a19ffe2305",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-12T08:19:34.292Z",
+    "success": true
+  },
+  {
+    "id": "373f595d-ca48-4851-8d43-62efa197d02d",
+    "cardId": "CARD-003",
+    "mssv": "20220003",
+    "userName": "Lê Văn C",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-08-21T02:11:06.919Z",
+    "success": true
+  },
+  {
+    "id": "75b37ec9-31a8-4aeb-af74-12760601d974",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-08-21T02:14:48.270Z",
+    "success": true
+  },
+  {
+    "id": "ba5325ce-d0eb-4aad-a305-c5cae5119a56",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-21T02:50:26.055Z",
+    "success": true
+  },
+  {
+    "id": "d38df470-754c-4a7b-a87e-d2c4d392beef",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-21T02:50:42.126Z",
+    "success": true
+  },
+  {
+    "id": "c36a3ee3-fe5d-4609-af62-3445a7e0ba2c",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "return",
+    "module": "equipment",
+    "timestamp": "2026-08-21T02:50:47.397Z",
+    "success": true
+  },
+  {
+    "id": "0bd28209-18b5-4543-838a-7e0e2379b9cd",
+    "cardId": "CARD-001",
+    "mssv": "20210001",
+    "userName": "Nguyễn Văn A",
+    "action": "borrow",
+    "module": "equipment",
+    "timestamp": "2026-08-21T02:51:24.604Z",
+    "success": true
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "s1",
+    "day": "Thứ 2",
+    "shift": "Sáng (08:00 - 11:30)",
+    "members": [
+      {
+        "mssv": "20210001",
+        "name": "Nguyễn Văn A"
+      }
+    ]
+  },
+  {
+    "id": "s2",
+    "day": "Thứ 2",
+    "shift": "Chiều (13:30 - 17:00)",
+    "members": [
+      {
+        "mssv": "20210002",
+        "name": "Trần Thị B"
+      },
+      {
+        "mssv": "20220003",
+        "name": "Lê Văn C"
+      }
+    ]
+  },
+  {
+    "id": "s3",
+    "day": "Thứ 3",
+    "shift": "Tối (18:00 - 21:00)",
+    "members": [
+      {
+        "mssv": "20220004",
+        "name": "Phạm Minh D"
+      }
+    ]
+  },
+  {
+    "id": "s4",
+    "day": "Thứ 4",
+    "shift": "Sáng (08:00 - 11:30)",
+    "members": []
+  },
+  {
+    "id": "s5",
+    "day": "Thứ 4",
+    "shift": "Chiều (13:30 - 17:00)",
+    "members": [
+      {
+        "mssv": "20210001",
+        "name": "Nguyễn Văn A"
+      }
+    ]
+  },
+  {
+    "id": "s6",
+    "day": "Thứ 5",
+    "shift": "Tối (18:00 - 21:00)",
+    "members": []
+  }
+]

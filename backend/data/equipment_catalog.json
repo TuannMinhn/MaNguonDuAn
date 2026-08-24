@@ -1,0 +1,672 @@
+[
+  {
+    "id": "cb77423a-d26d-422a-9908-d64e4f5a5aa2",
+    "name": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "codePrefix": "MEA-01",
+    "category": "Thiết bị đo lường",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "f2103a2e-72b8-455c-af02-b0d3cf61640f",
+    "name": "Đồng hồ vạn năng kỹ thuật số UNI-T UT61E",
+    "codePrefix": "MEA-02",
+    "category": "Thiết bị đo lường",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "87ecab53-4d3b-48a2-87bb-e127dcd06e7e",
+    "name": "Máy phát xung/hàm Siglent SDG1032X",
+    "codePrefix": "MEA-03",
+    "category": "Thiết bị đo lường",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "50368a1b-73ca-48db-9c35-0caadd8502e6",
+    "name": "Nguồn DC biến đổi Korad KA3005D (30V/5A)",
+    "codePrefix": "MEA-04",
+    "category": "Thiết bị đo lường",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "b9c59d09-7e95-473b-baaf-62bda279af87",
+    "name": "Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+    "codePrefix": "MEA-05",
+    "category": "Thiết bị đo lường",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "66917f16-1291-4663-8ff9-dd76b40ba335",
+    "name": "Máy phân tích phổ cầm tay (TinySA) để đo tần số sóng RF (433MHz, 2.4GHz)",
+    "codePrefix": "MEA-06",
+    "category": "Thiết bị đo lường",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "5e3ee3fb-ed88-4cf7-9e38-3f398fb747e4",
+    "name": "Camera nhiệt cầm tay (Thermal Imager) kiểm tra độ nóng của chip và linh kiện trên mạch",
+    "codePrefix": "MEA-07",
+    "category": "Thiết bị đo lường",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "43494ba1-4b13-488f-a6ba-194ae53784cc",
+    "name": "Kit phát triển Arduino Uno R3",
+    "codePrefix": "DEV-01",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "4b00fafd-a772-4b54-8f14-4a76db2201cf",
+    "name": "Kit phát triển Arduino Nano / Mega 2560",
+    "codePrefix": "DEV-02",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "eb670951-326e-47a6-b455-ddefc716102c",
+    "name": "Raspberry Pi 4 Model B (4GB) / Raspberry Pi 5 (8GB)",
+    "codePrefix": "DEV-03",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "7910f67a-dfbd-4ceb-9d2c-7ccb8d0492f4",
+    "name": "Kit IoT ESP32-WROOM-32E (Wi-Fi + Bluetooth)",
+    "codePrefix": "DEV-04",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "48ae9981-070e-4129-8f24-eb890e9753ea",
+    "name": "Kit AI Edge ESP32-CAM (Tích hợp camera nhận diện khuôn mặt)",
+    "codePrefix": "DEV-05",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "3515c647-2502-43b5-9665-143d9c07b0e8",
+    "name": "Kit STM32F103C8T6 (Blue Pill) & STM32F407 Discovery (Dòng ARM Cortex-M)",
+    "codePrefix": "DEV-06",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "32d2827d-1185-4cc9-85f9-bf672d235382",
+    "name": "Kit học tập vi mạch FPGA (Xilinx Spartan-7 hoặc Cyclone IV)",
+    "codePrefix": "DEV-07",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "53dfc9a2-dc1e-4a48-993c-37ce1fd65940",
+    "name": "Kit máy tính nhúng NVIDIA Jetson Nano Developer Kit (Phục vụ làm Robot AI, OpenCV)",
+    "codePrefix": "DEV-08",
+    "category": "Kit phát triển",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "0927a0db-112b-45ac-a4e8-6ba9951e10d5",
+    "name": "Module mạng không dây LoRa SX1278 (Truyền khoảng cách xa)",
+    "codePrefix": "MOD-01",
+    "category": "Module chức năng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "7069a32e-80b2-43b0-be34-1e81150efa73",
+    "name": "Module định vị toàn cầu GPS Neo-6M V2",
+    "codePrefix": "MOD-02",
+    "category": "Module chức năng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "e027b459-9996-4a3a-b37c-1e562aeb630c",
+    "name": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+    "codePrefix": "MOD-03",
+    "category": "Module chức năng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "0987a41a-f552-4156-91b6-770a58ae8a82",
+    "name": "Module kết nối Bluetooth HC-05 / BLE HM-10",
+    "codePrefix": "MOD-04",
+    "category": "Module chức năng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "0364f52a-fcc5-4fc7-95f1-6440b7389da9",
+    "name": "Module quẹt thẻ từ RFID RC522 (Kèm thẻ từ và móc khóa)",
+    "codePrefix": "MOD-05",
+    "category": "Module chức năng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "26369726-30e3-4af7-8fe3-2b39db7faf4a",
+    "name": "Mạch nạp chương trình ST-Link V2 (cho STM32) và USB-to-UART CP2102",
+    "codePrefix": "MOD-06",
+    "category": "Module chức năng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "0b393e3a-87ae-4e53-abac-1b8ece9e94dd",
+    "name": "Mạch chuyển đổi analog sang digital tích hợp ADC/DAC ADS1115 (16-bit)",
+    "codePrefix": "MOD-07",
+    "category": "Module chức năng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "af55025b-db9a-4f44-8dae-649c788f67a8",
+    "name": "Cảm biến nhiệt độ, độ ẩm không khí DHT22 / AM2302",
+    "codePrefix": "SEN-01",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "f1f9e506-e021-49c4-b654-5639de799d1f",
+    "name": "Cảm biến nhiệt độ dây bọc chống nước DS18B20",
+    "codePrefix": "SEN-02",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "a2ee7718-acd6-4b2f-8d51-2e58a5bd159b",
+    "name": "Cảm biến khoảng cách siêu âm HC-SR04 / JSN-SR04T (Chống nước)",
+    "codePrefix": "SEN-03",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "3acf3c29-7481-4888-ae13-bb55e1ac03c2",
+    "name": "Cảm biến gia tốc, góc nghiêng 6 trục MPU6050 (Làm cân bằng robot)",
+    "codePrefix": "SEN-04",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "3938bf91-4f32-4b23-83c9-5d3346c3c86b",
+    "name": "Cảm biến đo khoảng cách bằng Laser ToF (VL53L0X)",
+    "codePrefix": "SEN-05",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "8dd81ce5-243d-405b-b929-1c87f94991f7",
+    "name": "Cảm biến quét bản đồ 360 độ Lidar (Ứng dụng cho xe tự hành Robot ROS)",
+    "codePrefix": "SEN-06",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "498856db-deaf-4605-bad8-07be12b94429",
+    "name": "Cảm biến sinh học: Nhịp tim & Oxy trong máu (MAX30102)",
+    "codePrefix": "SEN-07",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "21363a38-9782-4dcc-9700-d8cd04e1b8b9",
+    "name": "Cảm biến vân tay quang học AS608",
+    "codePrefix": "SEN-08",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "6cc83254-eba9-4027-91a9-370e78ed5461",
+    "name": "Dòng cảm biến khí gas, khói, khí độc (MQ-2, MQ-7, MQ-135)",
+    "codePrefix": "SEN-09",
+    "category": "Cảm biến",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "cc9d3f56-7984-4905-806e-ec33ae79ebd7",
+    "name": "Màn hình LCD văn bản 16x2 / 20x4 kèm mạch chuyển I2C",
+    "codePrefix": "DSP-01",
+    "category": "Thiết bị hiển thị",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "96a9c2db-98d3-4aca-9923-997deac0e119",
+    "name": "Màn hình đồ họa OLED 0.96 inch / 1.3 inch (Giao tiếp I2C/SPI)",
+    "codePrefix": "DSP-02",
+    "category": "Thiết bị hiển thị",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "8778a2a6-0421-4e21-a8da-5a86da16b066",
+    "name": "Màn hình cảm ứng thông minh HMI Nextion (Tự thiết kế giao diện nút bấm)",
+    "codePrefix": "DSP-03",
+    "category": "Thiết bị hiển thị",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "ed0e97cf-90ad-45b8-b6f6-7f2524c8ed24",
+    "name": "Màn hình màu TFT LCD 2.4 inch / 3.5 inch SPI",
+    "codePrefix": "DSP-04",
+    "category": "Thiết bị hiển thị",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "4e1b0e19-cc4b-477c-a06c-e6542954d63a",
+    "name": "Led ma trận Max7219 (8x8 hoặc thanh 4 số)",
+    "codePrefix": "DSP-05",
+    "category": "Thiết bị hiển thị",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "4a5ee1b4-83df-4474-8cca-cc8f578d7a44",
+    "name": "Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
+    "codePrefix": "ACT-01",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "d021f1f4-52f4-4324-bc80-bff1351ade05",
+    "name": "Động cơ bước (Stepper Motor) Nema 17 kèm mạch điều khiển A4988 / TB6600",
+    "codePrefix": "ACT-02",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "d56f4d36-4639-49a9-84cd-219536c39a51",
+    "name": "Động cơ DC giảm tốc (Vàng) kèm bánh xe làm robot basic",
+    "codePrefix": "ACT-03",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "e92dc5ab-7182-42ff-af71-9bd00fbe60c3",
+    "name": "Module Relay kích H/L cách ly quang 2 kênh / 4 kênh / 8 kênh (Bật tắt điện 220V)",
+    "codePrefix": "ACT-04",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "74401489-e4ca-471d-a6a5-860c214f3ea1",
+    "name": "Van điện từ (Solenoid Valve) 12V kiểm soát dòng nước",
+    "codePrefix": "ACT-05",
+    "category": "Cơ cấu chấp hành & Động cơ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "f19669da-08aa-4e65-8813-f7553323a7e8",
+    "name": "Mỏ hàn thiếc Quick 936A / Trạm hàn khò nhiệt Quick 857DW+",
+    "codePrefix": "TOO-01",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "76ff933c-cdb4-41c5-8b24-40d732e3ad52",
+    "name": "Máy in 3D (Ender-3 V2 hoặc Bambu Lab) để sinh viên in vỏ hộp, cánh tay robot",
+    "codePrefix": "TOO-02",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "b1557829-7697-4c94-bbed-e18e23602a60",
+    "name": "Kính hiển vi kỹ thuật số kết nối màn hình HDMI (Soi chân IC dán SMD)",
+    "codePrefix": "TOO-03",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "252976a8-69c3-48f8-8c93-f1dbb2fa4a74",
+    "name": "Máy hút khói hàn để bảo vệ sức khỏe sinh viên trong phòng lab",
+    "codePrefix": "TOO-04",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "2aa40107-6f37-4281-bd6f-635540599ae0",
+    "name": "Máy mài, cắt cầm tay đa năng mini (Dremel)",
+    "codePrefix": "TOO-05",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "77b712e8-bd06-4ab0-aef6-fa066a3289ca",
+    "name": "Bộ kìm kỹ thuật: Kìm cắt chân linh kiện, kìm nhọn, kìm tuốt dây tự động",
+    "codePrefix": "TOO-06",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "bd38cdbf-9200-485e-b4b4-741111aa0d1a",
+    "name": "Bộ tuốc nơ vít sửa chữa điện tử chính xác cao (Xiaomi Wiha / iFixit)",
+    "codePrefix": "TOO-07",
+    "category": "Dụng cụ cơ khí & Gia công",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "76eaf083-6f38-4084-abcd-aa38eb8bda85",
+    "name": "Máy chủ vật lý (Server Rack) Dell PowerEdge R740 (Chạy Proxmox ảo hóa chia VPS)",
+    "codePrefix": "CMP-01",
+    "category": "Máy tính & Máy chủ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "03b16d21-911c-4aec-b6ec-a6d5869c8009",
+    "name": "Máy trạm PC sinh viên (Core i5/i7, 16GB RAM, SSD 512GB NVMe)",
+    "codePrefix": "CMP-02",
+    "category": "Máy tính & Máy chủ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "bf67378f-cfa7-4040-84b4-946e96535675",
+    "name": "Máy tính đồ họa cao cấp (Cắm card đồ họa NVIDIA RTX 4060 trở lên để train AI/Machine Learning)",
+    "codePrefix": "CMP-03",
+    "category": "Máy tính & Máy chủ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "71cc810b-8137-4c62-9d71-b88a0f44ef48",
+    "name": "Core Router / Router cân bằng tải (MikroTik RB5009)",
+    "codePrefix": "NET-01",
+    "category": "Thiết bị mạng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "a09a8698-4704-4bed-9f89-0a08dc2a3df2",
+    "name": "Switch Managed 24-Port / 48-Port Gigabit (Cisco hoặc Aruba) để cấu hình VLAN",
+    "codePrefix": "NET-02",
+    "category": "Thiết bị mạng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "0d70978d-9db2-4b17-81ef-63416f73547e",
+    "name": "Switch PoE cấp nguồn trực tiếp qua dây mạng cho Access Point/Camera",
+    "codePrefix": "NET-03",
+    "category": "Thiết bị mạng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "5fce7d06-608f-4d59-a70b-48073b483acf",
+    "name": "Bộ phát Wi-Fi 6 chuyên dụng chịu tải cao (UniFi U6 Pro hoặc Aruba AP)",
+    "codePrefix": "NET-04",
+    "category": "Thiết bị mạng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "5c5dc8ac-183d-4bb0-b3d4-acbc98dd333e",
+    "name": "Tường lửa cứng (Hardware Firewall - Fortinet FortiGate)",
+    "codePrefix": "NET-05",
+    "category": "Thiết bị mạng",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "f8b2aef8-acbc-4e01-b9ea-39924ed0e49c",
+    "name": "Ổ cứng mạng NAS (Synology DS923+ 4 khay ổ cứng) làm kho lưu trữ file ISO, source code nội bộ",
+    "codePrefix": "INF-01",
+    "category": "Hạ tầng nguồn & Lưu trữ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "b4f39568-29d5-4735-9b67-8d47ff1ec7dc",
+    "name": "Bộ lưu điện UPS công suất lớn (APC Smart-UPS 2KVA-3KVA) bảo vệ Server và NAS",
+    "codePrefix": "INF-02",
+    "category": "Hạ tầng nguồn & Lưu trữ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "761a7d33-971b-4cfd-b768-f004d69f1eed",
+    "name": "Tủ Rack chứa thiết bị (Tủ Rack 27U hoặc 42U kèm quạt tản nhiệt)",
+    "codePrefix": "INF-03",
+    "category": "Hạ tầng nguồn & Lưu trữ",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "82259cc0-e996-4668-899e-3be5d686e6f9",
+    "name": "Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+    "codePrefix": "CON-01",
+    "category": "Vật tư tiêu hao",
+    "assetType": "Vật tư tiêu hao",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "4dec00bb-8163-4ab1-8a2b-8ce0c6bbc55f",
+    "name": "Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+    "codePrefix": "CON-02",
+    "category": "Vật tư tiêu hao",
+    "assetType": "Vật tư tiêu hao",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "e3a1f18b-4d6a-4c15-b4b9-b6dba8398aa0",
+    "name": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+    "codePrefix": "CON-03",
+    "category": "Vật tư tiêu hao",
+    "assetType": "Vật tư tiêu hao",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "a74f0088-3f9f-4fa1-98b8-7fa5305ccd30",
+    "name": "Dây cắm testboard (Đực-Đực, Cái-Cái, Đực-Cái)",
+    "codePrefix": "CON-04",
+    "category": "Vật tư tiêu hao",
+    "assetType": "Vật tư tiêu hao",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "e013c9fa-9807-48f6-832e-c9ffeaf72332",
+    "name": "Khay/Hộp linh kiện thụ động hỗn hợp: Điện trở, Tụ điện, Thạch anh, Transistor, LED đơn đủ màu",
+    "codePrefix": "CON-05",
+    "category": "Vật tư tiêu hao",
+    "assetType": "Vật tư tiêu hao",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "76d7a5c5-cd8f-48a2-a2a9-fb32d1286286",
+    "name": "Tivi cường lực thông minh 75 inch hoặc Máy chiếu full HD phục vụ thuyết trình, training",
+    "codePrefix": "MUL-01",
+    "category": "Thiết bị đa phương tiện & Giảng dạy",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "79b33a51-7a45-400b-942f-02cfe0753ae0",
+    "name": "Bảng kính văn phòng cỡ lớn viết bút dạ để brainstorm giải thuật, vẽ kiến trúc hệ thống",
+    "codePrefix": "MUL-02",
+    "category": "Thiết bị đa phương tiện & Giảng dạy",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  },
+  {
+    "id": "80dff035-eb4b-4afa-8571-c8afe3c5be8c",
+    "name": "Hệ thống KVM Switch (Quản lý nhiều Server chỉ bằng 1 bộ màn hình, phím, chuột)",
+    "codePrefix": "MUL-03",
+    "category": "Thiết bị đa phương tiện & Giảng dạy",
+    "assetType": "Thiết bị",
+    "unit": "Cái",
+    "lifespanHours": 10000,
+    "description": "Đã thêm tự động từ danh sách hiện tại"
+  }
+]
