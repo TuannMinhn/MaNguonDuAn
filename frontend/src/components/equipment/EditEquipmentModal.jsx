@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { CATEGORIES, ASSET_TYPES } from '../../utils/constants';
 import Select from '../Select';
+import Modal from '../Modal';
 
 const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) => {
   const [editingEquip, setEditingEquip] = useState(null);
@@ -69,23 +70,26 @@ const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) 
     }
   };
 
-  if (!isOpen || !editingEquip) return null;
+  if (!editingEquip) return null;
 
-  const iconBtnStyle = {
-    background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem'
-  };
+  const modalFooter = (
+    <>
+      <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
+      <button type="submit" form="edit-equip-form" className="btn btn-primary">Lưu thay đổi</button>
+    </>
+  );
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '650px' }}>
-        <div className="modal-header">
-          <h3>Sửa thông tin thiết bị</h3>
-          <button style={iconBtnStyle} onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-        <form onSubmit={handleEditEquip}>
-          <div className="modal-body">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Sửa thông tin thiết bị"
+      size="lg"
+      footer={modalFooter}
+    >
+      <form id="edit-equip-form" onSubmit={handleEditEquip}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="modal-body" style={{ padding: 0 }}>
             <div className="form-group">
               <label>Tên thiết bị</label>
               <input
@@ -240,13 +244,9 @@ const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) 
               </div>
             )}
           </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
-            <button type="submit" className="btn btn-primary">Lưu thay đổi</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 };
 

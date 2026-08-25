@@ -24,6 +24,7 @@ import BorrowEquipmentModal from '../components/equipment/BorrowEquipmentModal';
 import ImportExcelModal from '../components/ImportExcelModal';
 import DataTable from '../components/DataTable';
 import { API_BASE_URL } from '../config';
+import Card from '../components/Card';
 
 export default function ComponentsInventory() {
   const { data: equipmentList = [], mutate: mutateEquip } = useSWR(`${API_BASE_URL}/equipment`, fetcher);
@@ -334,13 +335,11 @@ export default function ComponentsInventory() {
         </div>
       )}
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Boxes size={20} style={{ color: 'var(--accent-purple)' }} />
-            Danh sách linh kiện ({sortedComponents.length})
-          </h2>
-        </div>
+      <Card
+        title={`Danh sách linh kiện (${sortedComponents.length})`}
+        icon={Boxes}
+        style={{ color: 'var(--accent-purple)' }}
+      >
         <DataTable
           data={sortedComponents}
           columns={componentsColumns}
@@ -360,7 +359,7 @@ export default function ComponentsInventory() {
             </div>
           }
         />
-      </div>
+      </Card>
 
       {/* Modals */}
       <AddEquipmentModal 

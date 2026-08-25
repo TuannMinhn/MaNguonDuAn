@@ -48,6 +48,8 @@ import { CATEGORIES, ASSET_TYPES, BORROW_STATUS_TABS } from '../utils/constants'
 import { API_BASE_URL } from '../config';
 import SkeletonLoader from '../components/SkeletonLoader';
 import DataTable from '../components/DataTable';
+import Card from '../components/Card';
+import TextInput from '../components/TextInput';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -1353,9 +1355,9 @@ export default function Equipment({ activeTab = 'list' }) {
  
               {period === 'custom' && (
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input type="date" className="search-input" value={customStart} onChange={e => setCustomStart(e.target.value)} />
+                  <TextInput type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} style={{ width: '150px' }} />
                   <span> - </span>
-                  <input type="date" className="search-input" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+                  <TextInput type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} style={{ width: '150px' }} />
                 </div>
               )}
  
@@ -1397,9 +1399,9 @@ export default function Equipment({ activeTab = 'list' }) {
  
               {period === 'custom' && (
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input type="date" className="search-input" value={customStart} onChange={e => setCustomStart(e.target.value)} />
+                  <TextInput type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} style={{ width: '150px' }} />
                   <span> - </span>
-                  <input type="date" className="search-input" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+                  <TextInput type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} style={{ width: '150px' }} />
                 </div>
               )}
  
@@ -1438,14 +1440,11 @@ export default function Equipment({ activeTab = 'list' }) {
 
       {activeTab === 'analytics' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                <Activity size={20} style={{ color: 'var(--accent-blue)' }} />
-                Khấu hao & Tiêu hao Thiết Bị (Trong kỳ)
-              </h2>
-            </div>
-            
+          <Card
+            title="Khấu hao & Tiêu hao Thiết Bị (Trong kỳ)"
+            icon={Activity}
+            style={{ color: 'var(--accent-blue)' }}
+          >
             <DataTable
               data={sortedEquipmentStats}
               columns={eqStatsColumns}
@@ -1454,18 +1453,14 @@ export default function Equipment({ activeTab = 'list' }) {
               expandedRowId={expandedEqStatId}
               onExpandedRowChange={setExpandedEqStatId}
             />
-          </div>
+          </Card>
         </div>
       ) : activeTab === 'borrows' ? (
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-              <Inbox size={20} style={{ color: 'var(--accent-blue)' }} />
-              Danh sách phiếu mượn & hoạt động trả ({borrowTickets.length})
-            </h2>
-
-          </div>
-
+        <Card
+          title={`Danh sách phiếu mượn & hoạt động trả (${borrowTickets.length})`}
+          icon={Inbox}
+          style={{ color: 'var(--accent-blue)' }}
+        >
           <DataTable 
             data={borrowTickets.filter(ticket => {
               const matchCat = selectedBorrowTab === 'Tất cả' || ticket.status === selectedBorrowTab;
@@ -1499,17 +1494,13 @@ export default function Equipment({ activeTab = 'list' }) {
               </div>
             }
           />
-        </div>
+        </Card>
       ) : (
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-              <Boxes size={20} style={{ color: 'var(--accent-blue)' }} />
-              Kho thiết bị ({filteredEquipment.length})
-            </h2>
-
-          </div>
-          
+        <Card
+          title={`Kho thiết bị (${filteredEquipment.length})`}
+          icon={Boxes}
+          style={{ color: 'var(--accent-blue)' }}
+        >
           <DataTable 
             data={filteredEquipment}
             columns={equipmentColumns}
@@ -1528,7 +1519,7 @@ export default function Equipment({ activeTab = 'list' }) {
               </div>
             }
           />
-        </div>
+        </Card>
       )}
 
       {/* ─── Modals ───────────────────────────────────────────────────────── */}

@@ -1,0 +1,64 @@
+/* Custom sizes for the reusable Modal */
+.modal-size-sm {
+  max-width: 440px !important;
+}
+
+.modal-size-md {
+  max-width: 600px !important;
+}
+
+.modal-size-lg {
+  max-width: 800px !important;
+}
+
+.modal-size-xl {
+  max-width: 1000px !important;
+}
+
+/* Modal Title */
+.modal-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Close button style */
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.modal-close-btn:hover {
+  background: var(--bg-overlay-hover);
+  color: var(--text-primary);
+}
+
+/* Modal Body override to handle scrolling cleanly */
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  line-height: 1.5;
+}
+
+/* Modal Footer for CTA buttons */
+.modal-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.05);
+}

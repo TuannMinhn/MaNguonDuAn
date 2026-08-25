@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { CATEGORIES, ASSET_TYPES } from '../../utils/constants';
 import useSWR from 'swr';
 import { fetcher } from '../../utils/fetcher';
 import Select from '../Select';
+import Modal from '../Modal';
 
 const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentList = [] }) => {
   const [newEquip, setNewEquip] = useState({
@@ -146,24 +147,24 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
     }
   };
 
-  if (!isOpen) return null;
-
-  const iconBtnStyle = {
-    background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem'
-  };
+  const modalFooter = (
+    <>
+      <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
+      <button type="submit" form="add-equip-form" className="btn btn-primary">Thêm thiết bị</button>
+    </>
+  );
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '650px' }}>
-        <div className="modal-header">
-          <h3>Thêm thiết bị vào kho</h3>
-          <button style={iconBtnStyle} onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-        <form onSubmit={handleAddEquip}>
-          <div className="modal-body">
-            <div className="form-group" style={{ position: 'relative' }}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Thêm thiết bị vào kho"
+      size="lg"
+      footer={modalFooter}
+    >
+      <form id="add-equip-form" onSubmit={handleAddEquip}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="form-group" style={{ position: 'relative' }}>
               <label>Tên thiết bị / Linh kiện</label>
               <input
                 type="text"
@@ -360,14 +361,9 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
                 <small style={{ color: 'var(--text-muted)', marginTop: '0.5rem', display: 'block' }}>Mã Serial được sinh tự động dựa trên Mã thiết bị. Bạn có thể sửa lại theo Serial của NSX.</small>
               </div>
             )}
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
-            <button type="submit" className="btn btn-primary">Thêm thiết bị</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 };
 

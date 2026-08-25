@@ -20,6 +20,8 @@ import Select from '../components/Select';
 import DataTable from '../components/DataTable';
 import * as XLSX from 'xlsx';
 import ExportModal from '../components/ExportModal';
+import Card from '../components/Card';
+import Modal from '../components/Modal';
 
 export default function Maintenance() {
   const { data: maintenanceList = [], mutate: mutateMaintenance } = useSWR(`${API_BASE_URL}/maintenance`, fetcher);
@@ -461,6 +463,33 @@ export default function Maintenance() {
     return cols;
   }, [activeTab, selectedIds, filteredList]);
 
+  const addModalFooter = modalStep === 1 ? (
+    <>
+      <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)} style={{ width: '72px', height: '40px', padding: 0 }}>
+        Hủy
+      </Button>
+      <Button type="button" variant="primary" disabled={!addForm.equipmentId} onClick={() => setModalStep(2)} style={{ width: '140px', height: '40px', padding: 0 }}>
+        Tiếp tục →
+      </Button>
+    </>
+  ) : (
+    <>
+      <Button type="button" variant="ghost" onClick={() => setModalStep(1)} style={{ width: '90px', height: '40px', padding: 0 }}>
+        ← Quay lại
+      </Button>
+      <Button type="submit" form="add-ticket-form" variant="primary" disabled={!addForm.issueDescription.trim()} style={{ width: '140px', height: '40px', padding: 0 }}>
+        Tạo Ticket
+      </Button>
+    </>
+  );
+
+  const editModalFooter = (
+    <>
+      <Button type="button" variant="ghost" onClick={() => setShowEditModal(false)}>Hủy</Button>
+      <Button type="submit" form="edit-ticket-form" variant="primary">Lưu thay đổi</Button>
+    </>
+  );
+
   return (
     <div className="page-container fade-in">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -522,89 +551,57 @@ export default function Maintenance() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Wrench size={20} style={{ color: 'var(--accent-amber)' }} />
-            Danh sách phiếu bảo trì ({filteredList.length})
-          </h2>
-        </div>
+      <Card
+        title={`Danh sách phiếu bảo trì (${filteredList.length})`}
+        icon={Wrench}
+        style={{ color: 'var(--accent-amber)' }}
+      >
         <DataTable
           data={filteredList}
           columns={maintenanceColumns}
           globalFilter={searchTerm}
           setGlobalFilter={setSearchTerm}
         />
-      </div>
+      </Card>
 
       {/* Add Modal */}
-      {showAddModal && (
-        <div className="modal-overlay" style={{ backdropFilter: 'blur(4px)', transform: 'translateZ(0)', willChange: 'transform' }}>
-          <div className="modal-content" style={{ 
-            width: '600px', 
-            minWidth: '520px', 
-            maxWidth: '640px', 
-            maxHeight: '80vh', 
-            height: '702px',
-            borderRadius: '16px', 
-            overflow: 'hidden', 
-            display: 'flex', 
-            flexDirection: 'column',
-            padding: 0,
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
-          }}>
-            {/* HEADER: 64px */}
-            <div className="modal-header" style={{ 
-              height: '64px', 
-              minHeight: '64px',
-              padding: '0 24px', 
-              borderBottom: '1px solid var(--border-color)',
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+            <h3 style={{ 
+              margin: 0, 
+              fontSize: '18px', 
+              fontWeight: '700', 
+              lineHeight: '24px', 
+              color: 'var(--text-primary)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              boxSizing: 'border-box'
+              gap: '8px'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
-                <h3 style={{ 
-                  margin: 0, 
-                  fontSize: '18px', 
-                  fontWeight: '700', 
-                  lineHeight: '24px', 
-                  color: 'var(--text-primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <Wrench size={18} style={{ color: 'var(--accent-amber)' }} />
-                  {modalStep === 1 ? 'Báo hỏng thiết bị' : 'Chi tiết báo hỏng'}
-                </h3>
-                <span style={{ fontSize: '12px', lineHeight: '18px', color: 'var(--text-muted)' }}>
-                  {modalStep === 1 ? 'Bước 1/2: Chọn thiết bị gặp sự cố' : 'Bước 2/2: Nhập lý do và mô tả lỗi'}
-                </span>
-              </div>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowAddModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
-            </div>
-
-            {/* FORM CONTAINER */}
-            <form onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-              
-              {/* BƯỚC 1: CHỌN THIẾT BỊ */}
-              {modalStep === 1 && (
-                <>
-                  <div className="modal-body" style={{ 
-                    padding: '18px 24px 16px 24px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    flex: 1,
-                    overflow: 'hidden',
-                    boxSizing: 'border-box',
-                    gap: 0
-                  }}>
+              <Wrench size={18} style={{ color: 'var(--accent-amber)' }} />
+              {modalStep === 1 ? 'Báo hỏng thiết bị' : 'Chi tiết báo hỏng'}
+            </h3>
+            <span style={{ fontSize: '12px', lineHeight: '18px', color: 'var(--text-muted)', fontWeight: 'normal' }}>
+              {modalStep === 1 ? 'Bước 1/2: Chọn thiết bị gặp sự cố' : 'Bước 2/2: Nhập lý do và mô tả lỗi'}
+            </span>
+          </div>
+        }
+        size="lg"
+        footer={addModalFooter}
+      >
+        <form id="add-ticket-form" onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          {/* BƯỚC 1: CHỌN THIẾT BỊ */}
+          {modalStep === 1 && (
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              flex: 1,
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              gap: '0.8rem'
+            }}>
                     {/* Section Title: 20px, mb: 8px */}
                     <div style={{ height: '20px', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
                       <label style={{ fontSize: '13px', fontWeight: '600', lineHeight: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -814,41 +811,19 @@ export default function Maintenance() {
                         })
                       )}
                     </div>
-                  </div>
+            </div>
+          )}
 
-                  {/* FOOTER: 68px */}
-                  <div className="modal-footer" style={{ 
-                    height: '68px', 
-                    minHeight: '68px',
-                    padding: '0 24px', 
-                    borderTop: '1px solid var(--border-color)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: '12px',
-                    boxSizing: 'border-box'
-                  }}>
-                    <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)} style={{ width: '72px', height: '40px', padding: 0 }}>
-                      Hủy
-                    </Button>
-                    <Button type="button" variant="primary" disabled={!addForm.equipmentId} onClick={() => setModalStep(2)} style={{ width: '140px', height: '40px', padding: 0 }}>
-                      Tiếp tục →
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {/* BƯỚC 2: NHẬP LÝ DO & GHI CHÚ */}
-              {modalStep === 2 && (
-                <>
-                  <div className="modal-body" style={{ 
-                    padding: '18px 24px 16px 24px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    flex: 1,
-                    boxSizing: 'border-box',
-                    gap: 0
-                  }}>
+          {/* BƯỚC 2: NHẬP LÝ DO & GHI CHÚ */}
+          {modalStep === 2 && (
+            <div style={{ 
+              padding: '10px 0',
+              display: 'flex', 
+              flexDirection: 'column', 
+              flex: 1,
+              boxSizing: 'border-box',
+              gap: '0.8rem'
+            }}>
                     {/* Thẻ hiển thị thiết bị đã chọn */}
                     {(() => {
                       const selectedEq = equipmentList.find(e => e.id === addForm.equipmentId);
@@ -957,106 +932,75 @@ export default function Maintenance() {
                         boxSizing: 'border-box'
                       }}
                     ></textarea>
-                  </div>
-
-                  {/* FOOTER: 68px */}
-                  <div className="modal-footer" style={{ 
-                    height: '68px', 
-                    minHeight: '68px',
-                    padding: '0 24px', 
-                    borderTop: '1px solid var(--border-color)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: '12px',
-                    boxSizing: 'border-box'
-                  }}>
-                    <Button type="button" variant="ghost" onClick={() => setModalStep(1)} style={{ width: '90px', height: '40px', padding: 0 }}>
-                      ← Quay lại
-                    </Button>
-                    <Button type="submit" variant="primary" disabled={!addForm.issueDescription.trim()} style={{ width: '140px', height: '40px', padding: 0 }}>
-                      Tạo Ticket
-                    </Button>
-                  </div>
-                </>
-              )}
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+          )}
+        </form>
+      </Modal>
 
       {/* Edit Modal */}
-      {showEditModal && selectedTicket && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '500px' }}>
-            <div className="modal-header">
-              <h3>Cập nhật Ticket Sửa chữa</h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowEditModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Cập nhật Ticket Sửa chữa"
+        size="md"
+        footer={editModalFooter}
+      >
+        <form id="edit-ticket-form" onSubmit={handleEditSubmit}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div><strong>Thiết bị:</strong> {selectedTicket?.equipmentName}</div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}><strong>Lỗi báo cáo:</strong> {selectedTicket?.issueDescription}</div>
+            </div>
+
+            {selectedTicket?.notes && selectedTicket.notes.length > 0 && (
+              <div className="form-group">
+                <label>Lịch sử ghi chú</label>
+                <div style={{ maxHeight: '150px', overflowY: 'auto', background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {selectedTicket.notes.map((note) => (
+                    <div key={note.id} style={{ fontSize: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.15rem' }}>
+                        {new Date(note.date).toLocaleString('vi-VN')}
+                      </div>
+                      <div style={{ color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>{note.text}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="form-group">
+              <label>Trạng thái sửa chữa</label>
+              <Select 
+                value={editForm.status} 
+                onChange={val => setEditForm({...editForm, status: val})}
+                options={[
+                  { value: "Đang sửa", label: "Đang sửa nội bộ" },
+                  { value: "Bảo hành hãng", label: "Gửi hãng bảo hành" },
+                  { value: "Đã sửa", label: "Đã sửa xong (Sẵn sàng)" }
+                ]}
               />
             </div>
-            <form onSubmit={handleEditSubmit}>
-              <div className="modal-body flex-col gap-4">
-                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <div><strong>Thiết bị:</strong> {selectedTicket.equipmentName}</div>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}><strong>Lỗi báo cáo:</strong> {selectedTicket.issueDescription}</div>
-                </div>
-
-                {selectedTicket.notes && selectedTicket.notes.length > 0 && (
-                  <div className="form-group">
-                    <label>Lịch sử ghi chú</label>
-                    <div style={{ maxHeight: '150px', overflowY: 'auto', background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {selectedTicket.notes.map((note) => (
-                        <div key={note.id} style={{ fontSize: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                          <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.15rem' }}>
-                            {new Date(note.date).toLocaleString('vi-VN')}
-                          </div>
-                          <div style={{ color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>{note.text}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label>Trạng thái sửa chữa</label>
-                  <Select 
-                    value={editForm.status} 
-                    onChange={val => setEditForm({...editForm, status: val})}
-                    options={[
-                      { value: "Đang sửa", label: "Đang sửa nội bộ" },
-                      { value: "Bảo hành hãng", label: "Gửi hãng bảo hành" },
-                      { value: "Đã sửa", label: "Đã sửa xong (Sẵn sàng)" }
-                    ]}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Chi phí sửa chữa (VNĐ)</label>
-                  <input 
-                    type="number" 
-                    min="0"
-                    value={editForm.cost} 
-                    onChange={e => setEditForm({...editForm, cost: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Thêm ghi chú mới</label>
-                  <textarea 
-                    rows="2"
-                    value={editForm.newNote}
-                    onChange={e => setEditForm({...editForm, newNote: e.target.value})}
-                    placeholder="Nhập tiến độ sửa chữa, cập nhật linh kiện..."
-                  ></textarea>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <Button type="button" variant="ghost" onClick={() => setShowEditModal(false)}>Hủy</Button>
-                <Button type="submit" variant="primary">Lưu thay đổi</Button>
-              </div>
-            </form>
+            <div className="form-group">
+              <label>Chi phí sửa chữa (VNĐ)</label>
+              <input 
+                type="number" 
+                min="0"
+                value={editForm.cost} 
+                onChange={e => setEditForm({...editForm, cost: e.target.value})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Thêm ghi chú mới</label>
+              <textarea 
+                rows="2"
+                value={editForm.newNote}
+                onChange={e => setEditForm({...editForm, newNote: e.target.value})}
+                placeholder="Nhập tiến độ sửa chữa, cập nhật linh kiện..."
+              ></textarea>
+            </div>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
 
       {/* Export Modal */}
       <ExportModal 
@@ -1072,98 +1016,99 @@ export default function Maintenance() {
       />
 
       {/* Detail Modal */}
-      {showDetailModal && selectedDetailTicket && (
-        <div className="modal-overlay" style={{ backdropFilter: 'blur(4px)', transform: 'translateZ(0)', willChange: 'transform' }}>
-          <div className="modal-content" style={{ maxWidth: '540px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)', width: '90%' }}>
-            <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
-              <div style={{ textAlign: 'left' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Wrench size={18} style={{ color: 'var(--accent-blue)' }} />
-                  Chi tiết phiếu bảo trì
-                </h3>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mã Ticket: #{selectedDetailTicket.id.slice(0, 8)}</span>
-              </div>
-              <button className="btn-icon" onClick={() => setShowDetailModal(false)} style={{ border: 'none', background: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '18px' }}>✕</button>
+      <Modal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        title={
+          <div style={{ textAlign: 'left' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Wrench size={18} style={{ color: 'var(--accent-blue)' }} />
+              Chi tiết phiếu bảo trì
+            </h3>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'normal' }}>Mã Ticket: #{selectedDetailTicket?.id.slice(0, 8)}</span>
+          </div>
+        }
+        size="md"
+        footer={
+          <>
+            <Button type="button" variant="ghost" onClick={() => setShowDetailModal(false)} style={{ width: '80px', height: '40px', padding: 0 }}>Đóng</Button>
+            <Button 
+              type="button" 
+              variant="primary" 
+              onClick={() => {
+                setShowDetailModal(false);
+                handleEditClick(selectedDetailTicket);
+              }}
+              style={{ width: '120px', height: '40px', padding: 0 }}
+            >
+              Chỉnh sửa
+            </Button>
+          </>
+        }
+      >
+        {selectedDetailTicket && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
+            {/* Box info thiết bị */}
+            <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)', padding: '14px 16px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent-blue)', fontWeight: 'bold', letterSpacing: '0.5px' }}>Thiết bị báo hỏng</div>
+              <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', marginTop: '4px' }}>{selectedDetailTicket.equipmentName}</div>
             </div>
-            
-            <div className="modal-body flex-col gap-4" style={{ textAlign: 'left', padding: '20px 24px', maxHeight: '60vh', overflowY: 'auto' }}>
-              {/* Box info thiết bị */}
-              <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)', padding: '14px 16px', borderRadius: '10px' }}>
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent-blue)', fontWeight: 'bold', letterSpacing: '0.5px' }}>Thiết bị báo hỏng</div>
-                <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', marginTop: '4px' }}>{selectedDetailTicket.equipmentName}</div>
-              </div>
 
-              {/* Grid 2 cột */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Ngày báo hỏng</span>
-                  <strong style={{ fontSize: '13.5px', color: 'var(--text-secondary)' }}>{new Date(selectedDetailTicket.reportedDate).toLocaleString('vi-VN')}</strong>
-                </div>
-                <div>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Trạng thái hiện tại</span>
-                  <span className={`badge ${selectedDetailTicket.status === 'Đã sửa' ? 'badge-success' : 'badge-warning'}`} style={{ marginTop: '4px', display: 'inline-block' }}>
-                    {selectedDetailTicket.status}
-                  </span>
-                </div>
-                <div>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Chi phí sửa chữa</span>
-                  <strong style={{ fontSize: '13.5px', color: selectedDetailTicket.cost ? 'var(--accent-amber)' : 'var(--text-secondary)' }}>
-                    {selectedDetailTicket.cost ? `${selectedDetailTicket.cost.toLocaleString('vi-VN')} đ` : 'Chưa cập nhật chi phí'}
-                  </strong>
-                </div>
-                {selectedDetailTicket.resolvedDate && (
-                  <div>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Ngày hoàn tất sửa</span>
-                    <strong style={{ fontSize: '13.5px', color: 'var(--accent-green)' }}>{new Date(selectedDetailTicket.resolvedDate).toLocaleString('vi-VN')}</strong>
-                  </div>
-                )}
+            {/* Grid 2 cột */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Ngày báo hỏng</span>
+                <strong style={{ fontSize: '13.5px', color: 'var(--text-secondary)' }}>{new Date(selectedDetailTicket.reportedDate).toLocaleString('vi-VN')}</strong>
               </div>
-
-              {/* Chi tiết lỗi */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mô tả chi tiết sự cố</span>
-                <div style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '12px 14px', fontSize: '13.5px', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', lineHeight: '20px' }}>
-                  {selectedDetailTicket.issueDescription}
-                </div>
+              <div>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Trạng thái hiện tại</span>
+                <span className={`badge ${selectedDetailTicket.status === 'Đã sửa' ? 'badge-success' : 'badge-warning'}`} style={{ marginTop: '4px', display: 'inline-block' }}>
+                  {selectedDetailTicket.status}
+                </span>
               </div>
-
-              {/* Ghi chú tiến trình */}
-              {selectedDetailTicket.notes && selectedDetailTicket.notes.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Nhật ký sửa chữa & Cập nhật tiến độ</span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '2px solid var(--border-color)', paddingLeft: '14px', marginLeft: '6px' }}>
-                    {selectedDetailTicket.notes.map((note) => (
-                      <div key={note.id} style={{ position: 'relative', fontSize: '13px' }}>
-                        {/* Dấu chấm mốc tiến trình */}
-                        <div style={{ position: 'absolute', left: '-20px', top: '5px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-blue)' }} />
-                        <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginBottom: '2px' }}>
-                          {new Date(note.date).toLocaleString('vi-VN')}
-                        </div>
-                        <div style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>{note.text}</div>
-                      </div>
-                    ))}
-                  </div>
+              <div>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Chi phí sửa chữa</span>
+                <strong style={{ fontSize: '13.5px', color: selectedDetailTicket.cost ? 'var(--accent-amber)' : 'var(--text-secondary)' }}>
+                  {selectedDetailTicket.cost ? `${selectedDetailTicket.cost.toLocaleString('vi-VN')} đ` : 'Chưa cập nhật chi phí'}
+                </strong>
+              </div>
+              {selectedDetailTicket.resolvedDate && (
+                <div>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block' }}>Ngày hoàn tất sửa</span>
+                  <strong style={{ fontSize: '13.5px', color: 'var(--accent-green)' }}>{new Date(selectedDetailTicket.resolvedDate).toLocaleString('vi-VN')}</strong>
                 </div>
               )}
             </div>
 
-            <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <Button type="button" variant="ghost" onClick={() => setShowDetailModal(false)} style={{ width: '80px', height: '40px', padding: 0 }}>Đóng</Button>
-              <Button 
-                type="button" 
-                variant="primary" 
-                onClick={() => {
-                  setShowDetailModal(false);
-                  handleEditClick(selectedDetailTicket);
-                }}
-                style={{ width: '120px', height: '40px', padding: 0 }}
-              >
-                Chỉnh sửa
-              </Button>
+            {/* Chi tiết lỗi */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mô tả chi tiết sự cố</span>
+              <div style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '12px 14px', fontSize: '13.5px', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', lineHeight: '20px' }}>
+                {selectedDetailTicket.issueDescription}
+              </div>
             </div>
+
+            {/* Ghi chú tiến trình */}
+            {selectedDetailTicket.notes && selectedDetailTicket.notes.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Nhật ký sửa chữa & Cập nhật tiến độ</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '2px solid var(--border-color)', paddingLeft: '14px', marginLeft: '6px' }}>
+                  {selectedDetailTicket.notes.map((note) => (
+                    <div key={note.id} style={{ position: 'relative', fontSize: '13px' }}>
+                      {/* Dấu chấm mốc tiến trình */}
+                      <div style={{ position: 'absolute', left: '-20px', top: '5px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-blue)' }} />
+                      <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginBottom: '2px' }}>
+                        {new Date(note.date).toLocaleString('vi-VN')}
+                      </div>
+                      <div style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>{note.text}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
     </div>
   );
