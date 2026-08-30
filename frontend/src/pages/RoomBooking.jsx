@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Button from '../components/Button';
+import Card from '../components/Card';
+import Modal from '../components/Modal';
+import TextInput from '../components/TextInput';
 import useSWR from 'swr';
 import { fetcher } from '../utils/fetcher';
 
@@ -296,7 +299,50 @@ export default function RoomBooking({ userRole }) {
   const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 5);
   const confirmedList = members.filter(m => confirmedMssvs.has(m.mssv));
 
-  // ─────────────────────────────────────────────────────────────────────────
+  const regModalFooter = (
+    <>
+      <Button type="button" variant="secondary" onClick={() => setShowRegModal(false)}>Hủy</Button>
+      <Button
+        type="submit"
+        form="register-booking-form"
+        variant="primary"
+        icon={UserCheck}
+        disabled={confirmedMssvs.size === 0}
+      >
+        Xác nhận đặt phòng {confirmedMssvs.size > 0 ? `(${confirmedMssvs.size} người)` : ''}
+      </Button>
+    </>
+  );
+
+  const memberPickerFooter = (
+    <>
+      <Button type="button" variant="secondary" onClick={() => setShowMemberPicker(false)}>Hủy bỏ</Button>
+      <Button
+        type="button"
+        variant="primary"
+        icon={UserCheck}
+        onClick={confirmPicker}
+        disabled={pickerMssvs.size === 0}
+      >
+        Xác nhận ({pickerMssvs.size} người)
+      </Button>
+    </>
+  );
+
+  const cancelBookingFooter = (
+    <>
+      <Button type="button" variant="secondary" onClick={() => setShowCancelModal(false)}>Quay lại</Button>
+      <Button type="submit" form="cancel-booking-form" variant="danger" icon={Trash2} iconPosition="left">Xác nhận hủy</Button>
+    </>
+  );
+
+  const cancelAllBookingsFooter = (
+    <>
+      <Button type="button" variant="secondary" onClick={() => setShowCancelAllModal(false)}>Hủy bỏ</Button>
+      <Button type="submit" form="cancel-all-bookings-form" variant="danger" icon={Trash2} iconPosition="left">Vâng, Hủy toàn bộ</Button>
+    </>
+  );
+
   return (
     <div className="page-container fade-in" style={{ gap: '1.5rem' }}>
 
@@ -336,7 +382,7 @@ export default function RoomBooking({ userRole }) {
 
 
       {/* Weekly Table */}
-      <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <Card style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="schedule-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
             <thead>
@@ -381,7 +427,7 @@ export default function RoomBooking({ userRole }) {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* Floating Register Button */}
       {selected.size > 0 && (
@@ -402,434 +448,389 @@ export default function RoomBooking({ userRole }) {
       {/* ════════════════════════════════════════════════════════════
           MODAL CHÍNH — ĐĂNG KÝ
       ════════════════════════════════════════════════════════════ */}
-      {showRegModal && (
-        <div className="modal-overlay" style={{ zIndex: 1000 }}>
-          <div className="modal-content" style={{ maxWidth: '560px', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
-            <div className="modal-header">
-              <h3 style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
-                <CheckSquare size={18} style={{ color: 'var(--accent-blue)' }} />
-                Đăng ký sử dụng phòng Lab
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowRegModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
+      <Modal
+        isOpen={showRegModal}
+        onClose={() => setShowRegModal(false)}
+        title={
+          <div style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
+            <CheckSquare size={18} style={{ color: 'var(--accent-blue)' }} />
+            <span>Đăng ký sử dụng phòng Lab</span>
+          </div>
+        }
+        size="md"
+        footer={regModalFooter}
+      >
+        <form id="register-booking-form" onSubmit={handleRegisterSubmit} style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
+          {/* Slots summary */}
+          <div style={{ background:'rgba(59,130,246,0.08)', border:'1px solid rgba(59,130,246,0.2)', borderRadius:'10px', padding:'0.85rem 1rem' }}>
+            <div style={{ fontSize:'var(--text-2xs)', color:'var(--text-secondary)', marginBottom:'0.5rem', fontWeight:'700', letterSpacing:'0.05em' }}>
+              CÁC BUỔI ĐÃ CHỌN ({selected.size})
+            </div>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
+              {[...selected].map(key => {
+                const [dk, sid] = key.split('|');
+                const day     = DAYS.find(d => d.key === dk);
+                const session = SESSIONS.find(s => s.slots.some(sl => sl.id === sid));
+                const slot    = session?.slots.find(sl => sl.id === sid);
+                return (
+                  <span key={key} style={{ background:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.35)', padding:'0.2rem 0.65rem', borderRadius:'6px', fontSize:'var(--text-xs)', color:'#93c5fd' }}>
+                    {day?.label} · {slot?.label}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Member picker button ── */}
+          <div>
+            <div style={{ fontSize:'var(--text-sm)', color:'var(--text-secondary)', fontWeight:'600', marginBottom:'0.75rem', display:'flex', alignItems:'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Users size={14} /> Thành viên tham gia
+              </div>
             </div>
 
-            <form onSubmit={handleRegisterSubmit} style={{ display:'flex', flexDirection:'column', flex:1, overflow:'hidden' }}>
-              <div className="modal-body" style={{ overflowY:'auto', flex:1, gap:'1.25rem' }}>
-
-                {/* Slots summary */}
-                <div style={{ background:'rgba(59,130,246,0.08)', border:'1px solid rgba(59,130,246,0.2)', borderRadius:'10px', padding:'0.85rem 1rem' }}>
-                  <div style={{ fontSize:'var(--text-2xs)', color:'var(--text-secondary)', marginBottom:'0.5rem', fontWeight:'700', letterSpacing:'0.05em' }}>
-                    CÁC BUỔI ĐÃ CHỌN ({selected.size})
-                  </div>
-                  <div style={{ display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
-                    {[...selected].map(key => {
-                      const [dk, sid] = key.split('|');
-                      const day     = DAYS.find(d => d.key === dk);
-                      const session = SESSIONS.find(s => s.slots.some(sl => sl.id === sid));
-                      const slot    = session?.slots.find(sl => sl.id === sid);
-                      return (
-                        <span key={key} style={{ background:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.35)', padding:'0.2rem 0.65rem', borderRadius:'6px', fontSize:'var(--text-xs)', color:'#93c5fd' }}>
-                          {day?.label} · {slot?.label}
-                        </span>
-                      );
-                    })}
-                  </div>
+            {/* The big picker button */}
+            <button
+              type="button"
+              onClick={openPicker}
+              style={{
+                width: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '0.85rem 1.1rem',
+                background: confirmedMssvs.size > 0 ? 'rgba(59,130,246,0.1)' : 'var(--bg-overlay)',
+                border: confirmedMssvs.size > 0 ? '1px solid rgba(59,130,246,0.35)' : '1.5px dashed rgba(255,255,255,0.15)',
+                borderRadius: '10px',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <div style={{ display:'flex', alignItems:'center', gap:'0.65rem' }}>
+                <div style={{ width:36, height:36, borderRadius:'50%', background: confirmedMssvs.size > 0 ? 'linear-gradient(135deg,#3b82f6,#8b5cf6)' : 'rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <Users size={16} style={{ color: confirmedMssvs.size > 0 ? 'var(--text-primary)' : 'var(--text-muted)' }} />
                 </div>
-
-                {/* ── Member picker button ── */}
-                <div>
-                  <div style={{ fontSize:'var(--text-sm)', color:'var(--text-secondary)', fontWeight:'600', marginBottom:'0.75rem', display:'flex', alignItems:'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Users size={14} /> Thành viên tham gia
-                    </div>
-                  </div>
-
-                  {/* The big picker button */}
-                  <button
-                    type="button"
-                    onClick={openPicker}
-                    style={{
-                      width: '100%',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '0.85rem 1.1rem',
-                      background: confirmedMssvs.size > 0 ? 'rgba(59,130,246,0.1)' : 'var(--bg-overlay)',
-                      border: confirmedMssvs.size > 0 ? '1px solid rgba(59,130,246,0.35)' : '1.5px dashed rgba(255,255,255,0.15)',
-                      borderRadius: '10px',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    <div style={{ display:'flex', alignItems:'center', gap:'0.65rem' }}>
-                      <div style={{ width:36, height:36, borderRadius:'50%', background: confirmedMssvs.size > 0 ? 'linear-gradient(135deg,#3b82f6,#8b5cf6)' : 'rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <Users size={16} style={{ color: confirmedMssvs.size > 0 ? 'var(--text-primary)' : 'var(--text-muted)' }} />
+                <div style={{ textAlign:'left' }}>
+                  {confirmedMssvs.size > 0 ? (
+                    <>
+                      <div className="text-sm" style={{ fontWeight:'600', color:'var(--text-primary)' }}>
+                        {confirmedMssvs.size} thành viên đã chọn
                       </div>
-                      <div style={{ textAlign:'left' }}>
-                        {confirmedMssvs.size > 0 ? (
-                          <>
-                            <div className="text-sm" style={{ fontWeight:'600', color:'var(--text-primary)' }}>
-                              {confirmedMssvs.size} thành viên đã chọn
-                            </div>
-                            <div className="text-xs" style={{ color:'var(--text-secondary)', marginTop:'1px' }}>
-                              Nhấn để thay đổi danh sách
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-sm" style={{ color:'var(--text-secondary)' }}>Chọn thành viên tham gia</div>
-                            <div className="text-xs" style={{ color:'#475569', marginTop:'1px' }}>Nhấn để mở danh sách CLB</div>
-                          </>
-                        )}
+                      <div className="text-xs" style={{ color:'var(--text-secondary)', marginTop:'1px' }}>
+                        Nhấn để thay đổi danh sách
                       </div>
-                    </div>
-                    <ChevronRight size={18} style={{ color:'var(--text-muted)', flexShrink:0 }} />
-                  </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-sm" style={{ color:'var(--text-secondary)' }}>Chọn thành viên tham gia</div>
+                      <div className="text-xs" style={{ color:'#475569', marginTop:'1px' }}>Nhấn để mở danh sách CLB</div>
+                    </>
+                  )}
                 </div>
-
-                {/* Confirmed members summary */}
-                {confirmedList.length > 0 && (
-                  <div style={{ background:'rgba(16,185,129,0.06)', border:'1px solid rgba(16,185,129,0.15)', borderRadius:'10px', padding:'0.9rem 1rem' }}>
-                    <div style={{ fontSize:'var(--text-2xs)', color:'var(--accent-green)', marginBottom:'0.65rem', fontWeight:'700', letterSpacing:'0.05em' }}>
-                      DANH SÁCH THÀNH VIÊN ({confirmedList.length} người)
-                    </div>
-
-                    <div style={{ display:'flex', flexDirection:'column', gap:'0.45rem' }}>
-                      {confirmedList.map((m, i) => {
-                        const isRep = repMssv === m.mssv;
-                        return (
-                          <div key={m.mssv} style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
-                            {/* Avatar */}
-                            <div style={{ width:30, height:30, borderRadius:'50%', flexShrink:0, background:`linear-gradient(135deg,${avatarColor(m.name)},${avatarColor(m.mssv)})`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'var(--text-2xs)', fontWeight:'700', color:'var(--text-primary)' }}>
-                              {m.name?.charAt(0)?.toUpperCase()}
-                            </div>
-                            <div style={{ flex:1, minWidth:0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                              <span style={{ fontSize:'var(--text-sm)', color:'var(--text-primary)', fontWeight:'500', whiteSpace: 'nowrap' }}>{m.name}</span>
-                              <span style={{ fontSize:'var(--text-xs)', color:'var(--text-muted)' }}>({m.mssv})</span>
-                            </div>
-                            {/* Rep badge / button */}
-                            {isRep ? (
-                              <span style={{ fontSize:'var(--text-2xs)', background:'rgba(59,130,246,0.2)', color:'var(--accent-blue)', padding:'0.18rem 0.5rem', borderRadius:'4px', fontWeight:'700', flexShrink:0 }}>
-                                ⭐ Đại diện
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setAsRep(m.mssv)}
-                                style={{ fontSize:'var(--text-2xs)', background:'var(--bg-overlay)', color:'var(--text-secondary)', padding:'0.18rem 0.5rem', borderRadius:'4px', border:'1px solid rgba(255,255,255,0.08)', cursor:'pointer', flexShrink:0 }}
-                              >
-                                Đặt đại diện
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {errorMsg && <div className="alert-message alert-error" style={{ margin:0 }}>{errorMsg}</div>}
               </div>
-
-              <div className="modal-footer">
-                <Button type="button" variant="secondary" onClick={() => setShowRegModal(false)}>Hủy</Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  icon={UserCheck}
-                  disabled={confirmedMssvs.size === 0}
-                >
-                  Xác nhận đặt phòng {confirmedMssvs.size > 0 ? `(${confirmedMssvs.size} người)` : ''}
-                </Button>
-              </div>
-            </form>
+              <ChevronRight size={18} style={{ color:'var(--text-muted)', flexShrink:0 }} />
+            </button>
           </div>
-        </div>
-      )}
+
+          {/* Confirmed members summary */}
+          {confirmedList.length > 0 && (
+            <div style={{ background:'rgba(16,185,129,0.06)', border:'1px solid rgba(16,185,129,0.15)', borderRadius:'10px', padding:'0.9rem 1rem' }}>
+              <div style={{ fontSize:'var(--text-2xs)', color:'var(--accent-green)', marginBottom:'0.65rem', fontWeight:'700', letterSpacing:'0.05em' }}>
+                DANH SÁCH THÀNH VIÊN ({confirmedList.length} người)
+              </div>
+
+              <div style={{ display:'flex', flexDirection:'column', gap:'0.45rem' }}>
+                {confirmedList.map((m, i) => {
+                  const isRep = repMssv === m.mssv;
+                  return (
+                    <div key={m.mssv} style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
+                      {/* Avatar */}
+                      <div style={{ width:30, height:30, borderRadius:'50%', flexShrink:0, background:`linear-gradient(135deg,${avatarColor(m.name)},${avatarColor(m.mssv)})`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'var(--text-2xs)', fontWeight:'700', color:'var(--text-primary)' }}>
+                        {m.name?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <div style={{ flex:1, minWidth:0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span style={{ fontSize:'var(--text-sm)', color:'var(--text-primary)', fontWeight:'500', whiteSpace: 'nowrap' }}>{m.name}</span>
+                        <span style={{ fontSize:'var(--text-xs)', color:'var(--text-muted)' }}>({m.mssv})</span>
+                      </div>
+                      {/* Rep badge / button */}
+                      {isRep ? (
+                        <span style={{ fontSize:'var(--text-2xs)', background:'rgba(59,130,246,0.2)', color:'var(--accent-blue)', padding:'0.18rem 0.5rem', borderRadius:'4px', fontWeight:'700', flexShrink:0 }}>
+                          ⭐ Đại diện
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setAsRep(m.mssv)}
+                          style={{ fontSize:'var(--text-2xs)', background:'var(--bg-overlay)', color:'var(--text-secondary)', padding:'0.18rem 0.5rem', borderRadius:'4px', border:'1px solid rgba(255,255,255,0.08)', cursor:'pointer', flexShrink:0 }}
+                        >
+                          Đặt đại diện
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {errorMsg && <div className="alert-message alert-error" style={{ margin:0 }}>{errorMsg}</div>}
+        </form>
+      </Modal>
 
       {/* ════════════════════════════════════════════════════════════
           POPUP CHỌN THÀNH VIÊN (z-index cao hơn modal chính)
       ════════════════════════════════════════════════════════════ */}
-      {showMemberPicker && (
-        <div className="modal-overlay" style={{ zIndex: 1100, background: 'rgba(0,0,0,0.75)' }}>
-          <div className="modal-content" style={{ maxWidth: '500px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 0 0 1px rgba(59,130,246,0.3), 0 32px 64px rgba(0,0,0,0.6)' }}>
-
-            {/* Header */}
-            <div className="modal-header" style={{ background: 'linear-gradient(135deg,rgba(59,130,246,0.12),rgba(139,92,246,0.12))' }}>
-              <div>
-                <h3 style={{ display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'2px' }}>
-                  <Users size={18} style={{ color: 'var(--accent-blue)' }} />
-                  Chọn thành viên tham gia
-                </h3>
-                <p style={{ fontSize:'var(--text-xs)', margin:0, color:'var(--text-muted)' }}>Tick vào thành viên sẽ sử dụng phòng</p>
-              </div>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowMemberPicker(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
-            </div>
-
-            {/* Search */}
-            <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)' }}>
-              <div style={{ position:'relative' }}>
-                <Search size={14} style={{ position:'absolute', left:'0.7rem', top:'50%', transform:'translateY(-50%)', color:'var(--text-muted)', pointerEvents:'none' }} />
-                <input
-                  type="text"
-                  placeholder="Tìm theo tên hoặc MSSV..."
-                  value={pickerSearch}
-                  onChange={e => setPickerSearch(e.target.value)}
-                  autoFocus
-                  style={{ width:'100%', padding:'0.6rem 0.75rem 0.6rem 2.1rem', background:'var(--bg-overlay)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)', fontSize:'var(--text-sm)' }}
-                />
-              </div>
-              {/* Select all / Clear */}
-              <div style={{ display:'flex', gap:'0.75rem', marginTop:'0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setPickerMssvs(new Set(members.map(m => m.mssv)))}
-                  style={{ fontSize:'var(--text-xs)', color:'var(--accent-blue)', background:'none', border:'none', cursor:'pointer', padding:0 }}
-                >
-                  Chọn tất cả
-                </button>
-                <span style={{ color:'#475569' }}>·</span>
-                <button
-                  type="button"
-                  onClick={() => setPickerMssvs(new Set())}
-                  style={{ fontSize:'var(--text-xs)', color:'var(--text-secondary)', background:'none', border:'none', cursor:'pointer', padding:0 }}
-                >
-                  Bỏ chọn tất cả
-                </button>
-                {pickerMssvs.size > 0 && (
-                  <>
-                    <span style={{ color:'#475569' }}>·</span>
-                    <span style={{ fontSize:'var(--text-xs)', color:'var(--accent-green)', fontWeight:'600' }}>
-                      Đã chọn: {pickerMssvs.size} người
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Member list */}
-            <div style={{ flex:1, overflowY:'auto', padding:'0.65rem 0.75rem' }}>
-              {filteredMembers.length === 0 ? (
-                <div style={{ textAlign:'center', color:'#475569', padding:'2rem', fontSize:'var(--text-sm)' }}>Không tìm thấy thành viên</div>
-              ) : (
-                filteredMembers.map(m => {
-                  const checked = pickerMssvs.has(m.mssv);
-                  return (
-                    <div
-                      key={m.mssv}
-                      onClick={() => togglePicker(m.mssv)}
-                      style={{
-                        display:'flex', alignItems:'center', gap:'0.75rem',
-                        padding:'0.65rem 0.75rem', marginBottom:'0.3rem',
-                        background: checked ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.02)',
-                        border: checked ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
-                        borderRadius:'10px', cursor:'pointer',
-                        transition:'all 0.15s ease', userSelect:'none',
-                      }}
-                    >
-                      {/* Checkbox */}
-                      <div style={{ width:20, height:20, borderRadius:5, flexShrink:0, background: checked ? 'var(--accent-blue)' : 'transparent', border: checked ? 'none' : '2px solid rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.15s' }}>
-                        {checked && <span style={{ color:'var(--text-primary)', fontSize:'var(--text-xs)', fontWeight:'900' }}>✓</span>}
-                      </div>
-
-                      {/* Avatar */}
-                      <div style={{ width:36, height:36, borderRadius:'50%', flexShrink:0, background:`linear-gradient(135deg,${avatarColor(m.name)},${avatarColor(m.mssv)})`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'var(--text-xs)', fontWeight:'700', color:'var(--text-primary)' }}>
-                        {m.name?.charAt(0)?.toUpperCase()}
-                      </div>
-
-                      {/* Info */}
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontSize:'var(--text-sm)', color:'var(--text-primary)', fontWeight:'500' }}>{m.name}</div>
-                        <div style={{ fontSize:'var(--text-xs)', color:'var(--text-muted)' }}>MSSV: {m.mssv}</div>
-                      </div>
-
-                      {checked && (
-                        <div style={{ width:8, height:8, borderRadius:'50%', background:'var(--accent-blue)', flexShrink:0 }} />
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="modal-footer" style={{ background:'rgba(0,0,0,0.2)' }}>
-              <Button type="button" variant="secondary" onClick={() => setShowMemberPicker(false)}>Hủy bỏ</Button>
-              <Button
-                type="button"
-                variant="primary"
-                icon={UserCheck}
-                onClick={confirmPicker}
-                disabled={pickerMssvs.size === 0}
-              >
-                Xác nhận ({pickerMssvs.size} người)
-              </Button>
+      <Modal
+        isOpen={showMemberPicker}
+        onClose={() => setShowMemberPicker(false)}
+        title={
+          <div style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
+            <Users size={18} style={{ color: 'var(--accent-blue)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+              <span style={{ fontSize: '16px', fontWeight: '700' }}>Chọn thành viên tham gia</span>
+              <span style={{ fontSize:'var(--text-xs)', color:'var(--text-muted)', fontWeight: 'normal', textTransform: 'none', letterSpacing: 'normal' }}>Tick vào thành viên sẽ sử dụng phòng</span>
             </div>
           </div>
+        }
+        size="md"
+        footer={memberPickerFooter}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '70vh' }}>
+          {/* Search */}
+          <div style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ position:'relative' }}>
+              <Search size={14} style={{ position:'absolute', left:'0.7rem', top:'50%', transform:'translateY(-50%)', color:'var(--text-muted)', pointerEvents:'none', zIndex: 10 }} />
+              <TextInput
+                type="text"
+                placeholder="Tìm theo tên hoặc MSSV..."
+                value={pickerSearch}
+                onChange={e => setPickerSearch(e.target.value)}
+                autoFocus
+                style={{ paddingLeft: '2.1rem' }}
+              />
+            </div>
+            {/* Select all / Clear */}
+            <div style={{ display:'flex', gap:'0.75rem' }}>
+              <button
+                type="button"
+                onClick={() => setPickerMssvs(new Set(members.map(m => m.mssv)))}
+                style={{ fontSize:'var(--text-xs)', color:'var(--accent-blue)', background:'none', border:'none', cursor:'pointer', padding:0 }}
+              >
+                Chọn tất cả
+              </button>
+              <span style={{ color:'#475569' }}>·</span>
+              <button
+                type="button"
+                onClick={() => setPickerMssvs(new Set())}
+                style={{ fontSize:'var(--text-xs)', color:'var(--text-secondary)', background:'none', border:'none', cursor:'pointer', padding:0 }}
+              >
+                Bỏ chọn tất cả
+              </button>
+              {pickerMssvs.size > 0 && (
+                <>
+                  <span style={{ color:'#475569' }}>·</span>
+                  <span style={{ fontSize:'var(--text-xs)', color:'var(--accent-green)', fontWeight:'600' }}>
+                    Đã chọn: {pickerMssvs.size} người
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Member list */}
+          <div style={{ flex:1, overflowY:'auto', display: 'flex', flexDirection: 'column', gap: '0.3rem', maxHeight: '350px', paddingRight: '4px' }}>
+            {filteredMembers.length === 0 ? (
+              <div style={{ textAlign:'center', color:'#475569', padding:'2rem', fontSize:'var(--text-sm)' }}>Không tìm thấy thành viên</div>
+            ) : (
+              filteredMembers.map(m => {
+                const checked = pickerMssvs.has(m.mssv);
+                return (
+                  <div
+                    key={m.mssv}
+                    onClick={() => togglePicker(m.mssv)}
+                    style={{
+                      display:'flex', alignItems:'center', gap:'0.75rem',
+                      padding:'0.65rem 0.75rem',
+                      background: checked ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.02)',
+                      border: checked ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+                      borderRadius:'10px', cursor:'pointer',
+                      transition:'all 0.15s ease', userSelect:'none',
+                    }}
+                  >
+                    {/* Checkbox */}
+                    <div style={{ width:20, height:20, borderRadius:5, flexShrink:0, background: checked ? 'var(--accent-blue)' : 'transparent', border: checked ? 'none' : '2px solid rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.15s' }}>
+                      {checked && <span style={{ color:'var(--text-primary)', fontSize:'var(--text-xs)', fontWeight:'900' }}>✓</span>}
+                    </div>
+
+                    {/* Avatar */}
+                    <div style={{ width:36, height:36, borderRadius:'50%', flexShrink:0, background:`linear-gradient(135deg,${avatarColor(m.name)},${avatarColor(m.mssv)})`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'var(--text-xs)', fontWeight:'700', color:'var(--text-primary)' }}>
+                      {m.name?.charAt(0)?.toUpperCase()}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:'var(--text-sm)', color:'var(--text-primary)', fontWeight:'500' }}>{m.name}</div>
+                      <div style={{ fontSize:'var(--text-xs)', color:'var(--text-muted)' }}>MSSV: {m.mssv}</div>
+                    </div>
+
+                    {checked && (
+                      <div style={{ width:8, height:8, borderRadius:'50%', background:'var(--accent-blue)', flexShrink:0 }} />
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
-      )}
+      </Modal>
 
       {/* ════════════════════════════════════════════════════════════
           MODAL HỦY ĐẶT PHÒNG
       ════════════════════════════════════════════════════════════ */}
-      {showCancelModal && cancelTarget && (
-        <div className="modal-overlay" style={{ zIndex: 1000 }}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3 style={{ color:'var(--accent-red)', display:'flex', alignItems:'center', gap:'0.5rem' }}>
-                <ShieldAlert size={18} /> Hủy đặt phòng
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowCancelModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
-            </div>
-            <form onSubmit={handleCancelSubmit}>
-              <div className="modal-body">
-                <p>Bạn đang hủy lịch đặt phòng của <strong>{cancelTarget.representativeName}</strong>.</p>
-                {userRole === 'student' ? (
-                  <>
-                    <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginTop: '-0.5rem' }}>Chỉ người đại diện mới có thể xác nhận hủy.</p>
-                    <div className="form-group">
-                      <label>Nhập MSSV người đại diện để xác nhận hủy</label>
-                      <input type="text" required placeholder="Nhập MSSV..." value={cancelMssv} onChange={e => setCancelMssv(e.target.value)} />
-                    </div>
-                  </>
-                ) : (
-                  <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: 'var(--accent-red)', fontSize: 'var(--text-sm)', fontWeight: '500' }}>
-                    Bạn đang thao tác với tư cách Quản lý. Hệ thống cho phép hủy lịch mà không cần mã MSSV xác thực.
-                  </div>
-                )}
-                {errorMsg && <div className="alert-message alert-error" style={{ margin:0 }}>{errorMsg}</div>}
-              </div>
-              <div className="modal-footer">
-                <Button type="button" variant="secondary" onClick={() => setShowCancelModal(false)}>Quay lại</Button>
-                <Button type="submit" variant="danger" icon={Trash2} iconPosition="left">Xác nhận hủy</Button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showCancelModal && !!cancelTarget}
+        onClose={() => setShowCancelModal(false)}
+        title={
+          <div style={{ color:'var(--accent-red)', display:'flex', alignItems:'center', gap:'0.5rem' }}>
+            <ShieldAlert size={18} />
+            <span>Hủy đặt phòng</span>
           </div>
-        </div>
-      )}
+        }
+        size="sm"
+        footer={cancelBookingFooter}
+      >
+        <form id="cancel-booking-form" onSubmit={handleCancelSubmit}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <p style={{ margin: 0 }}>Bạn đang hủy lịch đặt phòng của <strong>{cancelTarget?.representativeName}</strong>.</p>
+            {userRole === 'student' ? (
+              <>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginTop: '-0.5rem', marginBottom: 0 }}>Chỉ người đại diện mới có thể xác nhận hủy.</p>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Nhập MSSV người đại diện để xác nhận hủy</label>
+                  <TextInput type="text" required placeholder="Nhập MSSV..." value={cancelMssv} onChange={e => setCancelMssv(e.target.value)} />
+                </div>
+              </>
+            ) : (
+              <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: 'var(--accent-red)', fontSize: 'var(--text-sm)', fontWeight: '500' }}>
+                Bạn đang thao tác với tư cách Quản lý. Hệ thống cho phép hủy lịch mà không cần mã MSSV xác thực.
+              </div>
+            )}
+            {errorMsg && <div className="alert-message alert-error" style={{ margin: 0 }}>{errorMsg}</div>}
+          </div>
+        </form>
+      </Modal>
 
       {/* ════════════════════════════════════════════════════════════
           MODAL HỦY TOÀN BỘ LỊCH ĐẶT PHÒNG
       ════════════════════════════════════════════════════════════ */}
-      {showCancelAllModal && (
-        <div className="modal-overlay" style={{ zIndex: 1000 }}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3 style={{ color:'var(--accent-red)', display:'flex', alignItems:'center', gap:'0.5rem' }}>
-                <ShieldAlert size={18} /> CẢNH BÁO: Hủy toàn bộ lịch
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowCancelAllModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
-            </div>
-            <form onSubmit={handleCancelAll}>
-              <div className="modal-body">
-                <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: 'var(--text-sm)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                  <p style={{ fontWeight: 'bold', color: 'var(--accent-red)', marginBottom: '0.5rem' }}>Bạn có chắc chắn muốn hủy TOÀN BỘ lịch đặt phòng trên hệ thống không?</p>
-                  <p style={{ color: 'var(--text-secondary)' }}>Thao tác này sẽ xóa sạch tất cả các lịch đặt phòng hiện có. Thường chỉ nên dùng khi có sự kiện đặc biệt của Trường/CLB hoặc vào dịp nghỉ lễ dài ngày.</p>
-                </div>
-                {errorMsg && <div className="alert-message alert-error" style={{ margin: '1rem 0 0 0' }}>{errorMsg}</div>}
-              </div>
-              <div className="modal-footer">
-                <Button type="button" variant="secondary" onClick={() => setShowCancelAllModal(false)}>Hủy bỏ</Button>
-                <Button type="submit" variant="danger" icon={Trash2} iconPosition="left">Vâng, Hủy toàn bộ</Button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showCancelAllModal}
+        onClose={() => setShowCancelAllModal(false)}
+        title={
+          <div style={{ color:'var(--accent-red)', display:'flex', alignItems:'center', gap:'0.5rem' }}>
+            <ShieldAlert size={18} />
+            <span>CẢNH BÁO: Hủy toàn bộ lịch</span>
           </div>
-        </div>
-      )}
+        }
+        size="sm"
+        footer={cancelAllBookingsFooter}
+      >
+        <form id="cancel-all-bookings-form" onSubmit={handleCancelAll}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: 'var(--text-sm)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+              <p style={{ fontWeight: 'bold', color: 'var(--accent-red)', marginBottom: '0.5rem', marginTop: 0 }}>Bạn có chắc chắn muốn hủy TOÀN BỘ lịch đặt phòng trên hệ thống không?</p>
+              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Thao tác này sẽ xóa sạch tất cả các lịch đặt phòng hiện có. Thường chỉ nên dùng khi có sự kiện đặc biệt của Trường/CLB hoặc vào dịp nghỉ lễ dài ngày.</p>
+            </div>
+            {errorMsg && <div className="alert-message alert-error" style={{ margin: 0 }}>{errorMsg}</div>}
+          </div>
+        </form>
+      </Modal>
 
       {/* ════════════════════════════════════════════════════════════
           MODAL CHI TIẾT ĐẶT PHÒNG / ĐIỂM DANH
       ════════════════════════════════════════════════════════════ */}
-      {showDetailsModal && detailsTarget && (
-        <div className="modal-overlay" style={{ zIndex: 1000 }}>
-          <div className="modal-content" style={{ maxWidth: '600px' }}>
-            <div className="modal-header">
-              <h3 style={{ display:'flex', alignItems:'center', gap:'0.5rem', color: 'var(--accent-blue)' }}>
-                <Info size={18} /> Chi tiết điểm danh ({detailsTarget.session?.attendees?.length || 0} người)
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowDetailsModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
+      <Modal
+        isOpen={showDetailsModal && !!detailsTarget}
+        onClose={() => setShowDetailsModal(false)}
+        title={
+          <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', color: 'var(--accent-blue)' }}>
+            <Info size={18} />
+            <span>Chi tiết điểm danh ({detailsTarget?.session?.attendees?.length || 0} người)</span>
+          </div>
+        }
+        size="md"
+        footer={
+          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>Đóng</Button>
+        }
+      >
+        {detailsTarget && (
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>Đại diện đặt phòng</p>
+              <p style={{ margin: '0.2rem 0 0 0', fontWeight: 'bold' }}>{detailsTarget.representativeName} ({detailsTarget.representativeMssv})</p>
             </div>
-            <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-              <div style={{ display: 'grid', gap: '1rem' }}>
-                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
-                  <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>Đại diện đặt phòng</p>
-                  <p style={{ margin: '0.2rem 0 0 0', fontWeight: 'bold' }}>{detailsTarget.representativeName} ({detailsTarget.representativeMssv})</p>
-                </div>
-                
-                <div>
-                  <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Danh sách thành viên đăng ký</h4>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    {detailsTarget.members?.map(m => {
-                      const mssv = typeof m === 'object' ? m.mssv : m;
-                      const name = typeof m === 'object' ? m.name : m;
-                      const isPresent = attendeesSet.has(mssv);
-                      return (
-                        <span key={mssv} style={{ 
-                          padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: 'var(--text-xs)',
-                          background: isPresent ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                          color: isPresent ? 'var(--accent-green)' : 'var(--text-secondary)',
-                          border: `1px solid ${isPresent ? 'rgba(16, 185, 129, 0.2)' : 'transparent'}`
-                        }}>
-                          {name} ({mssv}) {isPresent ? '(Có mặt)' : '(Vắng)'}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {detailsTarget.session?.attendees?.length > 0 && (
-                  <div>
-                    <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Lịch sử quẹt thẻ (Điểm danh & Vãng lai)</h4>
-                    <table style={{ width: '100%', fontSize: 'var(--text-sm)', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                          <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Họ Tên / MSSV</th>
-                          <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Mục đích</th>
-                          <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Giờ vào</th>
-                          <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Phân loại</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {detailsTarget.session.attendees.map((a, i) => (
-                          <tr key={i}>
-                            <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                              <div>{a.name}</div>
-                              <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>{a.mssv}</div>
-                            </td>
-                            <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>{a.activity}</td>
-                            <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                              {new Date(a.checkInAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
-                            </td>
-                            <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                              {a.type === 'walk-in' ? (
-                                <span style={{ color: 'var(--accent-amber)' }}>Vãng lai</span>
-                              ) : (
-                                <span style={{ color: 'var(--accent-green)' }}>Đăng ký</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+            
+            <div>
+              <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Danh sách thành viên đăng ký</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {detailsTarget.members?.map(m => {
+                  const mssv = typeof m === 'object' ? m.mssv : m;
+                  const name = typeof m === 'object' ? m.name : m;
+                  const isPresent = attendeesSet.has(mssv);
+                  return (
+                    <span key={mssv} style={{ 
+                      padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: 'var(--text-xs)',
+                      background: isPresent ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                      color: isPresent ? 'var(--accent-green)' : 'var(--text-secondary)',
+                      border: `1px solid ${isPresent ? 'rgba(16, 185, 129, 0.2)' : 'transparent'}`
+                    }}>
+                      {name} ({mssv}) {isPresent ? '(Có mặt)' : '(Vắng)'}
+                    </span>
+                  );
+                })}
               </div>
             </div>
-            <div className="modal-footer">
-              <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>Đóng</Button>
-            </div>
+
+            {detailsTarget.session?.attendees?.length > 0 && (
+              <div>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Lịch sử quẹt thẻ (Điểm danh & Vãng lai)</h4>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', fontSize: 'var(--text-sm)', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                        <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Họ Tên / MSSV</th>
+                        <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Mục đích</th>
+                        <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Giờ vào</th>
+                        <th style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Phân loại</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailsTarget.session.attendees.map((a, i) => (
+                        <tr key={i}>
+                          <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div>{a.name}</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>{a.mssv}</div>
+                          </td>
+                          <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>{a.activity}</td>
+                          <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            {new Date(a.checkInAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                          </td>
+                          <td style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            {a.type === 'walk-in' ? (
+                              <span style={{ color: 'var(--accent-amber)' }}>Vãng lai</span>
+                            ) : (
+                              <span style={{ color: 'var(--accent-green)' }}>Đăng ký</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
 
 

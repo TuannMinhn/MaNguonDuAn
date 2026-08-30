@@ -4,6 +4,9 @@ import { Search, Package, CheckCircle, AlertTriangle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import Select from '../components/Select';
 import DataTable from '../components/DataTable';
+import Card from '../components/Card';
+import Modal from '../components/Modal';
+import TextInput from '../components/TextInput';
 
 const CATEGORIES = [
   'Thiết bị đo lường',
@@ -211,42 +214,46 @@ export default function StudentEquipment() {
         </button>
       </div>
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-          <h2 className="section-heading">
-            <Package size={20} style={{ color: 'var(--accent-blue)' }} />
-            Danh sách thiết bị / linh kiện ({filteredEq.length})
-          </h2>
-        </div>
-        
+      <Card
+        title={`Danh sách thiết bị / linh kiện (${filteredEq.length})`}
+        icon={Package}
+        action={
+          <div style={{ width: '240px', flexShrink: 0 }}>
+            <Select
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              options={['Tất cả', ...availableCategories].map(cat => ({
+                value: cat,
+                label: cat === 'Tất cả' ? 'Tất cả danh mục' : cat
+              }))}
+            />
+          </div>
+        }
+      >
         <DataTable
           data={filteredEq}
           columns={equipmentColumns}
           searchKeys={['name', 'code', 'category', 'location']}
-          toolbarActions={
-            <div style={{ width: '240px', flexShrink: 0 }}>
-              <Select
-                value={selectedCategory}
-                onChange={setSelectedCategory}
-                options={['Tất cả', ...availableCategories].map(cat => ({
-                  value: cat,
-                  label: cat === 'Tất cả' ? 'Tất cả danh mục' : cat
-                }))}
-              />
-            </div>
-          }
         />
-      </div>
+      </Card>
 
-      {showModal && selectedEq && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-        }}>
-          <div className="glass-card" style={{ width: '90%', maxWidth: '500px', padding: '2rem' }}>
-            <h2 style={{ marginBottom: '1.5rem' }}>Đặt mượn thiết bị</h2>
-            
+      {/* Modal đặt mượn thiết bị */}
+      <Modal
+        isOpen={showModal && !!selectedEq}
+        onClose={() => setShowModal(false)}
+        title="Đặt mượn thiết bị"
+        size="sm"
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Hủy</Button>
+            <Button type="submit" form="reserve-equipment-form" variant="primary" loading={submitting}>
+              {submitting ? 'Đang xử lý...' : 'Xác nhận Đặt trước'}
+            </Button>
+          </>
+        }
+      >
+        {selectedEq && (
+          <div>
             <div style={{ background: 'var(--bg-overlay)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
               <div className="section-heading" style={{ marginBottom: '0.25rem' }}>{selectedEq.name}</div>
               <div className="text-muted">
@@ -270,21 +277,21 @@ export default function StudentEquipment() {
               </div>
             )}
 
-            <form onSubmit={handleReserve} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Mã số sinh viên (MSSV) <span style={{ color: 'var(--accent-red)' }}>*</span></label>
-                <input
+            <form id="reserve-equipment-form" onSubmit={handleReserve} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', paddingBottom: 'var(--space-md)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                <label className="form-label" style={{ margin: 0 }}>Mã số sinh viên (MSSV) <span style={{ color: 'var(--accent-red)' }}>*</span></label>
+                <TextInput
                   type="text"
                   required
+                  placeholder="Nhập MSSV..."
                   value={mssv}
                   onChange={(e) => setMssv(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
               
-              <div>
-                <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Số lượng <span style={{ color: 'var(--accent-red)' }}>*</span></label>
-                <input
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                <label className="form-label" style={{ margin: 0 }}>Số lượng <span style={{ color: 'var(--accent-red)' }}>*</span></label>
+                <TextInput
                   type="number"
                   min="1"
                   max={
@@ -295,32 +302,25 @@ export default function StudentEquipment() {
                   required
                   value={qty}
                   onChange={(e) => setQty(Number(e.target.value))}
-                  style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               {selectedEq.assetType !== 'Linh kiện tiêu hao' && activeTab === 'equipment' && (
-                <div>
-                  <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Ngày hẹn trả (Không bắt buộc)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                  <label className="form-label" style={{ margin: 0 }}>Ngày hẹn trả (Không bắt buộc)</label>
                   <input
                     type="date"
+                    className="search-input"
                     value={expectedReturnDate}
                     onChange={(e) => setExpectedReturnDate(e.target.value)}
-                    style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', outline: 'none' }}
+                    style={{ width: '100%', height: '40px' }}
                   />
                 </div>
               )}
-
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                <Button type="button" variant="secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Hủy</Button>
-                <Button type="submit" variant="primary" loading={submitting} style={{ flex: 1 }}>
-                  {submitting ? 'Đang xử lý...' : 'Xác nhận Đặt trước'}
-                </Button>
-              </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* Toast Notification */}
       {toast && (

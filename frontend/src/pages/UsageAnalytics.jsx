@@ -18,6 +18,8 @@ import Select from '../components/Select';
 import SkeletonLoader from '../components/SkeletonLoader';
 import DataTable from '../components/DataTable';
 import ExportModal from '../components/ExportModal';
+import EmptyState from '../components/EmptyState';
+import Modal from '../components/Modal';
 import * as XLSX from 'xlsx';
 
 const CustomYAxisTick = ({ x, y, payload }) => {
@@ -789,6 +791,7 @@ export default function UsageAnalytics() {
                       <XAxis type="number" hide />
                       <YAxis dataKey="name" type="category" width={yAxisWidth} tick={<CustomYAxisTick />} axisLine={false} tickLine={false} />
                       <RechartsTooltip 
+                        cursor={false}
                         contentStyle={{ 
                           backgroundColor: 'var(--bg-card)', 
                           border: '1px solid var(--border-color)', 
@@ -810,7 +813,7 @@ export default function UsageAnalytics() {
                 </div>
               </div>
 
-              {/* Top Tiêu Hao */}
+              {/* Top Tiêu Hoa */}
               <div className="glass-card chart-card">
                 <h3 className="chart-header">
                   <Package size={18} style={{ color: 'var(--accent-purple)' }} />
@@ -828,6 +831,7 @@ export default function UsageAnalytics() {
                         <XAxis type="number" hide />
                         <YAxis dataKey="name" type="category" width={yAxisWidth} tick={<CustomYAxisTick />} axisLine={false} tickLine={false} />
                         <RechartsTooltip 
+                          cursor={false}
                           contentStyle={{ 
                             backgroundColor: 'var(--bg-card)', 
                             border: '1px solid var(--border-color)', 
@@ -848,13 +852,11 @@ export default function UsageAnalytics() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', padding: '2rem 1.5rem', textAlign: 'center' }}>
-                    <Package size={40} style={{ opacity: 0.15, marginBottom: '0.75rem', color: 'var(--accent-purple)' }} />
-                    <h5 style={{ margin: 0, fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Không có dữ liệu xuất</h5>
-                    <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                      Chưa có phiếu cấp phát linh kiện tiêu hao nào được xuất trong khoảng thời gian đã chọn.
-                    </p>
-                  </div>
+                  <EmptyState 
+                    icon={Package}
+                    title="Không có dữ liệu xuất"
+                    description="Chưa có phiếu cấp phát linh kiện tiêu hao nào được xuất trong khoảng thời gian đã chọn."
+                  />
                 )}
               </div>
             </div>
@@ -934,35 +936,27 @@ export default function UsageAnalytics() {
       )}
 
       {/* Modal chi tiết cho biểu đồ ngày */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px' }}>
-            <div className="modal-header flex justify-between items-center mb-4" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-              <h3 className="font-bold text-xl">
-                {viewMode === 'range' ? `Chi tiết sử dụng tháng ${selectedDate}` : `Chi tiết sử dụng ngày ${selectedDate}`}
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
-            </div>
-            <div className="modal-body" style={{ padding: '0 1.5rem 1.5rem 1.5rem', maxHeight: '85vh', overflowY: 'auto' }}>
-              {detailsForDate.length > 0 ? (
-                <DataTable
-                  data={detailsForDate}
-                  columns={detailsColumns}
-                  renderExpandedRow={renderDetailsExpandedRow}
-                  expandedRowId={expandedRow}
-                  onExpandedRowChange={setExpandedRow}
-                />
-              ) : (
-                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-                  Không có dữ liệu cho {viewMode === 'range' ? `tháng ${selectedDate}` : `ngày ${selectedDate}`}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={viewMode === 'range' ? `Chi tiết sử dụng tháng ${selectedDate}` : `Chi tiết sử dụng ngày ${selectedDate}`}
+        size="lg"
+      >
+        {detailsForDate.length > 0 ? (
+          <DataTable
+            data={detailsForDate}
+            columns={detailsColumns}
+            renderExpandedRow={renderDetailsExpandedRow}
+            expandedRowId={expandedRow}
+            onExpandedRowChange={setExpandedRow}
+          />
+        ) : (
+          <EmptyState
+            title={`Không có dữ liệu cho ${viewMode === 'range' ? `tháng ${selectedDate}` : `ngày ${selectedDate}`}`}
+            description="Không tìm thấy bản ghi sử dụng nào trong thời gian này."
+          />
+        )}
+      </Modal>
 
       {/* KPI Details Modal (Toàn màn hình) */}
       {kpiModal.isOpen && (
@@ -1155,6 +1149,20 @@ export default function UsageAnalytics() {
           grid-template-columns: 1fr 1fr;
           gap: 1.5rem;
           width: 100%;
+        }
+
+        /* Recharts SVG focus outline killer */
+        .recharts-responsive-container,
+        .recharts-wrapper,
+        .recharts-surface,
+        .recharts-wrapper *:focus,
+        .recharts-surface:focus,
+        svg.recharts-surface,
+        svg.recharts-surface:focus,
+        svg.recharts-surface:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+          border: none !important;
         }
 
         @media (max-width: 1024px) {

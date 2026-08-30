@@ -162,8 +162,38 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
       size="lg"
       footer={modalFooter}
     >
+      <style>{`
+        .add-modal-form {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-md);
+          padding-bottom: var(--space-md);
+        }
+        .add-modal-form .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-sm);
+          margin: 0;
+        }
+        .add-modal-form .form-group label {
+          margin: 0;
+          font-size: var(--text-sm);
+          font-weight: 500;
+          color: var(--text-secondary);
+        }
+        .add-modal-form .grid-2col {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--space-md);
+        }
+        .add-modal-form .grid-3col {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: var(--space-md);
+        }
+      `}</style>
       <form id="add-equip-form" onSubmit={handleAddEquip}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="add-modal-form">
           <div className="form-group" style={{ position: 'relative' }}>
               <label>Tên thiết bị / Linh kiện</label>
               <input
@@ -190,7 +220,7 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
                   right: 0,
                   background: 'var(--bg-secondary)',
                   border: '1px solid var(--border-color)',
-                  borderRadius: '0 0 8px 8px',
+                  borderRadius: '0 0 var(--radius-md) var(--radius-md)',
                   maxHeight: '200px',
                   overflowY: 'auto',
                   listStyle: 'none',
@@ -241,8 +271,8 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
               />
             </div>
 
-            <div className="grid-2col" style={{ gap: '1rem', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
-              <div className="form-group" style={{ margin: 0 }}>
+            <div className="grid-2col">
+              <div className="form-group">
                 <label>Danh mục phân chia</label>
                 <Select
                   value={newEquip.category}
@@ -250,7 +280,7 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
                   options={CATEGORIES.map(cat => ({ value: cat, label: cat }))}
                 />
               </div>
-              <div className="form-group" style={{ margin: 0 }}>
+              <div className="form-group">
                 <label>Hạng mục quản lý (Asset Type)</label>
                 <Select
                   value={newEquip.assetType}
@@ -272,7 +302,7 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
               />
             </div>
 
-            <div className="grid-3col" style={{ gap: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
+            <div className="grid-3col">
               <div className="form-group">
                 <label>Tồn kho hiện tại</label>
                 <input
@@ -312,7 +342,7 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
               </div>
             </div>
 
-            <div className="grid-2col" style={{ gap: '1rem', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
+            <div className="grid-2col">
               <div className="form-group">
                 <label>Định mức cảnh báo</label>
                 <input
@@ -337,7 +367,7 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
             </div>
 
             {newEquip.assetType === 'Thiết bị' && newEquip.instances.length > 0 && (
-              <div className="form-group" style={{ marginTop: '0.5rem', background: 'var(--bg-overlay)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="form-group" style={{ marginTop: 'var(--space-xs)', background: 'var(--bg-overlay)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-blue)', marginBottom: '0.5rem' }}>
                   <Settings size={16} /> Quản lý Serial Cá thể ({newEquip.instances.length})
                 </label>

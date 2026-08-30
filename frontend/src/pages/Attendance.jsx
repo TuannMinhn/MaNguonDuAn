@@ -6,6 +6,7 @@ import RfidScanModal from '../components/RfidScanModal';
 import Button from '../components/Button';
 import { API_BASE_URL } from '../config';
 import DataTable from '../components/DataTable';
+import Card from '../components/Card';
 export default function Attendance() {
   const { data: logs = [], mutate: mutateLogs } = useSWR(`${API_BASE_URL}/attendance`, fetcher);
   const [searchTerm, setSearchTerm] = useState('');
@@ -189,14 +190,10 @@ export default function Attendance() {
       </div>
 
       {/* Nhật ký chi tiết */}
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Clock size={20} style={{ color: 'var(--accent-blue)' }} />
-            Lịch sử chi tiết ({logs.length})
-          </h2>
-        </div>
-        
+      <Card
+        title={`Lịch sử chi tiết (${logs.length})`}
+        icon={Clock}
+      >
         <DataTable
           data={logs}
           columns={attendanceColumns}
@@ -205,7 +202,7 @@ export default function Attendance() {
           searchKeys={['mssv', 'name']}
           searchPlaceholder="Tìm theo MSSV hoặc Họ tên thành viên..."
         />
-      </div>
+      </Card>
 
       {/* MODAL RFID ĐIỂM DANH (Giao diện Kiosk) */}
       <RfidScanModal

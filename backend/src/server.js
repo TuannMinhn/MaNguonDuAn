@@ -14,6 +14,38 @@ syncDatabase()
   .then(() => console.log('SQLite sync initialization complete.'))
   .catch(err => console.error('SQLite database initialization failed:', err));
 
+// Helper function: Lấy setting hệ thống (có fallback an toàn)
+const DEFAULT_SETTINGS = {
+  defaultBorrowDays: 7,
+  defaultReturnTime: '17:00',
+  defaultLowStockThreshold: 0,
+  defaultLifespanHours: 10000,
+  maintenanceWarningPercent: 20,
+  attendanceMinHours: 1.0,
+  attendanceStandardPoints: 5,
+  attendanceShortPoints: 2,
+  taskDefaultPoints: 10,
+  adminPassword: 'admin123',
+  maxNotificationHistory: 500,
+  rfidScanCooldownSeconds: 5,
+  defaultLabLocation: 'Kho Lab'
+};
+
+function getSystemSetting(key) {
+  try {
+    const settings = readCollection('settings', []);
+    const entry = settings.find(s => s.key === key);
+    if (entry && entry.value !== undefined && entry.value !== null && entry.value !== '') {
+      if (typeof DEFAULT_SETTINGS[key] === 'number') {
+        const num = Number(entry.value);
+        return isNaN(num) ? DEFAULT_SETTINGS[key] : num;
+      }
+      return String(entry.value).trim();
+    }
+  } catch (e) {}
+  return DEFAULT_SETTINGS[key];
+}
+
 // Helper function: Tạo thông báo cho Manager
 function createNotification(type, title, content, details = {}) {
   const notifications = readCollection('notifications');
@@ -27,8 +59,11 @@ function createNotification(type, title, content, details = {}) {
     read: false
   };
   notifications.unshift(newNotif); // Thêm lên đầu danh sách
-  // Giới hạn 500 thông báo gần nhất
-  if (notifications.length > 500) notifications.pop();
+  
+  const maxLimit = getSystemSetting('maxNotificationHistory') || 500;
+  if (notifications.length > maxLimit) {
+    notifications.splice(maxLimit);
+  }
   writeCollection('notifications', notifications);
 }
 
@@ -427,8 +462,11 @@ app.post('/api/attendance/check', (req, res) => {
       record = attendance[recordIndex];
     }
 
-    // Cộng điểm thưởng check-in chuyên cần (ví dụ: tối thiểu 1 tiếng trực Lab được cộng 5 điểm)
-    const pointsEarned = duration >= 1.0 ? 5 : 2;
+    // Cộng điểm thưởng check-in chuyên cần từ settings
+    const minHours = getSystemSetting('attendanceMinHours') ?? 1.0;
+    const stdPoints = getSystemSetting('attendanceStandardPoints') ?? 5;
+    const shortPoints = getSystemSetting('attendanceShortPoints') ?? 2;
+    const pointsEarned = duration >= minHours ? stdPoints : shortPoints;
     user.points += pointsEarned;
 
     writeCollection('users', users);
@@ -484,12 +522,12 @@ app.post('/api/equipment', (req, res) => {
     totalQty: newTotalQty,
     maxQty: maxQty !== undefined ? Number(maxQty) : newTotalQty,
     borrowedQty: 0,
-    location: location || 'Kho Lab',
+    location: location || getSystemSetting('defaultLabLocation') || 'Kho Lab',
     status: 'Sẵn sàng',
     category: category || 'Khác',
     assetType: assetType || 'Thiết bị',
     unit: unit || 'Cái',
-    minThreshold: minThreshold !== undefined ? Number(minThreshold) : 0
+    minThreshold: minThreshold !== undefined ? Number(minThreshold) : (getSystemSetting('defaultLowStockThreshold') || 0)
   };
 
   equipment.push(newEquip);
@@ -532,12 +570,12 @@ app.post('/api/equipment/import', (req, res) => {
       totalQty: parsedQty,
       maxQty: maxQty !== undefined ? Number(maxQty) : parsedQty,
       borrowedQty: 0,
-      location: location || 'Kho Lab',
+      location: location || getSystemSetting('defaultLabLocation') || 'Kho Lab',
       status: 'Sẵn sàng',
       category: category || 'Khác',
       assetType: assetType || 'Thiết bị',
       unit: unit || 'Cái',
-      minThreshold: minThreshold !== undefined ? Number(minThreshold) : 0
+      minThreshold: minThreshold !== undefined ? Number(minThreshold) : (getSystemSetting('defaultLowStockThreshold') || 0)
     };
 
     equipment.push(newEquip);
@@ -578,12 +616,12 @@ app.put('/api/equipment/:id', (req, res) => {
     code: code !== undefined ? code : current.code,
     totalQty: newTotalQty,
     maxQty: maxQty !== undefined ? Number(maxQty) : (current.maxQty || newTotalQty),
-    location: location !== undefined ? location : current.location,
+    location: location !== undefined ? location : (current.location || getSystemSetting('defaultLabLocation') || 'Kho Lab'),
     status: status !== undefined ? status : current.status,
     category: category !== undefined ? category : current.category || 'Khác',
     assetType: assetType !== undefined ? assetType : current.assetType || 'Thiết bị',
     unit: unit !== undefined ? unit : current.unit || 'Cái',
-    minThreshold: minThreshold !== undefined ? Number(minThreshold) : current.minThreshold || 0
+    minThreshold: minThreshold !== undefined ? Number(minThreshold) : (current.minThreshold !== undefined ? current.minThreshold : (getSystemSetting('defaultLowStockThreshold') || 0))
   };
 
   writeCollection('equipment', equipment);
@@ -592,20 +630,19 @@ app.put('/api/equipment/:id', (req, res) => {
 
 app.delete('/api/equipment/:id', (req, res) => {
   const { id } = req.params;
-  const equipment = readCollection('equipment');
-  const index = equipment.findIndex(e => e.id === id);
-
-  if (index === -1) {
+  let equipment = readCollection('equipment');
+  const eq = equipment.find(e => e.id === id);
+  if (!eq) {
     return res.status(404).json({ error: 'Không tìm thấy thiết bị' });
   }
 
-  if (equipment[index].borrowedQty > 0) {
-    return res.status(400).json({ error: 'Thiết bị đang được mượn, không thể xóa' });
+  if (eq.borrowedQty > 0) {
+    return res.status(400).json({ error: 'Không thể xóa thiết bị đang được mượn' });
   }
 
-  const filtered = equipment.filter(e => e.id !== id);
-  writeCollection('equipment', filtered);
-  res.json({ message: 'Xóa thiết bị thành công' });
+  equipment = equipment.filter(e => e.id !== id);
+  writeCollection('equipment', equipment);
+  res.json({ message: `Đã xóa thiết bị ${eq.name}` });
 });
 
 // Mượn thiết bị
@@ -615,16 +652,6 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
 
   if (!mssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Số lượng mượn không hợp lệ' });
-  }
-
-  // Validate ngày hẹn trả không được trong quá khứ
-  if (expectedReturnDate) {
-    const returnDate = new Date(expectedReturnDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (returnDate < today) {
-      return res.status(400).json({ error: 'Ngày hẹn trả không thể là ngày trong quá khứ' });
-    }
   }
 
   // Tìm thành viên trong users hoặc members
@@ -688,6 +715,9 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
   // Tạo phiếu mượn / xuất kho
   const borrows = readCollection('borrows');
   const borrowStatus = cardId ? (isConsumable ? 'Đã tiêu hao' : 'Đang mượn') : 'Đã đặt trước';
+  const borrowDays = getSystemSetting('defaultBorrowDays') || 7;
+  const fallbackReturnDate = new Date(Date.now() + borrowDays * 24 * 60 * 60 * 1000).toISOString();
+
   const newBorrow = {
     id: uuidv4(),
     equipmentId: eq.id,
@@ -697,7 +727,7 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
     borrowerName: user.name,
     qty: requestedQty,
     borrowDate: new Date().toISOString(),
-    expectedReturnDate: isConsumable ? null : (expectedReturnDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()),
+    expectedReturnDate: isConsumable ? null : (expectedReturnDate || fallbackReturnDate),
     initialCondition: initialCondition || 'Tốt',
     borrowNotes: borrowNotes || '',
     returnDate: (cardId && isConsumable) ? new Date().toISOString() : null,
@@ -1245,6 +1275,7 @@ app.post('/api/tasks', (req, res) => {
   }
 
   const tasks = readCollection('tasks');
+  const defaultPoints = getSystemSetting('taskDefaultPoints') ?? 10;
   const newTask = {
     id: uuidv4(),
     title,
@@ -1252,7 +1283,7 @@ app.post('/api/tasks', (req, res) => {
     status: 'todo',
     assignedTo: assignedTo || null,
     assignedName,
-    points: points ? Number(points) : 10
+    points: points ? Number(points) : defaultPoints
   };
 
   tasks.push(newTask);
@@ -1814,10 +1845,11 @@ app.post('/api/bookings/rfid-access', (req, res) => {
     const attendee = session.attendees[attendeeIndex];
     const checkedInTime = new Date(attendee.checkInAt);
     const diffMs = now - checkedInTime;
-    const cooldownMs = 5 * 1000;
+    const cooldownSec = getSystemSetting('rfidScanCooldownSeconds') || 5;
+    const cooldownMs = cooldownSec * 1000;
 
     if (diffMs < cooldownMs) {
-      return res.status(400).json({ error: 'Vui lòng đợi ít nhất 5 giây trước khi check-out (Chống quét nhầm)' });
+      return res.status(400).json({ error: `Vui lòng đợi ít nhất ${cooldownSec} giây trước khi check-out (Chống quét nhầm)` });
     }
 
     attendee.checkOutAt = now.toISOString();
@@ -1850,17 +1882,19 @@ app.post('/api/bookings/cancel-all', (req, res) => {
 app.get('/api/analytics/equipment', (req, res) => {
   const equipment = readCollection('equipment');
   let analytics = [];
+  const defaultLifespan = getSystemSetting('defaultLifespanHours') || 10000;
+  const warningPercent = getSystemSetting('maintenanceWarningPercent') || 20;
 
   equipment.forEach(eq => {
     if (eq.assetType === 'Thiết bị' && eq.instances && eq.instances.length > 0) {
       eq.instances.forEach(inst => {
-        const lifespan = inst.lifespanHours || eq.lifespanHours || 10000;
+        const lifespan = inst.lifespanHours || eq.lifespanHours || defaultLifespan;
         const used = inst.usedHours || 0;
         const healthPercent = Math.max(0, 100 - (used / lifespan) * 100);
 
         let status = 'Tốt';
         if (healthPercent <= 0) status = 'Quá hạn';
-        else if (healthPercent <= 20) status = 'Cần bảo trì';
+        else if (healthPercent <= warningPercent) status = 'Cần bảo trì';
 
         analytics.push({
           id: inst.id,
@@ -1878,13 +1912,13 @@ app.get('/api/analytics/equipment', (req, res) => {
         });
       });
     } else {
-      const lifespan = eq.lifespanHours || 10000;
+      const lifespan = eq.lifespanHours || defaultLifespan;
       const used = eq.usedHours || 0;
       const healthPercent = Math.max(0, 100 - (used / lifespan) * 100);
 
       let status = 'Tốt';
       if (healthPercent <= 0) status = 'Quá hạn';
-      else if (healthPercent <= 20) status = 'Cần bảo trì';
+      else if (healthPercent <= warningPercent) status = 'Cần bảo trì';
 
       analytics.push({
         ...eq,
@@ -2102,12 +2136,89 @@ app.post('/api/notifications/read-all', (req, res) => {
 // Phân quyền & Đăng nhập
 app.post('/api/login', (req, res) => {
   const { password } = req.body;
+  const currentAdminPass = getSystemSetting('adminPassword') || 'admin123';
 
-  if (password === 'admin123') {
+  if (password === currentAdminPass) {
     return res.json({ success: true, role: 'admin', message: 'Đăng nhập Quản lý thành công' });
   } else {
     return res.status(401).json({ success: false, error: 'Mật khẩu quản lý không chính xác' });
   }
+});
+
+// ==========================================
+// API SYSTEM SETTINGS (Cài đặt hệ thống chung)
+// ==========================================
+
+app.get('/api/settings', (req, res) => {
+  const settingsList = readCollection('settings', []);
+  const settingsObj = { ...DEFAULT_SETTINGS };
+  settingsList.forEach(s => {
+    if (s.key && s.value !== undefined) {
+      if (typeof DEFAULT_SETTINGS[s.key] === 'number') {
+        const n = Number(s.value);
+        settingsObj[s.key] = isNaN(n) ? DEFAULT_SETTINGS[s.key] : n;
+      } else {
+        settingsObj[s.key] = String(s.value);
+      }
+    }
+  });
+  // Bảo mật: Không trả adminPassword ra client
+  delete settingsObj.adminPassword;
+  res.json(settingsObj);
+});
+
+app.put('/api/settings', (req, res) => {
+  const updates = req.body;
+  if (!updates || typeof updates !== 'object') {
+    return res.status(400).json({ error: 'Dữ liệu cấu hình không hợp lệ' });
+  }
+
+  let settingsList = readCollection('settings', []);
+  const validKeys = Object.keys(DEFAULT_SETTINGS);
+
+  validKeys.forEach(key => {
+    if (updates[key] !== undefined) {
+      let val = updates[key];
+      // Nếu là adminPassword và rỗng hoặc chỉ có khoảng trắng thì bỏ qua không ghi đè
+      if (key === 'adminPassword') {
+        if (typeof val !== 'string' || !val.trim()) {
+          return;
+        }
+        val = val.trim();
+      } else if (typeof DEFAULT_SETTINGS[key] === 'number') {
+        const num = Number(val);
+        val = isNaN(num) ? String(DEFAULT_SETTINGS[key]) : String(num);
+      } else {
+        val = String(val).trim();
+      }
+
+      const idx = settingsList.findIndex(s => s.key === key);
+      if (idx !== -1) {
+        settingsList[idx].value = val;
+      } else {
+        settingsList.push({ key, value: val });
+      }
+    }
+  });
+
+  writeCollection('settings', settingsList);
+
+  const settingsObj = { ...DEFAULT_SETTINGS };
+  settingsList.forEach(s => {
+    if (s.key && s.value !== undefined) {
+      if (typeof DEFAULT_SETTINGS[s.key] === 'number') {
+        const n = Number(s.value);
+        settingsObj[s.key] = isNaN(n) ? DEFAULT_SETTINGS[s.key] : n;
+      } else {
+        settingsObj[s.key] = String(s.value);
+      }
+    }
+  });
+
+  // Bảo mật: Không trả adminPassword ra client
+  delete settingsObj.adminPassword;
+
+  res.json({ message: 'Cập nhật cài đặt hệ thống thành công', settings: settingsObj });
 });
 
 // ==========================================

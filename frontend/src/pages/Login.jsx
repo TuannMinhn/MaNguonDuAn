@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Users, ShieldCheck, Lock, ArrowRight, Binary } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import Button from '../components/Button';
+import Card from '../components/Card';
+import TextInput from '../components/TextInput';
 
 export default function Login({ setRole }) {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -49,107 +51,108 @@ export default function Login({ setRole }) {
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 9999,
-      background: 'var(--bg-primary)'
+      background: 'var(--bg-primary)',
+      padding: 'var(--space-md)'
     }}>
-      <div className="glass-card" style={{ maxWidth: '480px', width: '90%', padding: '3rem 2.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        
-        {/* Logo */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginBottom: '3rem' }}>
-          <div style={{ width: 70, height: 70, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Binary size={40} style={{ color: 'var(--accent-blue)' }} />
+      <div style={{ maxWidth: '440px', width: '100%' }}>
+        <Card style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Binary size={36} style={{ color: 'var(--accent-blue)' }} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>Lab CLB Manager</h1>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Hệ thống quản lý phòng Lab thông minh</p>
+            </div>
           </div>
-          <div>
-            <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Lab CLB Manager</h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Hệ thống quản lý phòng Lab thông minh</p>
-          </div>
-        </div>
 
-        {!showAdminLogin ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: '500' }}>Vui lòng chọn vai trò của bạn:</h3>
-            
-            <button 
-              onClick={handleStudentLogin}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '1.25rem 1.5rem', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)',
-                borderRadius: '12px', color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s ease',
-              }}
-              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(59,130,246,0.2)'}
-              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <Users size={24} style={{ color: 'var(--accent-blue)' }} />
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontSize: '1.05rem', fontWeight: '600' }}>Tôi là Sinh viên</div>
-                  <div style={{ fontSize: '0.8rem', color: '#93c5fd' }}>Điểm danh & Đăng ký phòng</div>
-                </div>
-              </div>
-              <ArrowRight size={20} style={{ color: 'var(--accent-blue)' }} />
-            </button>
-
-            <button 
-              onClick={() => setShowAdminLogin(true)}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '1.25rem 1.5rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)',
-                borderRadius: '12px', color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s ease',
-              }}
-              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(16,185,129,0.2)'}
-              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(16,185,129,0.1)'}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <ShieldCheck size={24} style={{ color: 'var(--accent-green)' }} />
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontSize: '1.05rem', fontWeight: '600' }}>Tôi là Quản lý</div>
-                  <div style={{ fontSize: '0.8rem', color: '#6ee7b7' }}>Quản trị hệ thống toàn diện</div>
-                </div>
-              </div>
-              <ArrowRight size={20} style={{ color: 'var(--accent-green)' }} />
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleAdminSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: '500' }}>Xác thực quyền Quản lý</h3>
-            
-            <div style={{ position: 'relative' }}>
-              <Lock size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input
-                type="password"
-                placeholder="Nhập mật khẩu Admin..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoFocus
+          {!showAdminLogin ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '0.25rem', fontWeight: '500' }}>Vui lòng chọn vai trò của bạn:</h3>
+              
+              <button 
+                type="button"
+                onClick={handleStudentLogin}
                 style={{
-                  width: '100%', padding: '1rem 1rem 1rem 3rem', background: 'var(--bg-overlay)',
-                  border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: 'var(--text-primary)',
-                  fontSize: '1rem', outline: 'none'
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '1rem 1.25rem', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)',
+                  borderRadius: 'var(--radius-lg)', color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s ease',
                 }}
-              />
-            </div>
-            
-            {error && <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', textAlign: 'left' }}>{error}</div>}
-            
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-              <Button 
-                type="button" 
-                variant="secondary"
-                onClick={() => { setShowAdminLogin(false); setError(''); setPassword(''); }}
-                style={{ flex: 1 }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(59,130,246,0.2)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
               >
-                Quay lại
-              </Button>
-              <Button 
-                type="submit" 
-                variant="primary"
-                loading={loading}
-                style={{ flex: 1 }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                  <Users size={22} style={{ color: 'var(--accent-blue)' }} />
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: '600' }}>Tôi là Sinh viên</div>
+                    <div style={{ fontSize: '0.8rem', color: '#93c5fd' }}>Điểm danh & Đăng ký phòng</div>
+                  </div>
+                </div>
+                <ArrowRight size={18} style={{ color: 'var(--accent-blue)' }} />
+              </button>
+
+              <button 
+                type="button"
+                onClick={() => setShowAdminLogin(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '1rem 1.25rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)',
+                  borderRadius: 'var(--radius-lg)', color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s ease',
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(16,185,129,0.2)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(16,185,129,0.1)'}
               >
-                Đăng nhập
-              </Button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                  <ShieldCheck size={22} style={{ color: 'var(--accent-green)' }} />
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: '600' }}>Tôi là Quản lý</div>
+                    <div style={{ fontSize: '0.8rem', color: '#6ee7b7' }}>Quản trị hệ thống toàn diện</div>
+                  </div>
+                </div>
+                <ArrowRight size={18} style={{ color: 'var(--accent-green)' }} />
+              </button>
             </div>
-          </form>
-        )}
+          ) : (
+            <form onSubmit={handleAdminSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '0.25rem', fontWeight: '500' }}>Xác thực quyền Quản lý</h3>
+              
+              <div className="form-group" style={{ margin: 0, textAlign: 'left' }}>
+                <TextInput
+                  type="password"
+                  placeholder="Nhập mật khẩu Admin..."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  icon={Lock}
+                  autoFocus
+                  required
+                />
+              </div>
+              
+              {error && <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', textAlign: 'left' }}>{error}</div>}
+              
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={() => { setShowAdminLogin(false); setError(''); setPassword(''); }}
+                  style={{ flex: 1 }}
+                >
+                  Quay lại
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="primary"
+                  loading={loading}
+                  disabled={loading || !password.trim()}
+                  style={{ flex: 1 }}
+                >
+                  Đăng nhập
+                </Button>
+              </div>
+            </form>
+          )}
+        </Card>
       </div>
     </div>
   );

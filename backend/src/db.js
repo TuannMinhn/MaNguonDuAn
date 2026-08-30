@@ -186,6 +186,12 @@ export const Maintenance = sequelize.define('Maintenance', {
   notes: { type: DataTypes.TEXT, defaultValue: '[]' } // JSON string
 }, { tableName: 'maintenance', timestamps: false });
 
+// 14. Bảng SystemSetting (Cài đặt hệ thống động)
+export const SystemSetting = sequelize.define('SystemSetting', {
+  key: { type: DataTypes.TEXT, primaryKey: true },
+  value: { type: DataTypes.TEXT, allowNull: false }
+}, { tableName: 'system_settings', timestamps: false });
+
 // ==========================================
 // ĐỒNG BỘ & SEED DỮ LIỆU TỪ JSON CŨ SANG SQLITE
 // ==========================================
@@ -287,6 +293,21 @@ export async function syncDatabase() {
   await seedIfEmpty(Session, 'sessions', []);
   await seedIfEmpty(Catalog, 'equipment_catalog', []);
   await seedIfEmpty(Maintenance, 'maintenance', []);
+  await seedIfEmpty(SystemSetting, 'settings', [
+    { key: 'defaultBorrowDays', value: '7' },
+    { key: 'defaultReturnTime', value: '17:00' },
+    { key: 'defaultLowStockThreshold', value: '0' },
+    { key: 'defaultLifespanHours', value: '10000' },
+    { key: 'maintenanceWarningPercent', value: '20' },
+    { key: 'attendanceMinHours', value: '1.0' },
+    { key: 'attendanceStandardPoints', value: '5' },
+    { key: 'attendanceShortPoints', value: '2' },
+    { key: 'taskDefaultPoints', value: '10' },
+    { key: 'adminPassword', value: 'admin123' },
+    { key: 'maxNotificationHistory', value: '500' },
+    { key: 'rfidScanCooldownSeconds', value: '5' },
+    { key: 'defaultLabLocation', value: 'Kho Lab' }
+  ]);
 
   // Load dữ liệu từ SQLite vào Cache sau khi đã đồng bộ & seed xong
   const collections = Object.keys(collectionToModelMap);
@@ -325,7 +346,8 @@ const collectionToModelMap = {
   notifications: Notification,
   sessions: Session,
   equipment_catalog: Catalog,
-  maintenance: Maintenance
+  maintenance: Maintenance,
+  settings: SystemSetting
 };
 
 function getModelByCollectionName(colName) {

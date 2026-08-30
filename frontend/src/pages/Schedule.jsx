@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, CheckCircle, HelpCircle } from 'lucide-react';
+import { Calendar, HelpCircle, Info } from 'lucide-react';
 import Button from '../components/Button';
+import Card from '../components/Card';
+import Modal from '../components/Modal';
+import TextInput from '../components/TextInput';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
 
 export default function Schedule() {
   const [schedules, setSchedules] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showRegModal, setShowRegModal] = useState(false);
   const [selectedShift, setSelectedShift] = useState(null);
   const [mssv, setMssv] = useState('');
@@ -26,6 +31,8 @@ export default function Schedule() {
       setSchedules(data);
     } catch (error) {
       console.error('Lỗi khi tải lịch trực Lab:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -105,6 +112,13 @@ export default function Schedule() {
     }
   }, [errorMsg]);
 
+  const modalFooter = (
+    <>
+      <Button type="button" variant="ghost" onClick={() => setShowRegModal(false)}>Đóng</Button>
+      <Button type="submit" form="schedule-register-form" variant="primary">Xác nhận</Button>
+    </>
+  );
+
   return (
     <div className="page-container fade-in">
       <div>
@@ -118,108 +132,111 @@ export default function Schedule() {
       {successMsg && <div className="alert-message alert-success">{successMsg}</div>}
       {errorMsg && <div className="alert-message alert-error">{errorMsg}</div>}
 
-      <div className="glass-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Calendar size={22} style={{ color: 'var(--accent-purple)' }} />
-          <h2>Lịch trực tuần hiện tại</h2>
-        </div>
+      {isLoading ? (
+        <SkeletonLoader count={3} />
+      ) : (
+        <Card
+          title="Lịch trực tuần hiện tại"
+          icon={Calendar}
+        >
+          {/* Lịch trực Grid container có scroll ngang an toàn trên màn hình nhỏ */}
+          <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '0.5rem' }}>
+            <div className="schedule-grid" style={{ minWidth: '700px' }}>
+              {/* Header */}
+              <div className="schedule-header">Ngày \ Ca</div>
+              {shiftsOfDay.map((shift, idx) => (
+                <div key={idx} className="schedule-header">{shift}</div>
+              ))}
 
-        {/* Lịch trực Grid */}
-        <div className="schedule-grid">
-          {/* Header */}
-          <div className="schedule-header">Ngày \ Ca</div>
-          {shiftsOfDay.map((shift, idx) => (
-            <div key={idx} className="schedule-header">{shift}</div>
-          ))}
-
-          {/* Các hàng tương ứng với từng ngày */}
-          {daysOfWeek.map((day, dayIdx) => (
-            <React.Fragment key={dayIdx}>
-              {/* Cột 1: Tên ngày */}
-              <div className="schedule-day-label">{day}</div>
-              
-              {/* 3 Cột ca trực */}
-              {shiftsOfDay.map((shiftName, shiftIdx) => {
-                const shiftData = getShiftData(day, shiftName);
-                const isRegistered = shiftData && shiftData.members.length > 0;
-                
-                return (
-                  <div 
-                    key={shiftIdx} 
-                    className={`schedule-cell ${isRegistered ? 'has-registrations' : ''}`}
-                    onClick={() => handleRegisterClick(day, shiftName)}
-                    style={{ cursor: 'pointer' }}
-                    title="Click để Đăng ký / Hủy đăng ký"
-                  >
-                    <div>
-                      <div className="shift-title">{shiftName.split(' ')[0]}</div>
-                      <div className="shift-members">
-                        {shiftData && shiftData.members.map((member, mIdx) => (
-                          <span key={mIdx} className="shift-member-tag">
-                            {member.name}
-                          </span>
-                        ))}
-                        {(!shiftData || shiftData.members.length === 0) && (
-                          <span className="text-xs text-muted" style={{ fontStyle: 'italic' }}>Trống ca trực</span>
-                        )}
+              {/* Các hàng tương ứng với từng ngày */}
+              {daysOfWeek.map((day, dayIdx) => (
+                <React.Fragment key={dayIdx}>
+                  {/* Cột 1: Tên ngày */}
+                  <div className="schedule-day-label">{day}</div>
+                  
+                  {/* 3 Cột ca trực */}
+                  {shiftsOfDay.map((shiftName, shiftIdx) => {
+                    const shiftData = getShiftData(day, shiftName);
+                    const isRegistered = shiftData && shiftData.members.length > 0;
+                    
+                    return (
+                      <div 
+                        key={shiftIdx} 
+                        className={`schedule-cell ${isRegistered ? 'has-registrations' : ''}`}
+                        onClick={() => handleRegisterClick(day, shiftName)}
+                        style={{ cursor: 'pointer' }}
+                        title="Click để Đăng ký / Hủy đăng ký"
+                      >
+                        <div>
+                          <div className="shift-title">{shiftName.split(' ')[0]}</div>
+                          <div className="shift-members">
+                            {shiftData && shiftData.members.map((member, mIdx) => (
+                              <span key={mIdx} className="shift-member-tag">
+                                {member.name}
+                              </span>
+                            ))}
+                            {(!shiftData || shiftData.members.length === 0) && (
+                              <span className="text-xs text-muted" style={{ fontStyle: 'italic' }}>Trống ca trực</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs" style={{ display: 'flex', justifyContent: 'flex-end', color: 'var(--accent-blue)', fontWeight: '500' }}>
+                          <span>Đăng ký →</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-xs" style={{ display: 'flex', justifyContent: 'flex-end', color: 'var(--accent-blue)', fontWeight: '500' }}>
-                      <span>Đăng ký →</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
 
-      <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <HelpCircle size={20} style={{ color: 'var(--accent-amber)' }} />
-        <p className="text-sm">
-          <strong>Lưu ý:</strong> Ca trực sáng từ 08:00 đến 11:30. Ca trực chiều từ 13:30 đến 17:00. Ca trực tối từ 18:00 đến 21:00. 
-          Vui lòng bấm trực tiếp vào ca trực để đăng ký MSSV của bạn (hoặc nhập lại MSSV đã đăng ký để HỦY ca trực). 
+      <Card
+        title="Lưu ý quy định trực Lab"
+        icon={HelpCircle}
+      >
+        <p className="text-sm" style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+          Ca trực sáng từ <strong>08:00 đến 11:30</strong>. Ca trực chiều từ <strong>13:30 đến 17:00</strong>. Ca trực tối từ <strong>18:00 đến 21:00</strong>. 
+          Vui lòng bấm trực tiếp vào ca trực để đăng ký MSSV của bạn (hoặc nhập lại MSSV đã đăng ký để <strong>HỦY</strong> ca trực). 
           Khi check-in vào phòng Lab trùng với ca trực đã đăng ký, bạn sẽ nhận được điểm tích lũy chuyên cần cao hơn.
         </p>
-      </div>
+      </Card>
 
       {/* MODAL ĐĂNG KÝ/HỦY ĐĂNG KÝ CA TRỰC */}
-      {showRegModal && selectedShift && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Đăng ký ca trực Lab</h3>
-              <Button variant="ghost" icon={X} onClick={() => setShowRegModal(false)} style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }} />
+      <Modal
+        isOpen={showRegModal && !!selectedShift}
+        onClose={() => setShowRegModal(false)}
+        title="Đăng ký ca trực Lab"
+        size="md"
+        footer={modalFooter}
+      >
+        {selectedShift && (
+          <form id="schedule-register-form" onSubmit={handleRegisterSubmit}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ padding: '0.75rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <p style={{ margin: 0 }}>Thời gian: <strong>{selectedShift.day}</strong> - ca <strong>{selectedShift.shift}</strong></p>
+                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Danh sách đã đăng ký: <strong style={{ color: 'var(--accent-purple)' }}>{selectedShift.members.map(m => m.name).join(', ') || 'Chưa có ai'}</strong></p>
+              </div>
+
+              <div className="form-group" style={{ margin: 0 }}>
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '500' }}>Nhập MSSV của bạn để Đăng ký / Hủy đăng ký</label>
+                <TextInput
+                  type="text"
+                  required
+                  placeholder="Ví dụ: 20220003"
+                  value={mssv}
+                  onChange={(e) => setMssv(e.target.value)}
+                />
+                <small style={{ color: 'var(--text-muted)', marginTop: '0.35rem', display: 'block', fontSize: '0.75rem' }}>
+                  * Hệ thống sẽ tự động đăng ký tên bạn nếu bạn chưa tham gia, hoặc hủy đăng ký nếu bạn đã đăng ký ca này trước đó.
+                </small>
+              </div>
             </div>
-            <form onSubmit={handleRegisterSubmit}>
-              <div className="modal-body">
-                <div style={{ padding: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <p>Thời gian: <strong>{selectedShift.day}</strong> - ca <strong>{selectedShift.shift}</strong></p>
-                  <p>Danh sách đã đăng ký: {selectedShift.members.map(m => m.name).join(', ') || 'Chưa có ai'}</p>
-                </div>
-                <div className="form-group">
-                  <label>Nhập MSSV của bạn để Đăng ký / Hủy đăng ký</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ví dụ: 20220003"
-                    value={mssv}
-                    onChange={(e) => setMsv(e.target.value)}
-                  />
-                  <small style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                    * Hệ thống sẽ tự động đăng ký tên bạn nếu bạn chưa tham gia, hoặc hủy đăng ký nếu bạn đã đăng ký ca này trước đó.
-                  </small>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <Button type="button" variant="ghost" onClick={() => setShowRegModal(false)}>Đóng</Button>
-                <Button type="submit" variant="primary">Xác nhận</Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          </form>
+        )}
+      </Modal>
     </div>
   );
 }

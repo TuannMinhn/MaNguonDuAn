@@ -57,6 +57,7 @@ export default function Equipment({ activeTab = 'list' }) {
   const { data: equipmentList = [], mutate: mutateEquip, isLoading: isLoadingEquip } = useSWR(`${API_BASE_URL}/equipment`, fetcher);
   const { data: borrowTickets = [], mutate: mutateBorrows, isLoading: isLoadingBorrows } = useSWR(`${API_BASE_URL}/equipment-borrows`, fetcher);
   const { data: members = [], isLoading: isLoadingMembers } = useSWR(`${API_BASE_URL}/members`, fetcher);
+  const { data: systemSettings } = useSWR(`${API_BASE_URL}/settings`, fetcher);
   const isLoading = isLoadingEquip || isLoadingBorrows || isLoadingMembers;
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryTab, setSelectedCategoryTab] = useState('Tất cả');
@@ -559,14 +560,15 @@ export default function Equipment({ activeTab = 'list' }) {
   // Xử lý tìm kiếm thành viên gợi ý
   const handleMemberSearch = (query) => {
     setMemberSearchQuery(query);
-    if (!query.trim()) {
-      setSuggestedMembers([]);
+    if (!query || !query.trim()) {
+      // Khi click vào hoặc input rỗng, hiển thị toàn bộ danh sách thành viên (giới hạn 30)
+      setSuggestedMembers(members.slice(0, 30));
       return;
     }
     const q = query.toLowerCase();
     const matches = members.filter(m =>
       m.name?.toLowerCase().includes(q) || m.mssv?.toLowerCase().includes(q)
-    ).slice(0, 5);
+    ).slice(0, 30);
     setSuggestedMembers(matches);
   };
 
@@ -634,9 +636,14 @@ export default function Equipment({ activeTab = 'list' }) {
 
   const handleBorrowSubmit = async (e) => {
     e.preventDefault();
-    if (!borrowForm.mssv.trim() || Number(borrowForm.qty) <= 0) {
+    const rawMssv = borrowForm.mssv || memberSearchQuery || '';
+    const cleanMssv = rawMssv.includes('–') ? rawMssv.split('–')[0].trim() : (rawMssv.includes('-') ? rawMssv.split('-')[0].trim() : rawMssv.trim());
+    if (!cleanMssv || Number(borrowForm.qty) <= 0) {
       setErrorMsg('Vui lòng điền đầy đủ MSSV và số lượng');
       return;
+    }
+    if (borrowForm.mssv !== cleanMssv) {
+      borrowForm.mssv = cleanMssv;
     }
     await processBorrow(null);
   };
@@ -753,12 +760,18 @@ export default function Equipment({ activeTab = 'list' }) {
 
   const processBorrow = async (cardId) => {
     try {
-      const isConsumable = selectedEquip.assetType === 'Linh kiện tiêu hao';
+      const isConsumable = selectedEquip.assetType === 'Linh kiện tiêu hao' || (selectedEquip.assetType && (selectedEquip.assetType.toLowerCase().includes('linh kiện') || selectedEquip.assetType.toLowerCase().includes('vật tư')));
+      const availableInstances = (selectedEquip.instances || []).filter(i => i.status === 'Sẵn sàng');
+      const selectedInstanceIds = !isConsumable && availableInstances.length > 0 
+        ? availableInstances.slice(0, Number(borrowForm.qty)).map(i => i.id) 
+        : [];
+
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEquip.id}/borrow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...borrowForm,
+          selectedInstanceIds,
           cardId: cardId,
           expectedReturnDate: isConsumable ? null : new Date(borrowForm.expectedReturnDate + 'T' + borrowForm.expectedReturnTime + ':00').toISOString()
         })
@@ -1076,9 +1089,10 @@ export default function Equipment({ activeTab = 'list' }) {
   const equipmentColumns = useMemo(() => [
     {
       accessorKey: 'code',
-      header: 'Mã',
+      header: 'Mã TB',
       width: '15%',
       sortable: true,
+      align: 'left',
       cell: (row) => {
         const available = row.totalQty - (row.borrowedQty || 0);
         const isConsumable = row.assetType === 'Linh kiện tiêu hao' || row.assetType === 'Vật tư tiêu hao';
@@ -1097,12 +1111,13 @@ export default function Equipment({ activeTab = 'list' }) {
     {
       accessorKey: 'name',
       header: 'Tên thiết bị',
-      width: '40%',
+      width: '45%',
       sortable: true,
+      align: 'left',
       cell: (row) => {
         const isConsumable = row.assetType === 'Linh kiện tiêu hao' || row.assetType === 'Vật tư tiêu hao';
         return (
-          <div style={{ fontWeight: '600' }}>
+          <div style={{ fontWeight: '600', textAlign: 'left' }}>
             <div>{row.name}</div>
             {isConsumable && <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '1px 4px', borderRadius: '4px' }}>Tiêu hao</span>}
           </div>
@@ -1110,15 +1125,9 @@ export default function Equipment({ activeTab = 'list' }) {
       }
     },
     {
-      accessorKey: 'location',
-      header: 'Vị trí',
-      width: '12%',
-      sortable: true
-    },
-    {
       accessorKey: 'totalQty',
-      header: 'SL',
-      width: '10%',
+      header: 'Còn lại',
+      width: '18%',
       sortable: true,
       align: 'right',
       cell: (row) => {
@@ -1126,13 +1135,12 @@ export default function Equipment({ activeTab = 'list' }) {
         const isConsumable = row.assetType === 'Linh kiện tiêu hao' || row.assetType === 'Vật tư tiêu hao';
         const minThreshold = row.minThreshold || 0;
         const isLowStock = isConsumable ? (row.totalQty <= minThreshold && row.totalQty > 0) : (available <= minThreshold && available > 0);
-        const displayUnit = row.unit ? ` ${row.unit}` : '';
         
         if (isConsumable) {
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
               <span style={{ color: row.totalQty > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                {row.totalQty}{displayUnit}
+                {row.totalQty}
               </span>
               {isLowStock && <span style={{ fontSize: '0.65rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.1)', padding: '2px 4px', borderRadius: '4px' }}>Sắp hết</span>}
             </div>
@@ -1141,7 +1149,7 @@ export default function Equipment({ activeTab = 'list' }) {
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
             <div>
-              <span style={{ color: available > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>{available}</span> / {row.totalQty}{displayUnit}
+              <span style={{ color: available > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>{available}</span> / {row.totalQty}
             </div>
             {isLowStock && <span style={{ fontSize: '0.65rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.1)', padding: '2px 4px', borderRadius: '4px' }}>Sắp hết</span>}
           </div>
@@ -1151,7 +1159,7 @@ export default function Equipment({ activeTab = 'list' }) {
     {
       accessorKey: 'actions',
       header: 'Thao tác',
-      width: '23%',
+      width: '20%',
       sortable: false,
       align: 'right',
       cell: (row) => {
@@ -1159,13 +1167,26 @@ export default function Equipment({ activeTab = 'list' }) {
         const isConsumable = row.assetType === 'Linh kiện tiêu hao' || row.assetType === 'Vật tư tiêu hao';
         const isOutOfStock = isConsumable ? row.totalQty <= 0 : available <= 0;
         return (
-          <div style={{ display: 'inline-flex', gap: '0.35rem', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <div style={{ display: 'inline-flex', gap: '0.35rem', flexDirection: 'column', alignItems: 'flex-end', width: '100%' }}>
             {isOutOfStock && equipmentWaitlists[row.id] > 0 && <div style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', marginBottom: '0.3rem' }}><User size={10} /> {equipmentWaitlists[row.id]} chờ</div>}
-            <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+            <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
               {isOutOfStock && !isConsumable ? (
                 <Button size="sm" variant="secondary" style={{ borderColor: 'var(--accent-amber)', color: 'var(--accent-amber)' }} onClick={() => { setSelectedEquip(row); setShowWaitlistModal(true); }}>🔔 Đăng ký chờ</Button>
               ) : (
-                <Button size="sm" variant={isConsumable ? 'secondary' : 'primary'} onClick={() => { setSelectedEquip(row); setBorrowForm({ mssv: '', qty: 1, expectedReturnDate: getTodayDateString(), expectedReturnTime: '17:00', initialCondition: 'Tốt / Hoạt động bình thường', borrowNotes: '' }); setShowBorrowModal(true); }}>{isConsumable ? 'Xuất kho' : 'Mượn'}</Button>
+                <Button size="sm" variant="primary" onClick={() => { 
+                  setSelectedEquip(row); 
+                  const firstReadyInst = row.instances?.find(i => i.status === 'Sẵn sàng');
+                  setBorrowForm({ 
+                    mssv: '', 
+                    qty: 1, 
+                    selectedInstanceIds: firstReadyInst ? [firstReadyInst.id] : [],
+                    expectedReturnDate: getTodayDateString(), 
+                    expectedReturnTime: systemSettings?.defaultReturnTime || '17:00', 
+                    initialCondition: 'Tốt / Hoạt động bình thường', 
+                    borrowNotes: '' 
+                  }); 
+                  setShowBorrowModal(true); 
+                }}>{isConsumable ? 'Xuất kho' : 'Mượn'}</Button>
               )}
               <Button size="sm" variant="ghost" icon={Edit3} onClick={() => { setEditingEquip(row); setShowEditModal(true); }} />
               <Button size="sm" variant="danger" icon={Trash2} onClick={() => handleDeleteEquip(row.id, row.name)} />

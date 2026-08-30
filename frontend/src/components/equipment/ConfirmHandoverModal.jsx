@@ -15,7 +15,7 @@ const ConfirmHandoverModal = ({
   const modalFooter = (
     <>
       <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
-      <button type="submit" className="btn btn-primary" style={{ backgroundColor: 'var(--accent-amber)', borderColor: 'var(--accent-amber)' }}>Tiếp tục quét thẻ</button>
+      <button type="submit" form="confirm-handover-form" className="btn btn-primary" style={{ backgroundColor: 'var(--accent-amber)', borderColor: 'var(--accent-amber)' }}>Tiếp tục quét thẻ</button>
     </>
   );
 
@@ -25,13 +25,34 @@ const ConfirmHandoverModal = ({
       onClose={onClose}
       title="Xác nhận thông tin bàn giao"
       size="md"
+      footer={modalFooter}
     >
-      <form onSubmit={(e) => {
+      <style>{`
+        .handover-modal-form {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-md);
+          padding-bottom: var(--space-md);
+        }
+        .handover-modal-form .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-sm);
+          margin: 0;
+        }
+        .handover-modal-form .form-group label {
+          margin: 0;
+          font-size: var(--text-sm);
+          font-weight: 500;
+          color: var(--text-secondary);
+        }
+      `}</style>
+      <form id="confirm-handover-form" onSubmit={(e) => {
         e.preventDefault();
         onConfirm();
       }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '0.85rem', borderRadius: '8px' }}>
+        <div className="handover-modal-form">
+          <div style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--accent-amber)' }}>{selectedBorrow.equipmentName}</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
               <span>Mã: {selectedBorrow.equipmentCode}</span>
@@ -61,24 +82,22 @@ const ConfirmHandoverModal = ({
           <div className="form-group">
             <label>Ghi chú chi tiết</label>
             <textarea
-              rows="2.5"
               placeholder="Ghi nhận phụ kiện đi kèm hoặc trạng thái trầy xước..."
               value={borrowForm.borrowNotes}
               onChange={(e) => setBorrowForm({ ...borrowForm, borrowNotes: e.target.value })}
               style={{
                 width: '100%',
-                padding: '0.6rem',
+                minHeight: '72px',
+                height: '72px',
+                padding: 'var(--space-sm) var(--space-md)',
                 background: 'var(--bg-overlay)',
                 border: '1px solid var(--border-color)',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-md)',
                 color: 'var(--text-primary)',
-                fontSize: '0.85rem'
+                fontSize: '0.85rem',
+                resize: 'vertical'
               }}
             />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem', borderTop: '1px solid var(--border-table)', paddingTop: '1rem' }}>
-            {modalFooter}
           </div>
         </div>
       </form>

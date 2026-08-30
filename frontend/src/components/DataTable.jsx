@@ -120,17 +120,19 @@ export default function DataTable({
               {visibleColumns.map(col => (
                 <th key={col.accessorKey} style={{ textAlign: col.align || 'left', width: col.width }}>
                   {col.sortable ? (
-                    <button 
-                      className="data-table-sort-btn"
-                      onClick={() => toggleSort(col.accessorKey)}
-                    >
-                      {col.header}
-                      {sorting.key === col.accessorKey ? (
-                        sorting.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
-                      ) : (
-                        <ChevronsUpDown size={14} className="text-muted opacity-50 hover:opacity-100" />
-                      )}
-                    </button>
+                    <div style={{ display: 'flex', justifyContent: col.align === 'center' ? 'center' : (col.align === 'right' ? 'flex-end' : 'flex-start') }}>
+                      <button 
+                        className="data-table-sort-btn"
+                        onClick={() => toggleSort(col.accessorKey)}
+                      >
+                        {col.header}
+                        {sorting.key === col.accessorKey ? (
+                          sorting.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                        ) : (
+                          <ChevronsUpDown size={14} className="text-muted opacity-50 hover:opacity-100" />
+                        )}
+                      </button>
+                    </div>
                   ) : (
                     col.header
                   )}

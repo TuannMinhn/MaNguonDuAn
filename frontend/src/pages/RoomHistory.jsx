@@ -8,6 +8,9 @@ import * as XLSX from 'xlsx';
 import Button from '../components/Button';
 import Select from '../components/Select';
 import SessionReportModal from '../components/bookings/SessionReportModal';
+import Modal from '../components/Modal';
+import Card from '../components/Card';
+import EmptyState from '../components/EmptyState';
 import { Users, Clock, Calendar, Info, X, CheckCircle, XCircle, UserPlus, Download, Zap, Briefcase, FileText, Plus } from 'lucide-react';
 
 const SESSIONS = [
@@ -362,190 +365,185 @@ export default function RoomHistory() {
         </div>
       )}
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        {error ? (
-          <div style={{ color: 'var(--accent-red)', padding: '1rem', textAlign: 'center' }}>
-            Không thể tải dữ liệu lịch sử.
-          </div>
-        ) : !history ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-            Đang tải dữ liệu...
-          </div>
-        ) : history.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-            <Calendar size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-            <p>Chưa có dữ liệu lịch sử dùng phòng.</p>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                <Calendar size={20} style={{ color: 'var(--accent-blue)' }} />
-                Danh sách các ca đã dùng ({history.length})
-              </h2>
-            </div>
-            
-            <DataTable
-              data={history.map(item => ({...item, membersCount: item.members ? item.members.length : 0}))}
-              columns={historyColumns}
-              onRowClick={(row) => setSelectedItem({...row, slotLabel: getSlotLabel(row.slotId)})}
-            />
-          </>
-        )}
-      </div>
+      {error ? (
+        <div style={{ color: 'var(--accent-red)', padding: '1rem', textAlign: 'center' }}>
+          Không thể tải dữ liệu lịch sử.
+        </div>
+      ) : !history ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+          Đang tải dữ liệu...
+        </div>
+      ) : history.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={Calendar}
+            title="Chưa có dữ liệu lịch sử dùng phòng"
+            description="Không tìm thấy bản ghi sử dụng phòng nào trong khoảng thời gian đã chọn."
+          />
+        </Card>
+      ) : (
+        <Card
+          title={`Danh sách các ca đã dùng (${history.length})`}
+          icon={Calendar}
+        >
+          <DataTable
+            data={history.map(item => ({...item, membersCount: item.members ? item.members.length : 0}))}
+            columns={historyColumns}
+            onRowClick={(row) => setSelectedItem({...row, slotLabel: getSlotLabel(row.slotId)})}
+          />
+        </Card>
+      )}
 
       {/* Detail Modal */}
-      {selectedItem && (
-        <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
-          <div className="modal-content glass-card fade-in" style={{ maxWidth: '600px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Chi tiết ca sử dụng phòng</h3>
-              <Button variant="ghost" icon={X} onClick={() => setSelectedItem(null)} style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }} />
-            </div>
-            
-            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', background: 'rgba(0,0,0,0.15)', padding: '1rem', borderRadius: '8px' }}>
-                <div>
-                  <div className="text-xs text-muted">Thời gian</div>
-                  <div style={{ fontWeight: '600' }}>{selectedItem.date}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted">Khung giờ</div>
-                  <div style={{ fontWeight: '600', color: 'var(--accent-blue)' }}>{selectedItem.slotLabel}</div>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                  <Users size={18} color="var(--accent-purple)" /> Nhóm đăng ký ({selectedItem.members ? selectedItem.members.length : 0})
-                </h4>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {(selectedItem.members || []).map(m => {
-                    const isRep = m.mssv === selectedItem.representativeMssv;
-                    const isPresent = selectedItem.session?.attendees?.some(a => a.mssv === m.mssv);
-                    
-                    return (
-                      <div key={m.mssv} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: isPresent ? '3px solid var(--accent-green)' : '3px solid var(--accent-red)' }}>
-                        <div>
-                          <div style={{ fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {m.name} 
-                            {isRep && <span className="text-tiny" style={{ padding: '0.1rem 0.4rem', background: 'var(--accent-amber)', color: '#000', borderRadius: '4px', fontWeight: 'bold' }}>Đại diện</span>}
-                          </div>
-                          <div className="text-xs text-muted">MSSV: {m.mssv}</div>
-                        </div>
-                        <div>
-                          {isPresent ? (
-                            <span className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--accent-green)' }}>
-                              <CheckCircle size={14} /> Có mặt
-                            </span>
-                          ) : (
-                            <span className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--accent-red)' }}>
-                              <XCircle size={14} /> Vắng
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Lên ké */}
-              {selectedItem.session && (() => {
-                const registeredMssvs = (selectedItem.members || []).map(m => m.mssv);
-                const extraAttendees = (selectedItem.session.attendees || []).filter(a => !registeredMssvs.includes(a.mssv));
-                
-                if (extraAttendees.length === 0) return null;
-                
-                return (
-                  <div>
-                    <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--accent-amber)' }}>
-                      <UserPlus size={18} /> Khách / Thành viên đi cùng ({extraAttendees.length})
-                    </h4>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {extraAttendees.map(a => (
-                        <div key={a.mssv} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '8px', borderLeft: '3px solid var(--accent-amber)' }}>
-                          <div>
-                            <div style={{ fontWeight: '500' }}>{a.name}</div>
-                            <div className="text-xs text-muted">MSSV/ĐV: {a.mssv}</div>
-                          </div>
-                          <div className="text-xs text-muted">
-                            (Quẹt thẻ vào phòng)
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Báo cáo ca trực */}
-              {selectedItem.checkoutReport && (
-                <div style={{ marginTop: '1.5rem' }}>
-                  <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--accent-green)' }}>
-                    <FileText size={18} /> Báo cáo Ca trực / Bàn giao
-                  </h4>
-                  <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1rem', borderRadius: '8px' }}>
-                    <div className="text-sm text-muted" style={{ marginBottom: '1rem' }}>
-                      Được báo cáo lúc: {new Date(selectedItem.checkoutReport.reportedAt).toLocaleString('vi-VN')}
-                    </div>
-                    
-                    {selectedItem.checkoutReport.consumables?.length > 0 && (
-                      <div style={{ marginBottom: '1rem' }}>
-                        <strong className="text-sm" style={{ color: 'var(--text-primary)' }}>Linh kiện tiêu hao:</strong>
-                        <ul className="text-sm" style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
-                          {selectedItem.checkoutReport.consumables.map((c, idx) => (
-                            <li key={idx}>{c.name} - SL: {c.qty}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
- 
-                    {selectedItem.checkoutReport.issues?.length > 0 && (
-                      <div style={{ marginBottom: '1rem' }}>
-                        <strong className="text-sm" style={{ color: 'var(--accent-amber)' }}>Báo hỏng thiết bị:</strong>
-                        <ul className="text-sm" style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
-                          {selectedItem.checkoutReport.issues.map((i, idx) => (
-                            <li key={idx}>{i.name}: {i.issueDescription}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
- 
-                    {selectedItem.checkoutReport.notes && (
-                      <div>
-                        <strong className="text-sm" style={{ color: 'var(--text-primary)' }}>Ghi chú:</strong>
-                        <p className="text-sm" style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontStyle: 'italic' }}>
-                          "{selectedItem.checkoutReport.notes}"
-                        </p>
-                      </div>
-                    )}
-                  </div>
+      <Modal
+        isOpen={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+        title="Chi tiết ca sử dụng phòng"
+        size="md"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div>
+              {selectedItem?.status !== 'Sắp tới' && !selectedItem?.checkoutReport && (
+                <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => setShowReportModal(true)}>
+                  Tạo Báo cáo ca trực / Checkout
+                </Button>
+              )}
+              {selectedItem?.checkoutReport && (
+                <div style={{ padding: '0.5rem 1rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CheckCircle size={18} /> Đã báo cáo ca trực
                 </div>
               )}
-
             </div>
-            
-            <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
-              <div>
-                {selectedItem.status !== 'Sắp tới' && !selectedItem.checkoutReport && (
-                  <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => setShowReportModal(true)}>
-                    Tạo Báo cáo ca trực / Checkout
-                  </Button>
-                )}
-                {selectedItem.checkoutReport && (
-                  <div style={{ padding: '0.5rem 1rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <CheckCircle size={18} /> Đã báo cáo ca trực
-                  </div>
-                )}
-              </div>
-              <Button variant="secondary" onClick={() => setSelectedItem(null)}>Đóng</Button>
-            </div>
+            <Button variant="secondary" onClick={() => setSelectedItem(null)}>Đóng</Button>
           </div>
-        </div>
-      )}
+        }
+      >
+        {selectedItem && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', background: 'rgba(0,0,0,0.15)', padding: '1rem', borderRadius: '8px' }}>
+              <div>
+                <div className="text-xs text-muted">Thời gian</div>
+                <div style={{ fontWeight: '600' }}>{selectedItem.date}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted">Khung giờ</div>
+                <div style={{ fontWeight: '600', color: 'var(--accent-blue)' }}>{selectedItem.slotLabel}</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <Users size={18} color="var(--accent-purple)" /> Nhóm đăng ký ({selectedItem.members ? selectedItem.members.length : 0})
+              </h4>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {(selectedItem.members || []).map(m => {
+                  const isRep = m.mssv === selectedItem.representativeMssv;
+                  const isPresent = selectedItem.session?.attendees?.some(a => a.mssv === m.mssv);
+                  
+                  return (
+                    <div key={m.mssv} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: isPresent ? '3px solid var(--accent-green)' : '3px solid var(--accent-red)' }}>
+                      <div>
+                        <div style={{ fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {m.name} 
+                          {isRep && <span className="text-tiny" style={{ padding: '0.1rem 0.4rem', background: 'var(--accent-amber)', color: '#000', borderRadius: '4px', fontWeight: 'bold' }}>Đại diện</span>}
+                        </div>
+                        <div className="text-xs text-muted">MSSV: {m.mssv}</div>
+                      </div>
+                      <div>
+                        {isPresent ? (
+                          <span className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--accent-green)' }}>
+                            <CheckCircle size={14} /> Có mặt
+                          </span>
+                        ) : (
+                          <span className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--accent-red)' }}>
+                            <XCircle size={14} /> Vắng
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Lên ké */}
+            {selectedItem.session && (() => {
+              const registeredMssvs = (selectedItem.members || []).map(m => m.mssv);
+              const extraAttendees = (selectedItem.session.attendees || []).filter(a => !registeredMssvs.includes(a.mssv));
+              
+              if (extraAttendees.length === 0) return null;
+              
+              return (
+                <div>
+                  <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--accent-amber)' }}>
+                    <UserPlus size={18} /> Khách / Thành viên đi cùng ({extraAttendees.length})
+                  </h4>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {extraAttendees.map(a => (
+                      <div key={a.mssv} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '8px', borderLeft: '3px solid var(--accent-amber)' }}>
+                        <div>
+                          <div style={{ fontWeight: '500' }}>{a.name}</div>
+                          <div className="text-xs text-muted">MSSV/ĐV: {a.mssv}</div>
+                        </div>
+                        <div className="text-xs text-muted">
+                          (Quẹt thẻ vào phòng)
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Báo cáo ca trực */}
+            {selectedItem.checkoutReport && (
+              <div style={{ marginTop: '1.5rem' }}>
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--accent-green)' }}>
+                  <FileText size={18} /> Báo cáo Ca trực / Bàn giao
+                </h4>
+                <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1rem', borderRadius: '8px' }}>
+                  <div className="text-sm text-muted" style={{ marginBottom: '1rem' }}>
+                    Được báo cáo lúc: {new Date(selectedItem.checkoutReport.reportedAt).toLocaleString('vi-VN')}
+                  </div>
+                  
+                  {selectedItem.checkoutReport.consumables?.length > 0 && (
+                    <div style={{ marginBottom: '1rem' }}>
+                      <strong className="text-sm" style={{ color: 'var(--text-primary)' }}>Linh kiện tiêu hao:</strong>
+                      <ul className="text-sm" style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
+                        {selectedItem.checkoutReport.consumables.map((c, idx) => (
+                          <li key={idx}>{c.name} - SL: {c.qty}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {selectedItem.checkoutReport.issues?.length > 0 && (
+                    <div style={{ marginBottom: '1rem' }}>
+                      <strong className="text-sm" style={{ color: 'var(--accent-amber)' }}>Báo hỏng thiết bị:</strong>
+                      <ul className="text-sm" style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
+                        {selectedItem.checkoutReport.issues.map((i, idx) => (
+                          <li key={idx}>{i.name}: {i.issueDescription}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {selectedItem.checkoutReport.notes && (
+                    <div>
+                      <strong className="text-sm" style={{ color: 'var(--text-primary)' }}>Ghi chú:</strong>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontStyle: 'italic' }}>
+                        "{selectedItem.checkoutReport.notes}"
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
 
       {/* Báo cáo Modal */}
       {selectedItem && showReportModal && (

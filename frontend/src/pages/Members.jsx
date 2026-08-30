@@ -13,6 +13,9 @@ import { API_BASE_URL } from '../config';
 import Button from '../components/Button';
 import Select from '../components/Select';
 import DataTable from '../components/DataTable';
+import Card from '../components/Card';
+import Modal from '../components/Modal';
+import TextInput from '../components/TextInput';
 
 export default function Members() {
   const { data: members = [], mutate } = useSWR(`${API_BASE_URL}/members`, fetcher);
@@ -184,6 +187,20 @@ export default function Members() {
     )}
   ], [activeTab]);
 
+  const addMemberFooter = (
+    <>
+      <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>Hủy</Button>
+      <Button type="submit" form="add-member-form" variant="primary">Thêm mới</Button>
+    </>
+  );
+
+  const editMemberFooter = (
+    <>
+      <Button type="button" variant="ghost" onClick={() => setShowEditModal(false)}>Hủy</Button>
+      <Button type="submit" form="edit-member-form" variant="primary">Lưu thay đổi</Button>
+    </>
+  );
+
   return (
     <div className="page-container fade-in">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -221,124 +238,110 @@ export default function Members() {
         </button>
       </div>
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Users size={20} style={{ color: 'var(--accent-blue)' }} />
-            {activeTab === 'managers' ? 'Danh sách Ban quản lý' : 'Danh sách Sinh viên & Thành viên'} ({activeTab === 'managers' ? managers.length : students.length})
-          </h2>
-        </div>
-        
+      <Card
+        title={`${activeTab === 'managers' ? 'Danh sách Ban quản lý' : 'Danh sách Sinh viên & Thành viên'} (${activeTab === 'managers' ? managers.length : students.length})`}
+        icon={Users}
+      >
         <DataTable
           data={activeTab === 'managers' ? managers : students}
           columns={membersColumns}
           globalFilter={searchTerm}
           setGlobalFilter={setSearchTerm}
         />
-      </div>
+      </Card>
 
       {/* MODAL THÊM THÀNH VIÊN MỚI */}
-      {showAddModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Thêm thành viên mới</h3>
-              <Button variant="ghost" icon={X} onClick={() => setShowAddModal(false)} style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }} />
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Thêm thành viên mới"
+        size="sm"
+        footer={addMemberFooter}
+      >
+        <form id="add-member-form" onSubmit={handleAddMember}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Mã số / MSSV</label>
+              <TextInput
+                type="text"
+                required
+                placeholder="Ví dụ: 20220003"
+                value={newMember.mssv}
+                onChange={(e) => setNewMember({ ...newMember, mssv: e.target.value })}
+              />
             </div>
-            <form onSubmit={handleAddMember}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Mã số / MSSV</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ví dụ: 20220003"
-                    value={newMember.mssv}
-                    onChange={(e) => setNewMember({ ...newMember, mssv: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Họ và tên</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ví dụ: Lê Văn C"
-                    value={newMember.name}
-                    onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Chức vụ / Ban hoạt động</label>
-                  <Select
-                    value={newMember.role}
-                    onChange={(val) => setNewMember({ ...newMember, role: val })}
-                    options={[
-                      { value: "Chủ nhiệm", label: "Chủ nhiệm" },
-                      { value: "Phó chủ nhiệm", label: "Phó chủ nhiệm" },
-                      { value: "Trưởng ban Kỹ thuật", label: "Trưởng ban Kỹ thuật" },
-                      { value: "Trưởng ban Truyền thông", label: "Trưởng ban Truyền thông" },
-                      { value: "Thành viên", label: "Thành viên" },
-                      { value: "Cộng tác viên", label: "Cộng tác viên" }
-                    ]}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>Hủy</Button>
-                <Button type="submit" variant="primary">Thêm mới</Button>
-              </div>
-            </form>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Họ và tên</label>
+              <TextInput
+                type="text"
+                required
+                placeholder="Ví dụ: Lê Văn C"
+                value={newMember.name}
+                onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+              />
+            </div>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Chức vụ / Ban hoạt động</label>
+              <Select
+                value={newMember.role}
+                onChange={(val) => setNewMember({ ...newMember, role: val })}
+                options={[
+                  { value: "Chủ nhiệm", label: "Chủ nhiệm" },
+                  { value: "Phó chủ nhiệm", label: "Phó chủ nhiệm" },
+                  { value: "Trưởng ban Kỹ thuật", label: "Trưởng ban Kỹ thuật" },
+                  { value: "Trưởng ban Truyền thông", label: "Trưởng ban Truyền thông" },
+                  { value: "Thành viên", label: "Thành viên" },
+                  { value: "Cộng tác viên", label: "Cộng tác viên" }
+                ]}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
 
       {/* MODAL SỬA THÔNG TIN THÀNH VIÊN */}
-      {showEditModal && editingMember && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Sửa thông tin thành viên</h3>
-              <Button variant="ghost" icon={X} onClick={() => setShowEditModal(false)} style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }} />
+      <Modal
+        isOpen={showEditModal && !!editingMember}
+        onClose={() => setShowEditModal(false)}
+        title="Sửa thông tin thành viên"
+        size="sm"
+        footer={editMemberFooter}
+      >
+        {editingMember && (
+          <form id="edit-member-form" onSubmit={handleEditMember}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label>Mã số / MSSV (Không thể sửa)</label>
+                <TextInput type="text" disabled value={editingMember.mssv} style={{ color: 'var(--text-muted)' }} />
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label>Họ và tên</label>
+                <TextInput
+                  type="text"
+                  required
+                  value={editingMember.name}
+                  onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
+                />
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label>Chức vụ / Ban hoạt động</label>
+                <Select
+                  value={editingMember.role}
+                  onChange={(val) => setEditingMember({ ...editingMember, role: val })}
+                  options={[
+                    { value: "Chủ nhiệm", label: "Chủ nhiệm" },
+                    { value: "Phó chủ nhiệm", label: "Phó chủ nhiệm" },
+                    { value: "Trưởng ban Kỹ thuật", label: "Trưởng ban Kỹ thuật" },
+                    { value: "Trưởng ban Truyền thông", label: "Trưởng ban Truyền thông" },
+                    { value: "Thành viên", label: "Thành viên" },
+                    { value: "Cộng tác viên", label: "Cộng tác viên" }
+                  ]}
+                />
+              </div>
             </div>
-            <form onSubmit={handleEditMember}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Mã số / MSSV (Không thể sửa)</label>
-                  <input type="text" disabled value={editingMember.mssv} style={{ color: 'var(--text-muted)' }} />
-                </div>
-                <div className="form-group">
-                  <label>Họ và tên</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingMember.name}
-                    onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Chức vụ / Ban hoạt động</label>
-                  <Select
-                    value={editingMember.role}
-                    onChange={(val) => setEditingMember({ ...editingMember, role: val })}
-                    options={[
-                      { value: "Chủ nhiệm", label: "Chủ nhiệm" },
-                      { value: "Phó chủ nhiệm", label: "Phó chủ nhiệm" },
-                      { value: "Trưởng ban Kỹ thuật", label: "Trưởng ban Kỹ thuật" },
-                      { value: "Trưởng ban Truyền thông", label: "Trưởng ban Truyền thông" },
-                      { value: "Thành viên", label: "Thành viên" },
-                      { value: "Cộng tác viên", label: "Cộng tác viên" }
-                    ]}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <Button type="button" variant="ghost" onClick={() => setShowEditModal(false)}>Hủy</Button>
-                <Button type="submit" variant="primary">Lưu thay đổi</Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          </form>
+        )}
+      </Modal>
 
     </div>
   );

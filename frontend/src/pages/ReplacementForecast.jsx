@@ -15,6 +15,7 @@ import {
 import { API_BASE_URL } from '../config';
 import DataTable from '../components/DataTable';
 import Button from '../components/Button';
+import Card from '../components/Card';
 
 export default function ReplacementForecast() {
   const { data: equipmentList = [] } = useSWR(`${API_BASE_URL}/analytics/equipment`, fetcher);
@@ -222,21 +223,17 @@ export default function ReplacementForecast() {
         </p>
       </div>
 
-      {/* Table */}
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-          <h2 className="section-heading">
-            <Calendar size={20} style={{ color: 'var(--accent-blue)' }} />
-            Danh sách thiết bị cảnh báo ({forecastData.length})
-          </h2>
-        </div>
-        
+      {/* Table Card */}
+      <Card
+        title={`Danh sách thiết bị cảnh báo (${forecastData.length})`}
+        icon={Calendar}
+      >
         <DataTable
           data={forecastData}
           columns={forecastColumns}
           searchKeys={['name', 'code']}
         />
-      </div>
+      </Card>
     </div>
   );
 }

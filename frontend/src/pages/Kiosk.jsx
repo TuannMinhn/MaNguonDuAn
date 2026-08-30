@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config';
 import { ShieldAlert, CheckCircle, XCircle } from 'lucide-react';
 import Button from '../components/Button';
+import Card from '../components/Card';
 
 export default function Kiosk() {
   const [status, setStatus] = useState('idle'); // 'idle', 'success', 'error'
@@ -73,18 +74,18 @@ export default function Kiosk() {
     }
   };
 
-  let bgGradient = 'radial-gradient(circle at center, #1e293b 0%, #0b0f19 100%)';
   let Icon = ShieldAlert;
-  let iconColor = 'rgba(255,255,255,0.2)';
+  let iconColor = 'var(--text-muted)';
+  let borderColor = 'var(--border-color)';
   
   if (status === 'success') {
-    bgGradient = 'radial-gradient(circle at center, rgba(16, 185, 129, 0.2) 0%, #0b0f19 100%)';
     Icon = CheckCircle;
     iconColor = 'var(--accent-green)';
+    borderColor = 'rgba(16, 185, 129, 0.4)';
   } else if (status === 'error') {
-    bgGradient = 'radial-gradient(circle at center, rgba(239, 68, 68, 0.2) 0%, #0b0f19 100%)';
     Icon = XCircle;
     iconColor = 'var(--accent-red)';
+    borderColor = 'rgba(239, 68, 68, 0.4)';
   }
 
   return (
@@ -98,52 +99,72 @@ export default function Kiosk() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: bgGradient,
-      transition: 'background 0.5s ease',
-      color: '#fff',
+      background: 'var(--bg-primary)',
+      color: 'var(--text-primary)',
       fontFamily: 'var(--font-family)',
-      zIndex: 9999
+      zIndex: 9999,
+      padding: 'var(--space-md)'
     }}>
       <div style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '3rem',
-        borderRadius: '24px',
-        textAlign: 'center',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
         maxWidth: '500px',
-        width: '90%'
+        width: '100%'
       }}>
-        
-        
-        <>
-            <div style={{
-              width: '120px', height: '120px', borderRadius: '50%',
-              background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', marginBottom: '2rem',
-              border: `2px solid ${iconColor}`,
-              boxShadow: `0 0 30px ${iconColor}`
-            }}>
-              <Icon size={64} color={iconColor} style={{ animation: status === 'idle' ? 'pulse 2s infinite' : 'none' }} />
-            </div>
+        <Card style={{
+          padding: '3rem 2rem',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          border: `1px solid ${borderColor}`,
+          transition: 'border-color 0.3s ease'
+        }}>
+          <div style={{
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            background: 'var(--bg-secondary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '1.75rem',
+            border: `2px solid ${iconColor}`
+          }}>
+            <Icon size={52} style={{ color: iconColor }} />
+          </div>
 
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 1rem 0', fontWeight: '700', letterSpacing: '-1px' }}>
-              {status === 'idle' ? 'Chạm thẻ RFID' : message}
-            </h1>
-            
-            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', margin: 0, minHeight: '60px', lineHeight: '1.5' }}>
-              {status === 'idle' ? (
-                <>
-                  Vui lòng đặt thẻ của bạn lên thiết bị đọc<br/>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>(Nhấn phím 1, 2, 3, 4 để giả lập quét)</span>
-                </>
-              ) : subMessage}
-            </p>
-          </>
+          <h1 style={{
+            fontSize: '2rem',
+            margin: '0 0 1rem 0',
+            fontWeight: '700',
+            letterSpacing: '-0.5px',
+            color: 'var(--text-primary)'
+          }}>
+            {status === 'idle' ? 'Chạm thẻ RFID' : message}
+          </h1>
+          
+          <div style={{
+            fontSize: '1.125rem',
+            color: 'var(--text-secondary)',
+            margin: 0,
+            minHeight: '56px',
+            lineHeight: '1.5',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            {status === 'idle' ? (
+              <>
+                <span>Vui lòng đặt thẻ của bạn lên thiết bị đọc</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                  (Nhấn phím 1, 2, 3, 4 để giả lập quét)
+                </span>
+              </>
+            ) : (
+              <span>{subMessage}</span>
+            )}
+          </div>
+        </Card>
       </div>
 
       <Button 
@@ -156,14 +177,6 @@ export default function Kiosk() {
       >
         Thoát chế độ Kiosk
       </Button>
-
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.1); }
-          70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255,255,255,0); }
-          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-        }
-      `}</style>
     </div>
   );
 }

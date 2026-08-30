@@ -461,7 +461,7 @@ export default function AssetOverview() {
                           interval={0}
                           tickFormatter={formatYAxisTick}
                         />
-                        <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }} />
+                        <RechartsTooltip cursor={false} contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }} />
                         <Bar dataKey="Số lượng" fill="var(--accent-blue)" radius={[0, 4, 4, 0]} barSize={16}>
                           <LabelList dataKey="Số lượng" position="right" fill="var(--text-secondary)" fontSize={10} fontWeight="600" offset={8} />
                         </Bar>
@@ -954,6 +954,20 @@ export default function AssetOverview() {
         }
         .compact-alert-table tr:last-child td {
           border-bottom: none;
+        }
+
+        /* Recharts SVG focus outline killer */
+        .recharts-responsive-container,
+        .recharts-wrapper,
+        .recharts-surface,
+        .recharts-wrapper *:focus,
+        .recharts-surface:focus,
+        svg.recharts-surface,
+        svg.recharts-surface:focus,
+        svg.recharts-surface:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+          border: none !important;
         }
 
         @media (max-width: 1200px) {

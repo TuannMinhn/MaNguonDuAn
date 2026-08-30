@@ -21,9 +21,22 @@ const ReturnEquipmentModal = ({
   const modalFooter = (
     <>
       <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
-      <button type="submit" className="btn btn-primary" style={{ backgroundColor: 'var(--accent-green)', borderColor: 'var(--accent-green)' }}>Xác nhận duyệt trả</button>
+      <button type="submit" form="return-equip-form" className="btn btn-primary" style={{ backgroundColor: 'var(--accent-green)', borderColor: 'var(--accent-green)' }}>Xác nhận duyệt trả</button>
     </>
   );
+
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <Modal
@@ -35,8 +48,9 @@ const ReturnEquipmentModal = ({
         </div>
       }
       size="md"
+      footer={modalFooter}
     >
-      <form onSubmit={handleReturnSubmit}>
+      <form id="return-equip-form" onSubmit={handleReturnSubmit}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
           <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '0.85rem', borderRadius: '8px' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Thiết bị trả lại</div>
@@ -47,7 +61,7 @@ const ReturnEquipmentModal = ({
           </div>
 
           {/* Tìm gợi ý người đi trả */}
-          <div className="form-group" style={{ position: 'relative' }}>
+          <div className="form-group" style={{ position: 'relative' }} ref={dropdownRef}>
             <label>Mã số sinh viên (Người trả thiết bị)</label>
             <div style={{ position: 'relative' }}>
               <User size={15} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -56,7 +70,12 @@ const ReturnEquipmentModal = ({
                 required
                 placeholder="Gõ tên hoặc MSSV người đi trả..."
                 value={memberSearchQuery || returnForm.returnMssv}
+                onFocus={() => {
+                  setIsDropdownOpen(true);
+                  handleMemberSearch(memberSearchQuery || returnForm.returnMssv);
+                }}
                 onChange={(e) => {
+                  setIsDropdownOpen(true);
                   handleMemberSearch(e.target.value);
                   setReturnForm({ ...returnForm, returnMssv: e.target.value });
                 }}
@@ -65,19 +84,21 @@ const ReturnEquipmentModal = ({
             </div>
 
             {/* List gợi ý */}
-            {suggestedMembers.length > 0 && (
+            {isDropdownOpen && suggestedMembers.length > 0 && (
               <div style={{
                 position: 'absolute', top: '100%', left: 0, right: 0,
                 backgroundColor: 'var(--bg-secondary)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px', zIndex: 300, overflow: 'hidden',
+                borderRadius: '8px', zIndex: 300, overflowY: 'auto', maxHeight: '200px',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.5)', marginTop: '4px'
               }}>
                 {suggestedMembers.map(m => (
                   <div
                     key={m.mssv}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault();
                       setReturnForm({ ...returnForm, returnMssv: m.mssv });
                       setMemberSearchQuery(`${m.mssv} – ${m.name}`);
+                      setIsDropdownOpen(false);
                       setSuggestedMembers([]);
                     }}
                     style={{ padding: '0.6rem 0.85rem', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', transition: 'background 0.15s' }}
@@ -125,10 +146,6 @@ const ReturnEquipmentModal = ({
                 fontSize: '0.85rem'
               }}
             />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem', borderTop: '1px solid var(--border-table)', paddingTop: '1rem' }}>
-            {modalFooter}
           </div>
         </div>
       </form>

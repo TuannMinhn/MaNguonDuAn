@@ -140,13 +140,19 @@ export default function ComponentsInventory() {
 
   const handleBorrowSubmit = async (e) => {
     e.preventDefault();
+    const rawMssv = borrowForm.mssv || memberSearchQuery || '';
+    const cleanMssv = rawMssv.includes('–') ? rawMssv.split('–')[0].trim() : (rawMssv.includes('-') ? rawMssv.split('-')[0].trim() : rawMssv.trim());
+    if (!cleanMssv || Number(borrowForm.qty) <= 0) {
+      setErrorMsg('Vui lòng điền đầy đủ MSSV và số lượng');
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEquip.id}/borrow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...borrowForm,
-          // Force values for consumable if modal didn't set them
+          mssv: cleanMssv
         })
       });
       const data = await res.json();
@@ -189,8 +195,9 @@ export default function ComponentsInventory() {
     {
       accessorKey: 'code',
       header: 'Mã LK',
-      width: '110px',
+      width: '15%',
       sortable: true,
+      align: 'left',
       cell: (row) => {
         const minThreshold = row.minThreshold || 0;
         const isOutOfStock = row.totalQty <= 0;
@@ -207,54 +214,37 @@ export default function ComponentsInventory() {
     {
       accessorKey: 'name',
       header: 'Tên linh kiện',
-      width: 'auto',
+      width: '45%',
       sortable: true,
-      cell: (row) => <div style={{ fontWeight: '600' }}>{row.name}</div>
-    },
-    {
-      accessorKey: 'category',
-      header: 'Danh mục',
-      width: '130px',
-      sortable: true,
-      cell: (row) => (
-        <span style={{ background: 'rgba(139, 92, 246, 0.1)', color: 'var(--accent-purple)', padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.85rem' }}>
-          {row.category || 'Chưa phân loại'}
-        </span>
-      )
+      align: 'left',
+      cell: (row) => <div style={{ fontWeight: '600', textAlign: 'left' }}>{row.name}</div>
     },
     {
       accessorKey: 'totalQty',
       header: 'Tồn kho',
-      width: '90px',
+      width: '18%',
       sortable: true,
       align: 'right',
       cell: (row) => {
         const minThreshold = row.minThreshold || 0;
-        const displayUnit = row.unit ? ` ${row.unit}` : '';
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
             <span style={{ color: row.totalQty > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-              {row.totalQty}{displayUnit}
+              {row.totalQty}
             </span>
           </div>
         );
       }
     },
     {
-      accessorKey: 'location',
-      header: 'Vị trí',
-      width: '110px',
-      sortable: true
-    },
-    {
       accessorKey: 'actions',
       header: 'Thao tác',
-      width: '210px',
+      width: '20%',
       sortable: false,
       align: 'right',
       cell: (row) => (
-        <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
-          <Button size="sm" variant="secondary"
+        <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end', width: '100%' }}>
+          <Button size="sm" variant="primary"
             onClick={() => handleBorrowClick(row)}
             disabled={row.totalQty === 0}
           >Xuất kho</Button>

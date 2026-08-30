@@ -10,6 +10,9 @@ import ExportModal from '../components/ExportModal';
 import { API_BASE_URL } from '../config';
 import DataTable from '../components/DataTable';
 import Select from '../components/Select';
+import Modal from '../components/Modal';
+import TextInput from '../components/TextInput';
+import Card from '../components/Card';
 
 export default function RfidManagement({ userRole }) {
   const [activeTab, setActiveTab] = useState('cards');
@@ -502,45 +505,39 @@ export default function RfidManagement({ userRole }) {
         <div style={{ padding: '1.5rem' }}>
           {/* Tab 1: Cards List */}
           {activeTab === 'cards' && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                  <CreditCard size={20} style={{ color: 'var(--accent-blue)' }} />
-                  Danh sách thẻ đã cấp ({cards.length})
-                </h2>
-              </div>
+            <Card
+              title={`Danh sách thẻ đã cấp (${cards.length})`}
+              icon={CreditCard}
+              action={
+                <Button variant="secondary" icon={RefreshCw} iconPosition="left" onClick={fetchCards}>Làm mới</Button>
+              }
+            >
               <DataTable
                 data={cards}
                 columns={cardsColumns}
                 searchKeys={['cardId', 'mssv', 'userName']}
-                toolbarActions={
-                  <Button variant="secondary" icon={RefreshCw} iconPosition="left" onClick={fetchCards}>Làm mới</Button>
-                }
               />
-            </div>
+            </Card>
           )}
 
           {/* Tab 2: History */}
           {activeTab === 'history' && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                  <History size={20} style={{ color: 'var(--accent-blue)' }} />
-                  Lịch sử quẹt thẻ ({history.length})
-                </h2>
-              </div>
+            <Card
+              title={`Lịch sử quẹt thẻ (${history.length})`}
+              icon={History}
+              action={
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Button variant="secondary" icon={RefreshCw} iconPosition="left" onClick={fetchHistory}>Làm mới</Button>
+                  <Button variant="secondary" icon={Download} iconPosition="left" onClick={() => setIsExportModalOpen(true)}>Xuất báo cáo</Button>
+                </div>
+              }
+            >
               <DataTable
                 data={history}
                 columns={historyColumns}
                 searchKeys={['cardId', 'action', 'details', 'userName', 'mssv']}
-                toolbarActions={
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Button variant="secondary" icon={RefreshCw} iconPosition="left" onClick={fetchHistory}>Làm mới</Button>
-                    <Button variant="secondary" icon={Download} iconPosition="left" onClick={() => setIsExportModalOpen(true)}>Xuất báo cáo</Button>
-                  </div>
-                }
               />
-            </div>
+            </Card>
           )}
         </div>
       </div>
@@ -548,197 +545,170 @@ export default function RfidManagement({ userRole }) {
       {/* ==================== MODALS ==================== */}
 
       {/* Add Card Modal */}
-      {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <div className="modal-header">
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Plus size={20} style={{ color: 'var(--accent-blue)' }} />
-                Đăng ký thẻ RFID mới
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowAddModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Đăng ký thẻ RFID mới"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setShowAddModal(false)}>Hủy</Button>
+            <Button variant="primary" loading={loading} onClick={handleRegisterCard}>
+              {loading ? 'Đang xử lý...' : 'Đăng ký thẻ'}
+            </Button>
+          </>
+        }
+      >
+        <div className="form-group">
+          <label>Mã thẻ (Card ID)</label>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
+              <TextInput
+                placeholder="VD: CARD-005"
+                value={newCard.cardId}
+                onChange={(e) => setNewCard(prev => ({ ...prev, cardId: e.target.value }))}
               />
             </div>
-
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Mã thẻ (Card ID)</label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
-                    type="text"
-                    placeholder="VD: CARD-005"
-                    value={newCard.cardId}
-                    onChange={(e) => setNewCard(prev => ({ ...prev, cardId: e.target.value }))}
-                    style={{ flex: 1 }}
-                  />
-                  <Button variant="secondary" size="sm" onClick={() => setShowRfidScanModal(true)}>🔐 Quét thẻ</Button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Chọn thành viên (MSSV)</label>
-                <Select
-                  value={newCard.mssv}
-                  onChange={(val) => setNewCard(prev => ({ ...prev, mssv: val }))}
-                  options={[
-                    { value: "", label: "-- Chọn thành viên --" },
-                    ...users.map(u => ({ value: u.mssv, label: `${u.mssv} - ${u.name} (${u.role})` }))
-                  ]}
-                />
-              </div>
-
-              {newCard.cardId && newCard.mssv && (
-                <div style={{
-                  padding: '1rem',
-                  background: 'rgba(59, 130, 246, 0.08)',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(59, 130, 246, 0.15)'
-                }}>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Xác nhận:</p>
-                  <p style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-                    Thẻ <strong style={{ color: 'var(--accent-blue)', fontFamily: 'monospace' }}>{newCard.cardId}</strong>
-                    {' → '}
-                    {users.find(u => u.mssv === newCard.mssv)?.name || newCard.mssv}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <Button variant="secondary" onClick={() => setShowAddModal(false)}>Hủy</Button>
-              <Button variant="primary" loading={loading} onClick={handleRegisterCard}>
-                {loading ? 'Đang xử lý...' : 'Đăng ký thẻ'}
-              </Button>
-            </div>
+            <Button variant="secondary" size="md" onClick={() => setShowRfidScanModal(true)}>🔐 Quét thẻ</Button>
           </div>
         </div>
-      )}
+
+        <div className="form-group">
+          <label>Chọn thành viên (MSSV)</label>
+          <Select
+            value={newCard.mssv}
+            onChange={(val) => setNewCard(prev => ({ ...prev, mssv: val }))}
+            options={[
+              { value: "", label: "-- Chọn thành viên --" },
+              ...users.map(u => ({ value: u.mssv, label: `${u.mssv} - ${u.name} (${u.role})` }))
+            ]}
+          />
+        </div>
+
+        {newCard.cardId && newCard.mssv && (
+          <div style={{
+            padding: '1rem',
+            background: 'rgba(59, 130, 246, 0.08)',
+            borderRadius: '10px',
+            border: '1px solid rgba(59, 130, 246, 0.15)'
+          }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Xác nhận:</p>
+            <p style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+              Thẻ <strong style={{ color: 'var(--accent-blue)', fontFamily: 'monospace' }}>{newCard.cardId}</strong>
+              {' → '}
+              {users.find(u => u.mssv === newCard.mssv)?.name || newCard.mssv}
+            </p>
+          </div>
+        )}
+      </Modal>
 
       {/* Edit Card Modal */}
-      {showEditModal && editCard && (
-        <div className="modal-overlay" onClick={() => { setShowEditModal(false); setEditCard(null); }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <div className="modal-header">
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Edit2 size={20} style={{ color: 'var(--accent-purple)' }} />
-                Sửa thông tin thẻ {editCard.cardId}
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => { setShowEditModal(false); setEditCard(null); }}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
+      <Modal
+        isOpen={showEditModal && !!editCard}
+        onClose={() => { setShowEditModal(false); setEditCard(null); }}
+        title={`Sửa thông tin thẻ ${editCard?.cardId || ''}`}
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => { setShowEditModal(false); setEditCard(null); }}>Hủy</Button>
+            <Button variant="primary" loading={loading} onClick={handleEditCard}>
+              {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+            </Button>
+          </>
+        }
+      >
+        {editCard && (
+          <>
+            <div className="form-group">
+              <label>Mã thẻ</label>
+              <TextInput value={editCard.cardId} disabled />
+            </div>
+
+            <div className="form-group">
+              <label>Gán cho thành viên (MSSV)</label>
+              <Select
+                value={editCard.mssv}
+                onChange={(val) => setEditCard(prev => ({ ...prev, mssv: val }))}
+                options={users.map(u => ({ value: u.mssv, label: `${u.mssv} - ${u.name} (${u.role})` }))}
               />
             </div>
 
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Mã thẻ</label>
-                <input type="text" value={editCard.cardId} disabled style={{ opacity: 0.6, cursor: 'not-allowed' }} />
-              </div>
-
-              <div className="form-group">
-                <label>Gán cho thành viên (MSSV)</label>
-                <Select
-                  value={editCard.mssv}
-                  onChange={(val) => setEditCard(prev => ({ ...prev, mssv: val }))}
-                  options={users.map(u => ({ value: u.mssv, label: `${u.mssv} - ${u.name} (${u.role})` }))}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Trạng thái</label>
-                <Select
-                  value={editCard.status}
-                  onChange={(val) => setEditCard(prev => ({ ...prev, status: val }))}
-                  options={[
-                    { value: "active", label: "Active (Hoạt động)" },
-                    { value: "inactive", label: "Inactive (Vô hiệu hóa)" }
-                  ]}
-                />
-              </div>
+            <div className="form-group">
+              <label>Trạng thái</label>
+              <Select
+                value={editCard.status}
+                onChange={(val) => setEditCard(prev => ({ ...prev, status: val }))}
+                options={[
+                  { value: "active", label: "Active (Hoạt động)" },
+                  { value: "inactive", label: "Inactive (Vô hiệu hóa)" }
+                ]}
+              />
             </div>
-
-            <div className="modal-footer">
-              <Button variant="secondary" onClick={() => { setShowEditModal(false); setEditCard(null); }}>Hủy</Button>
-              <Button variant="primary" loading={loading} onClick={handleEditCard}>
-                {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
 
       {/* Delete Confirm Modal */}
-      {showDeleteConfirm && (
-        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px' }}>
-            <div className="modal-header" style={{ borderBottom: 'none' }}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-red)' }}>
-                <AlertTriangle size={20} />
-                Xác nhận xóa thẻ
-              </h3>
-            </div>
-
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>
-                Bạn có chắc muốn xóa thẻ <strong style={{ color: 'var(--accent-red)', fontFamily: 'monospace' }}>{showDeleteConfirm.cardId}</strong>?
-              </p>
-              <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-                Thẻ của {showDeleteConfirm.userName} ({showDeleteConfirm.mssv})
-              </p>
-              <p style={{ fontSize: '0.82rem', color: 'var(--accent-red)', marginTop: '0.75rem' }}>
-                ⚠️ Hành động này không thể hoàn tác
-              </p>
-            </div>
-
-            <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <Button variant="secondary" onClick={() => setShowDeleteConfirm(null)}>Hủy bỏ</Button>
-              <Button
-                variant="danger"
-                loading={loading}
-                onClick={() => handleDeleteCard(showDeleteConfirm)}
-              >
-                {loading ? 'Đang xóa...' : 'Xóa thẻ'}
-              </Button>
-            </div>
+      <Modal
+        isOpen={!!showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(null)}
+        title="Xác nhận xóa thẻ"
+        size="sm"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%', gap: '0.75rem' }}>
+            <Button variant="secondary" onClick={() => setShowDeleteConfirm(null)}>Hủy bỏ</Button>
+            <Button
+              variant="danger"
+              loading={loading}
+              onClick={() => handleDeleteCard(showDeleteConfirm)}
+            >
+              {loading ? 'Đang xóa...' : 'Xóa thẻ'}
+            </Button>
           </div>
-        </div>
-      )}
+        }
+      >
+        {showDeleteConfirm && (
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>
+              Bạn có chắc muốn xóa thẻ <strong style={{ color: 'var(--accent-red)', fontFamily: 'monospace' }}>{showDeleteConfirm.cardId}</strong>?
+            </p>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+              Thẻ của {showDeleteConfirm.userName} ({showDeleteConfirm.mssv})
+            </p>
+            <p style={{ fontSize: '0.82rem', color: 'var(--accent-red)', marginTop: '0.75rem' }}>
+              ⚠️ Hành động này không thể hoàn tác
+            </p>
+          </div>
+        )}
+      </Modal>
 
       {/* RFID Scan Modal */}
-      {showRfidScanModal && (
-        <div className="modal-overlay" onClick={() => setShowRfidScanModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🔐 Quét thẻ RFID mới
-              </h3>
-              <Button type="button" variant="ghost" icon={X} onClick={() => setShowRfidScanModal(false)}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
-              />
-            </div>
-
-            <div className="modal-body" style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-              <div style={{
-                width: '80px',
-                height: '80px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 1.5rem',
-                animation: 'pulse 2s infinite'
-              }}>
-                <CreditCard size={36} style={{ color: 'var(--accent-blue)' }} />
-              </div>
-              <h3 style={{ marginBottom: '0.5rem' }}>Đang chờ quét thẻ...</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                Đặt thẻ RFID mới vào đầu đọc để đọc mã thẻ
-              </p>
-            </div>
+      <Modal
+        isOpen={showRfidScanModal}
+        onClose={() => setShowRfidScanModal(false)}
+        title="🔐 Quét thẻ RFID mới"
+        size="sm"
+      >
+        <div style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem',
+            animation: 'pulse 2s infinite'
+          }}>
+            <CreditCard size={36} style={{ color: 'var(--accent-blue)' }} />
           </div>
+          <h3 style={{ marginBottom: '0.5rem', fontSize: 'var(--text-lg)' }}>Đang chờ quét thẻ...</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
+            Đặt thẻ RFID mới vào đầu đọc để đọc mã thẻ
+          </p>
         </div>
-      )}
+      </Modal>
 
       <ExportModal 
         isOpen={isExportModalOpen}
@@ -761,3 +731,4 @@ export default function RfidManagement({ userRole }) {
     </div>
   );
 }
+
