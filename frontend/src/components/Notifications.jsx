@@ -3,11 +3,10 @@ import { Bell, X, Info } from 'lucide-react';
 import useSWR from 'swr';
 import { API_BASE_URL } from '../config';
 import Button from './Button';
-
-const fetcher = (url) => fetch(url).then(res => res.json());
+import { fetcher } from '../utils/fetcher';
 
 export default function Notifications({ userRole }) {
-  // Chỉ hiển thị cho admin/quản lý
+  // Chỉ hiển thị cho admin/quản lý (Student không mở UI và không mở SSE stream)
   if (userRole === 'student') return null;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -30,10 +29,84 @@ export default function Notifications({ userRole }) {
     };
   }, [isOpen]);
 
-  // Polling mỗi 10 giây để nhận thông báo mới
+  // Initial fetch qua GET /api/notifications (KHÔNG còn polling refreshInterval)
   const { data: notifications = [], mutate } = useSWR(`${API_BASE_URL}/notifications`, fetcher, {
-    refreshInterval: 10000 
+    revalidateOnFocus: false
   });
+
+  // Realtime Server-Sent Events (SSE) stream listener với Exponential Backoff Reconnect
+  useEffect(() => {
+    let eventSource = null;
+    let reconnectTimeout = null;
+    let retryDelay = 1000; // Khởi đầu 1 giây
+    const maxRetryDelay = 30000; // Giới hạn max 30 giây
+    let isSubscribed = true;
+
+    const connectSSE = () => {
+      if (!isSubscribed) return;
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      if (!token) return;
+
+      // Đóng kết nối cũ nếu có
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+
+      const streamUrl = `${API_BASE_URL}/notifications/stream?token=${encodeURIComponent(token)}`;
+      eventSource = new EventSource(streamUrl);
+
+      eventSource.addEventListener('connected', () => {
+        // Reset retry delay khi kết nối thành công
+        retryDelay = 1000;
+      });
+
+      eventSource.addEventListener('notification', (event) => {
+        try {
+          const newNotif = JSON.parse(event.data);
+          if (newNotif && newNotif.id) {
+            // Cập nhật SWR cache cục bộ: prepend và loại bỏ duplicate id (không trigger refetch toàn bộ)
+            mutate((currentList = []) => {
+              if (currentList.some(n => n.id === newNotif.id)) {
+                return currentList;
+              }
+              return [newNotif, ...currentList];
+            }, false);
+          }
+        } catch (err) {
+          // Bỏ qua nếu dữ liệu malformed
+        }
+      });
+
+      eventSource.onerror = () => {
+        if (!isSubscribed) return;
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+
+        // Tự động reconnect với exponential backoff
+        reconnectTimeout = setTimeout(() => {
+          retryDelay = Math.min(retryDelay * 2, maxRetryDelay);
+          connectSSE();
+        }, retryDelay);
+      };
+    };
+
+    connectSSE();
+
+    return () => {
+      isSubscribed = false;
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    };
+  }, [userRole, mutate]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

@@ -262,7 +262,10 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole, setUser
           </button>
           
           <button 
-            onClick={() => setUserRole(null)}
+            onClick={() => {
+              localStorage.removeItem('lab_auth_token');
+              setUserRole(null);
+            }}
             style={{ 
               flex: expanded ? 2 : 'none', 
               width: expanded ? 'auto' : '40px',

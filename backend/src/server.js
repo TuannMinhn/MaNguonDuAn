@@ -1,17 +1,75 @@
 import express from 'express';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
-import { readCollection, writeCollection, syncDatabase } from './db.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { readCollection, writeCollection, syncDatabase, AuditLog } from './db.js';
+import { Op } from 'sequelize';
+import { createBackup, listBackups, restoreBackup, scheduleAutoBackup } from './backupService.js';
+import { logAuditEvent, sanitizeData } from './auditLogger.js';
+import { registerClient, cleanupClient, broadcastNotification, getActiveConnectionCount, getActiveClientsSummary } from './sseManager.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || 'lab_clb_jwt_super_secret_key_2026';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 app.use(cors());
 app.use(express.json());
 
+// Helper chuẩn hóa role name
+export function normalizeRole(role) {
+  if (!role) return 'student';
+  const r = String(role).toLowerCase().trim();
+  if (['super_admin', 'admin-root', 'superadmin'].includes(r)) return 'super_admin';
+  if (['admin', 'manager', 'quản lý', 'chủ nhiệm', 'trưởng ban kỹ thuật', 'lab_manager'].includes(r)) return 'manager';
+  return 'student';
+}
+
+// Middleware: Xác thực JSON Web Token (JWT)
+export function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Yêu cầu mã xác thực (Token missing)' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ success: false, error: 'Token không hợp lệ hoặc đã hết hạn' });
+    }
+    req.user = {
+      ...decoded,
+      normalizedRole: normalizeRole(decoded.role)
+    };
+    next();
+  });
+}
+
+// Middleware: Phân quyền vai trò (Role-Based Access Control)
+export function authorizeRoles(...allowedRoles) {
+  const normalizedAllowed = allowedRoles.map(r => normalizeRole(r));
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Yêu cầu mã xác thực' });
+    }
+    
+    // Super admin luôn có toàn quyền
+    if (req.user.normalizedRole === 'super_admin' || normalizedAllowed.includes(req.user.normalizedRole)) {
+      return next();
+    }
+
+    return res.status(403).json({ success: false, error: 'Bạn không có quyền thực hiện thao tác này' });
+  };
+}
+
 // Khởi tạo kết nối SQLite database và seed dữ liệu từ JSON cũ
 syncDatabase()
-  .then(() => console.log('SQLite sync initialization complete.'))
+  .then(() => {
+    console.log('SQLite sync initialization complete.');
+    scheduleAutoBackup(getSystemSetting);
+  })
   .catch(err => console.error('SQLite database initialization failed:', err));
 
 // Helper function: Lấy setting hệ thống (có fallback an toàn)
@@ -30,6 +88,9 @@ const DEFAULT_SETTINGS = {
   rfidScanCooldownSeconds: 5,
   defaultLabLocation: 'Kho Lab',
   kioskIdleTimeoutSeconds: 30,
+  autoBackupEnabled: false,
+  backupIntervalHours: 24,
+  backupRetentionCount: 7,
   slot_morning_1_start: '07:00',
   slot_morning_1_end: '09:00',
   slot_morning_2_start: '09:00',
@@ -41,7 +102,10 @@ const DEFAULT_SETTINGS = {
   slot_evening_1_start: '16:00',
   slot_evening_1_end: '18:00',
   slot_evening_2_start: '18:00',
-  slot_evening_2_end: '20:00'
+  slot_evening_2_end: '20:00',
+  roomBookingCancelDeadlineHours: 2,
+  roomBookingAdvanceDays: 14,
+  maxBookingSlotsPerWeek: 4
 };
 
 function getSystemSetting(key) {
@@ -59,7 +123,7 @@ function getSystemSetting(key) {
   return DEFAULT_SETTINGS[key];
 }
 
-// Helper function: Tạo thông báo cho Manager
+// Helper function: Tạo thông báo cho hệ thống & push SSE realtime
 function createNotification(type, title, content, details = {}) {
   const notifications = readCollection('notifications');
   const newNotif = {
@@ -78,6 +142,13 @@ function createNotification(type, title, content, details = {}) {
     notifications.splice(maxLimit);
   }
   writeCollection('notifications', notifications);
+
+  // Broadcast realtime qua SSE tới các client phù hợp quyền (Failure safety: không làm fail request chính)
+  try {
+    broadcastNotification(newNotif);
+  } catch (err) {
+    console.error('Lỗi khi broadcast SSE notification:', err.message);
+  }
 }
 
 // ==========================================
@@ -158,13 +229,13 @@ app.post('/api/rfid-scan', (req, res) => {
 // ==========================================
 
 // Lấy danh sách thẻ RFID
-app.get('/api/rfid-cards', (req, res) => {
+app.get('/api/rfid-cards', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const rfidCards = readCollection('rfid_cards');
   res.json(rfidCards);
 });
 
 // Đăng ký thẻ RFID mới
-app.post('/api/rfid-cards', (req, res) => {
+app.post('/api/rfid-cards', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { cardId, mssv } = req.body;
 
   if (!cardId || !mssv) {
@@ -206,11 +277,25 @@ app.post('/api/rfid-cards', (req, res) => {
 
   logRfidAction(cardId, mssv, user.name, 'register', 'management', true);
 
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CREATE',
+    targetType: 'rfid_card',
+    targetId: newCard.id,
+    newValue: {
+      cardId: newCard.cardId,
+      mssv: newCard.mssv,
+      userName: newCard.userName,
+      status: newCard.status
+    },
+    success: true
+  });
+
   res.status(201).json({ message: `Đăng ký thẻ ${cardId} cho ${user.name} thành công`, card: newCard });
 });
 
 // Sửa thông tin thẻ RFID
-app.put('/api/rfid-cards/:id', (req, res) => {
+app.put('/api/rfid-cards/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const { mssv, status } = req.body;
 
@@ -221,6 +306,7 @@ app.put('/api/rfid-cards/:id', (req, res) => {
   }
 
   const card = rfidCards[index];
+  const oldCard = { ...card };
 
   // Nếu đổi MSSV, validate user mới
   if (mssv && mssv !== card.mssv) {
@@ -247,11 +333,31 @@ app.put('/api/rfid-cards/:id', (req, res) => {
 
   logRfidAction(card.cardId, card.mssv, card.userName, 'update', 'management', true);
 
+  // Ghi nhận Audit Log
+  const changedOld = {};
+  const changedNew = {};
+  ['mssv', 'userName', 'status'].forEach(field => {
+    if (oldCard[field] !== card[field]) {
+      changedOld[field] = oldCard[field];
+      changedNew[field] = card[field];
+    }
+  });
+
+  logAuditEvent(req, {
+    action: 'UPDATE',
+    targetType: 'rfid_card',
+    targetId: id,
+    oldValue: changedOld,
+    newValue: changedNew,
+    metadata: { cardId: card.cardId },
+    success: true
+  });
+
   res.json({ message: 'Cập nhật thẻ RFID thành công', card });
 });
 
 // Xóa / Vô hiệu hóa thẻ RFID
-app.delete('/api/rfid-cards/:id', (req, res) => {
+app.delete('/api/rfid-cards/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
 
   const rfidCards = readCollection('rfid_cards');
@@ -267,24 +373,55 @@ app.delete('/api/rfid-cards/:id', (req, res) => {
   const filtered = rfidCards.filter(c => c.id !== id);
   writeCollection('rfid_cards', filtered);
 
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'DELETE',
+    targetType: 'rfid_card',
+    targetId: id,
+    oldValue: {
+      cardId: card.cardId,
+      mssv: card.mssv,
+      userName: card.userName,
+      status: card.status
+    },
+    success: true
+  });
+
   res.json({ message: `Đã xóa thẻ ${card.cardId}` });
 });
 
 // Lịch sử quét thẻ của 1 thẻ cụ thể
-app.get('/api/rfid-cards/:cardId/history', (req, res) => {
+app.get('/api/rfid-cards/:cardId/history', authenticateToken, (req, res) => {
   const { cardId } = req.params;
+  const rfidCards = readCollection('rfid_cards');
+  const targetCard = rfidCards.find(c => c.cardId === cardId);
+
+  // Nếu là student, chỉ được xem lịch sử thẻ của chính mình
+  if (req.user.normalizedRole === 'student') {
+    if (!targetCard || targetCard.mssv !== req.user.mssv) {
+      return res.status(403).json({ error: 'Bạn không có quyền xem lịch sử thẻ của người khác' });
+    }
+  }
+
   const history = readCollection('rfid_history');
   const cardHistory = history.filter(h => h.cardId === cardId);
   res.json([...cardHistory].reverse());
 });
 
 // Toàn bộ lịch sử quét thẻ (có filter)
-app.get('/api/rfid-history', (req, res) => {
-  const { cardId, mssv, module: mod, from, to } = req.query;
+app.get('/api/rfid-history', authenticateToken, (req, res) => {
+  const { cardId, module: mod, from, to } = req.query;
+  let targetMssv = req.query.mssv;
+
+  // Nếu là student, ép targetMssv về MSSV trong token
+  if (req.user.normalizedRole === 'student') {
+    targetMssv = req.user.mssv;
+  }
+
   let history = readCollection('rfid_history');
 
   if (cardId) history = history.filter(h => h.cardId === cardId);
-  if (mssv) history = history.filter(h => h.mssv === mssv);
+  if (targetMssv) history = history.filter(h => h.mssv === targetMssv);
   if (mod) history = history.filter(h => h.module === mod);
   if (from) history = history.filter(h => new Date(h.timestamp) >= new Date(from));
   if (to) history = history.filter(h => new Date(h.timestamp) <= new Date(to));
@@ -297,36 +434,56 @@ app.get('/api/rfid-history', (req, res) => {
 // ==========================================
 
 app.get('/api/members', (req, res) => {
-  const users = readCollection('users');
-  res.json(users);
+  const users = readCollection('users', []);
+  // Bảo mật: Loại bỏ passwordHash khỏi danh sách trả về client
+  const safeUsers = users.map(u => {
+    const { passwordHash, ...safe } = u;
+    return safe;
+  });
+  res.json(safeUsers);
 });
 
-app.post('/api/members', (req, res) => {
-  const { mssv, name, role } = req.body;
+app.post('/api/members', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
+  const { mssv, name, role, username, email, password } = req.body;
   if (!mssv || !name) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Tên thành viên' });
   }
 
-  const users = readCollection('users');
+  const users = readCollection('users', []);
   if (users.some(u => u.mssv === mssv)) {
     return res.status(400).json({ error: 'MSSV đã tồn tại trong hệ thống' });
   }
 
   const newUser = {
     id: uuidv4(),
-    mssv,
-    name,
+    mssv: String(mssv).trim(),
+    name: String(name).trim(),
+    username: username ? String(username).trim().toLowerCase() : String(mssv).trim().toLowerCase(),
+    email: email ? String(email).trim().toLowerCase() : '',
+    passwordHash: password ? bcrypt.hashSync(String(password).trim(), 10) : null,
     role: role || 'Thành viên',
     points: 0,
-    active: false
+    active: false,
+    accountStatus: 'active'
   };
 
   users.push(newUser);
   writeCollection('users', users);
-  res.status(201).json(newUser);
+
+  // Ghi nhận Audit Log (Password/passwordHash tự động redact)
+  logAuditEvent(req, {
+    action: 'CREATE',
+    targetType: 'user',
+    targetId: newUser.id,
+    newValue: newUser,
+    success: true
+  });
+
+  const { passwordHash: _, ...safeUser } = newUser;
+  res.status(201).json(safeUser);
 });
 
-app.put('/api/members/:id', (req, res) => {
+app.put('/api/members/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const { name, role, points } = req.body;
 
@@ -336,6 +493,8 @@ app.put('/api/members/:id', (req, res) => {
     return res.status(404).json({ error: 'Không tìm thấy thành viên' });
   }
 
+  const oldUser = { ...users[index] };
+
   users[index] = {
     ...users[index],
     name: name !== undefined ? name : users[index].name,
@@ -344,23 +503,48 @@ app.put('/api/members/:id', (req, res) => {
   };
 
   writeCollection('users', users);
-  res.json(users[index]);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'UPDATE',
+    targetType: 'user',
+    targetId: id,
+    oldValue: oldUser,
+    newValue: users[index],
+    success: true
+  });
+
+  const { passwordHash: _, ...safeUpdated } = users[index];
+  res.json(safeUpdated);
 });
 
-app.delete('/api/members/:id', (req, res) => {
+app.delete('/api/members/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const users = readCollection('users');
-  const filtered = users.filter(u => u.id !== id);
+  const index = users.findIndex(u => u.id === id);
 
-  if (filtered.length === users.length) {
+  if (index === -1) {
     return res.status(404).json({ error: 'Không tìm thấy thành viên' });
   }
 
+  const deletedUser = users[index];
+  const filtered = users.filter(u => u.id !== id);
+
   writeCollection('users', filtered);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'DELETE',
+    targetType: 'user',
+    targetId: id,
+    oldValue: deletedUser,
+    success: true
+  });
+
   res.json({ message: 'Xóa thành viên thành công' });
 });
 
-app.post('/api/members/:id/points', (req, res) => {
+app.post('/api/members/:id/points', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const { amount, reason } = req.body; // e.g. amount: 10 hoặc -5
 
@@ -374,9 +558,26 @@ app.post('/api/members/:id/points', (req, res) => {
     return res.status(404).json({ error: 'Không tìm thấy thành viên' });
   }
 
+  const oldPoints = users[index].points;
   users[index].points = Math.max(0, users[index].points + Number(amount));
   writeCollection('users', users);
-  res.json(users[index]);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'UPDATE',
+    targetType: 'user_points',
+    targetId: id,
+    oldValue: { points: oldPoints },
+    newValue: { points: users[index].points },
+    metadata: {
+      amount: Number(amount),
+      reason: reason || ''
+    },
+    success: true
+  });
+
+  const { passwordHash: _, ...safeMember } = users[index];
+  res.json(safeMember);
 });
 
 
@@ -444,6 +645,24 @@ app.post('/api/attendance/check', (req, res) => {
       logRfidAction(cardId, user.mssv, user.name, 'check-in', 'attendance', true);
     }
 
+    // Ghi nhận Audit Log
+    logAuditEvent(req, {
+      action: 'CHECK_IN',
+      targetType: 'attendance_record',
+      targetId: newRecord.id,
+      newValue: {
+        mssv: user.mssv,
+        name: user.name,
+        checkInTime: newRecord.checkInTime,
+        checkInMethod: newRecord.checkInMethod
+      },
+      metadata: {
+        cardId: cardId || null,
+        source: cardId ? 'rfid' : 'kiosk_manual'
+      },
+      success: true
+    });
+
     return res.json({
       message: `Check-in thành công cho ${user.name}`,
       type: 'in',
@@ -490,6 +709,25 @@ app.post('/api/attendance/check', (req, res) => {
       logRfidAction(cardId, user.mssv, user.name, 'check-out', 'attendance', true);
     }
 
+    // Ghi nhận Audit Log
+    logAuditEvent(req, {
+      action: 'CHECK_OUT',
+      targetType: 'attendance_record',
+      targetId: record?.id || user.mssv,
+      newValue: {
+        mssv: user.mssv,
+        name: user.name,
+        checkOutTime: now,
+        duration,
+        pointsEarned
+      },
+      metadata: {
+        cardId: cardId || null,
+        source: cardId ? 'rfid' : 'kiosk_manual'
+      },
+      success: true
+    });
+
     return res.json({
       message: `Check-out thành công cho ${user.name}. Đã trực ${duration} giờ. Nhận +${pointsEarned} điểm tích lũy!`,
       type: 'out',
@@ -516,7 +754,7 @@ app.get('/api/equipment', (req, res) => {
   res.json(equipment);
 });
 
-app.post('/api/equipment', (req, res) => {
+app.post('/api/equipment', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { name, code, totalQty, location, category, assetType, unit, minThreshold, maxQty } = req.body;
   if (!name || !code || totalQty === undefined) {
     return res.status(400).json({ error: 'Vui lòng điền đủ Tên, Mã thiết bị và Số lượng' });
@@ -549,7 +787,7 @@ app.post('/api/equipment', (req, res) => {
 });
 
 // Import hàng loạt thiết bị / linh kiện
-app.post('/api/equipment/import', (req, res) => {
+app.post('/api/equipment/import', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const items = req.body;
   if (!Array.isArray(items)) {
     return res.status(400).json({ error: 'Dữ liệu không đúng định dạng danh sách' });
@@ -606,7 +844,7 @@ app.post('/api/equipment/import', (req, res) => {
   });
 });
 
-app.put('/api/equipment/:id', (req, res) => {
+app.put('/api/equipment/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const { name, code, totalQty, location, status, category, assetType, unit, minThreshold, maxQty } = req.body;
 
@@ -641,7 +879,7 @@ app.put('/api/equipment/:id', (req, res) => {
   res.json(equipment[index]);
 });
 
-app.delete('/api/equipment/:id', (req, res) => {
+app.delete('/api/equipment/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   let equipment = readCollection('equipment');
   const eq = equipment.find(e => e.id === id);
@@ -659,11 +897,19 @@ app.delete('/api/equipment/:id', (req, res) => {
 });
 
 // Mượn thiết bị
-app.post('/api/equipment/:id/borrow', (req, res) => {
+app.post('/api/equipment/:id/borrow', authenticateToken, (req, res) => {
   const { id } = req.params;
-  const { mssv, qty, expectedReturnDate, initialCondition, borrowNotes, cardId, selectedInstanceIds } = req.body;
+  const { qty, expectedReturnDate, initialCondition, borrowNotes, cardId, selectedInstanceIds } = req.body;
 
-  if (!mssv || !qty || Number(qty) <= 0) {
+  // Lấy MSSV từ token nếu là student, hoặc từ req.body nếu là manager/super_admin
+  let targetMssv = req.user.mssv;
+  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
+    if (req.body.mssv && String(req.body.mssv).trim()) {
+      targetMssv = String(req.body.mssv).trim();
+    }
+  }
+
+  if (!targetMssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Số lượng mượn không hợp lệ' });
   }
 
@@ -672,7 +918,7 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
   const members = readCollection('members');
   const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
 
-  const user = findPerson(mssv);
+  const user = findPerson(targetMssv);
   if (!user) {
     return res.status(404).json({ error: 'Thành viên mượn thiết bị không tồn tại trên hệ thống' });
   }
@@ -776,15 +1022,45 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
     }
   );
 
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: isConsumable ? 'ISSUE' : 'BORROW',
+    targetType: isConsumable ? 'component' : 'borrow_ticket',
+    targetId: newBorrow.id,
+    newValue: {
+      equipmentId: eq.id,
+      equipmentName: eq.name,
+      equipmentCode: eq.code,
+      borrowerMssv: user.mssv,
+      borrowerName: user.name,
+      qty: requestedQty,
+      status: newBorrow.status,
+      isConsumable
+    },
+    metadata: {
+      initialCondition: newBorrow.initialCondition,
+      expectedReturnDate: newBorrow.expectedReturnDate
+    },
+    success: true
+  });
+
   res.json({ message: isConsumable ? 'Xuất linh kiện thành công' : 'Mượn thiết bị thành công', borrow: newBorrow });
 });
 
-// Đặt trước thiết bị (Online Reservation)
-app.post('/api/equipment/:id/reserve', (req, res) => {
+// Đặt trước thiết bị (Online Reservation - Sinh viên chỉ đặt cho chính mình hoặc Manager đặt thay)
+app.post('/api/equipment/:id/reserve', authenticateToken, (req, res) => {
   const { id } = req.params;
-  const { mssv, qty, expectedReturnDate } = req.body;
+  const { qty, expectedReturnDate } = req.body;
 
-  if (!mssv || !qty || Number(qty) <= 0) {
+  // Lấy MSSV từ token nếu là student, hoặc từ req.body nếu là manager
+  let targetMssv = req.user.mssv;
+  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
+    if (req.body.mssv && String(req.body.mssv).trim()) {
+      targetMssv = String(req.body.mssv).trim();
+    }
+  }
+
+  if (!targetMssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Số lượng mượn không hợp lệ' });
   }
 
@@ -792,7 +1068,7 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
   const members = readCollection('members');
   const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
 
-  const user = findPerson(mssv);
+  const user = findPerson(targetMssv);
   if (!user) {
     return res.status(404).json({ error: 'MSSV không tồn tại trên hệ thống' });
   }
@@ -858,11 +1134,28 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
     }
   );
 
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'RESERVE',
+    targetType: 'reserve_ticket',
+    targetId: newBorrow.id,
+    newValue: {
+      equipmentId: eq.id,
+      equipmentName: eq.name,
+      equipmentCode: eq.code,
+      borrowerMssv: user.mssv,
+      borrowerName: user.name,
+      qty: requestedQty,
+      status: 'Đã đặt trước'
+    },
+    success: true
+  });
+
   res.json({ message: 'Đặt trước thiết bị thành công', borrow: newBorrow });
 });
 
 // Xác nhận bàn giao thiết bị đã đặt trước (Quét RFID)
-app.post('/api/equipment/borrows/:borrowId/confirm-handover', (req, res) => {
+app.post('/api/equipment/borrows/:borrowId/confirm-handover', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { borrowId } = req.params;
   const { cardId, initialCondition, borrowNotes } = req.body;
 
@@ -898,6 +1191,8 @@ app.post('/api/equipment/borrows/:borrowId/confirm-handover', (req, res) => {
   const eq = equipment.find(e => e.id === borrowTicket.equipmentId);
   const isConsumable = eq && eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
 
+  const oldStatus = borrowTicket.status;
+
   // Cập nhật trạng thái
   if (isConsumable) {
     borrowTicket.status = 'Đã tiêu hao';
@@ -928,11 +1223,25 @@ app.post('/api/equipment/borrows/:borrowId/confirm-handover', (req, res) => {
   // Log RFID
   logRfidAction(cardId, borrowTicket.mssv, borrowTicket.borrowerName, 'borrow', 'equipment', true);
 
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'APPROVE',
+    targetType: 'borrow_ticket',
+    targetId: borrowId,
+    oldValue: { status: oldStatus },
+    newValue: { status: borrowTicket.status, cardId },
+    metadata: {
+      borrowerMssv: borrowTicket.mssv,
+      borrowerName: borrowTicket.borrowerName
+    },
+    success: true
+  });
+
   res.json({ message: 'Bàn giao thiết bị thành công', borrow: borrowTicket });
 });
 
 // Trả thiết bị
-app.post('/api/equipment/borrows/:borrowId/return', (req, res) => {
+app.post('/api/equipment/borrows/:borrowId/return', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { borrowId } = req.params;
   const { returnMssv, finalCondition, returnNotes, cardId } = req.body;
 
@@ -960,6 +1269,8 @@ app.post('/api/equipment/borrows/:borrowId/return', (req, res) => {
   if (!returner) {
     return res.status(404).json({ error: 'Người trả thiết bị không tồn tại trên hệ thống' });
   }
+
+  const oldStatus = borrowTicket.status;
 
   const equipment = readCollection('equipment');
   const eqIndex = equipment.findIndex(e => e.id === borrowTicket.equipmentId);
@@ -1044,6 +1355,26 @@ app.post('/api/equipment/borrows/:borrowId/return', (req, res) => {
   if (cardId) {
     logRfidAction(cardId, returner.mssv, returner.name, 'return', 'equipment', true);
   }
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'RETURN',
+    targetType: 'borrow_ticket',
+    targetId: borrowId,
+    oldValue: { status: oldStatus },
+    newValue: {
+      status: 'Đã trả',
+      returnMssv: returner.mssv,
+      returnerName: returner.name,
+      finalCondition: borrowTicket.finalCondition
+    },
+    metadata: {
+      equipmentId: borrowTicket.equipmentId,
+      qty: borrowTicket.qty,
+      isDamagedOrLost
+    },
+    success: true
+  });
 
   // Thông báo waitlist nếu có người chờ
   const notified = notifyWaitlist(borrowTicket.equipmentId);
@@ -1227,14 +1558,23 @@ app.get('/api/schedules', (req, res) => {
 });
 
 // Đăng ký ca trực
-app.post('/api/schedules/register', (req, res) => {
-  const { scheduleId, mssv } = req.body;
-  if (!scheduleId || !mssv) {
+app.post('/api/schedules/register', authenticateToken, (req, res) => {
+  const { scheduleId } = req.body;
+
+  // Lấy MSSV từ token nếu là student, hoặc từ req.body nếu là manager/super_admin
+  let targetMssv = req.user.mssv;
+  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
+    if (req.body.mssv && String(req.body.mssv).trim()) {
+      targetMssv = String(req.body.mssv).trim();
+    }
+  }
+
+  if (!scheduleId || !targetMssv) {
     return res.status(400).json({ error: 'Thiếu mã ca trực hoặc MSSV' });
   }
 
   const users = readCollection('users');
-  const user = users.find(u => u.mssv === mssv);
+  const user = users.find(u => u.mssv === targetMssv);
   if (!user) {
     return res.status(404).json({ error: 'Thành viên không tồn tại' });
   }
@@ -1248,19 +1588,60 @@ app.post('/api/schedules/register', (req, res) => {
   const schedule = schedules[scheduleIndex];
 
   // Kiểm tra xem đã đăng ký chưa
-  const alreadyRegistered = schedule.members.some(m => m.mssv === mssv);
+  const alreadyRegistered = schedule.members.some(m => m.mssv === targetMssv);
   if (alreadyRegistered) {
     // Nếu đã đăng ký, thực hiện hủy đăng ký (toggle)
-    schedule.members = schedule.members.filter(m => m.mssv !== mssv);
+    schedule.members = schedule.members.filter(m => m.mssv !== targetMssv);
     writeCollection('schedules', schedules);
+
+    // Ghi nhận Audit Log
+    logAuditEvent(req, {
+      action: 'CANCEL',
+      targetType: 'schedule_shift',
+      targetId: scheduleId,
+      oldValue: {
+        registeredMssv: user.mssv,
+        registeredName: user.name,
+        shift: schedule.shift,
+        day: schedule.day
+      },
+      metadata: {
+        scheduleId,
+        day: schedule.day,
+        shift: schedule.shift
+      },
+      success: true
+    });
+
     return res.json({ message: 'Đã hủy đăng ký ca trực thành công', schedule });
   } else {
     // Nếu chưa đăng ký, thêm vào danh sách
     schedule.members.push({ mssv: user.mssv, name: user.name });
     writeCollection('schedules', schedules);
+
+    // Ghi nhận Audit Log
+    logAuditEvent(req, {
+      action: 'REGISTER',
+      targetType: 'schedule_shift',
+      targetId: scheduleId,
+      newValue: {
+        registeredMssv: user.mssv,
+        registeredName: user.name,
+        shift: schedule.shift,
+        day: schedule.day
+      },
+      metadata: {
+        scheduleId,
+        day: schedule.day,
+        shift: schedule.shift
+      },
+      success: true
+    });
+
     return res.json({ message: 'Đăng ký ca trực thành công', schedule });
   }
 });
+
 
 
 // ==========================================
@@ -1272,10 +1653,10 @@ app.get('/api/tasks', (req, res) => {
   res.json(tasks);
 });
 
-app.post('/api/tasks', (req, res) => {
+app.post('/api/tasks', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { title, project, assignedTo, points } = req.body;
   if (!title || !project) {
-    return res.status(400).json({ error: 'Thiếu tên nhiệm vụ hoặc tên dự án' });
+    return res.status(400).json({ error: 'Thiếu Tiêu đề nhiệm vụ hoặc Tên dự án' });
   }
 
   let assignedName = 'Chưa phân công';
@@ -1304,7 +1685,7 @@ app.post('/api/tasks', (req, res) => {
   res.status(201).json(newTask);
 });
 
-app.put('/api/tasks/:id', (req, res) => {
+app.put('/api/tasks/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   const { title, project, status, assignedTo, points } = req.body;
 
@@ -1317,8 +1698,15 @@ app.put('/api/tasks/:id', (req, res) => {
   const currentTask = tasks[index];
   const prevStatus = currentTask.status;
 
+  // Student chỉ được phép cập nhật status của task được giao cho mình
+  if (req.user.normalizedRole === 'student') {
+    if (currentTask.assignedTo !== req.user.mssv) {
+      return res.status(403).json({ error: 'Bạn chỉ có thể cập nhật trạng thái nhiệm vụ được giao cho mình' });
+    }
+  }
+
   let assignedName = currentTask.assignedName;
-  if (assignedTo !== undefined) {
+  if (assignedTo !== undefined && req.user.normalizedRole !== 'student') {
     if (assignedTo) {
       const users = readCollection('users');
       const user = users.find(u => u.mssv === assignedTo);
@@ -1330,12 +1718,12 @@ app.put('/api/tasks/:id', (req, res) => {
 
   tasks[index] = {
     ...currentTask,
-    title: title !== undefined ? title : currentTask.title,
-    project: project !== undefined ? project : currentTask.project,
+    title: (req.user.normalizedRole !== 'student' && title !== undefined) ? title : currentTask.title,
+    project: (req.user.normalizedRole !== 'student' && project !== undefined) ? project : currentTask.project,
     status: status !== undefined ? status : currentTask.status,
-    assignedTo: assignedTo !== undefined ? assignedTo : currentTask.assignedTo,
+    assignedTo: (req.user.normalizedRole !== 'student' && assignedTo !== undefined) ? assignedTo : currentTask.assignedTo,
     assignedName,
-    points: points !== undefined ? Number(points) : currentTask.points
+    points: (req.user.normalizedRole !== 'student' && points !== undefined) ? Number(points) : currentTask.points
   };
 
   // Cộng điểm khi hoàn thành công việc
@@ -1361,7 +1749,7 @@ app.put('/api/tasks/:id', (req, res) => {
   res.json(tasks[index]);
 });
 
-app.delete('/api/tasks/:id', (req, res) => {
+app.delete('/api/tasks/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const tasks = readCollection('tasks');
   const filtered = tasks.filter(t => t.id !== id);
@@ -1375,8 +1763,27 @@ app.delete('/api/tasks/:id', (req, res) => {
 });
 
 
+// Helper: Lấy thời gian bắt đầu (Date object) của 1 slot theo setting
+export function getSlotStartDateTime(dateStr, slotId) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const slotKey = `slot_${slotId}_start`;
+  const timeStr = getSystemSetting(slotKey) || '07:00';
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return new Date(year, month - 1, day, hours || 0, minutes || 0, 0, 0);
+}
+
+// Helper: Lấy ngày Thứ 2 đầu tuần (YYYY-MM-DD) của một ngày bất kỳ
+export function getMondayOfWeek(dateStr) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const d = new Date(year, month - 1, day);
+  const dayOfWeek = d.getDay(); // 0: Sun, 1: Mon, ...
+  const diff = d.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  const monday = new Date(d.setDate(diff));
+  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+}
+
 // ==========================================
-// API ĐĂNG KÝ SỬ DỤNG PHÒNG (ROOM BOOKINGS)
+// API PHÒNG LAB (ROOM BOOKING)
 // ==========================================
 
 app.get('/api/bookings/all', (req, res) => {
@@ -1456,22 +1863,65 @@ app.get('/api/bookings', (req, res) => {
   res.json(dayBookings);
 });
 
-app.post('/api/bookings', (req, res) => {
-  const { date, slotId, representativeMssv, memberMssvs, scannedCards = {} } = req.body;
+app.post('/api/bookings', authenticateToken, (req, res) => {
+  const { date, slotId, memberMssvs, scannedCards = {} } = req.body;
+  
+  // Student chỉ được đăng ký đại diện bằng MSSV của chính mình trong Token
+  let representativeMssv = req.user.mssv;
+  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
+    if (req.body.representativeMssv && String(req.body.representativeMssv).trim()) {
+      representativeMssv = String(req.body.representativeMssv).trim();
+    }
+  }
+
   if (!date || !slotId || !representativeMssv || !memberMssvs || !Array.isArray(memberMssvs)) {
     return res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ thông tin đăng ký (ngày, ca, người đại diện, danh sách MSSV)' });
   }
 
+  // 1. POLICY: Booking Advance Window (Chỉ cho phép đặt trong vòng N ngày tới)
+  const advanceDaysSetting = getSystemSetting('roomBookingAdvanceDays');
+  const advanceDays = advanceDaysSetting !== undefined ? Number(advanceDaysSetting) : 14;
+  if (advanceDays > 0) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const maxBookingDate = new Date(today);
+    maxBookingDate.setDate(today.getDate() + advanceDays);
+
+    const [bYear, bMonth, bDay] = date.split('-').map(Number);
+    const targetBookingDate = new Date(bYear, bMonth - 1, bDay);
+    targetBookingDate.setHours(0, 0, 0, 0);
+
+    if (targetBookingDate < today) {
+      return res.status(400).json({ error: 'Không thể đăng ký phòng cho ngày trong quá khứ' });
+    }
+    if (targetBookingDate > maxBookingDate) {
+      return res.status(400).json({ error: `Chỉ được phép đăng ký phòng trước tối đa ${advanceDays} ngày` });
+    }
+  }
+
   const bookings = readCollection('bookings');
 
-  // Kiểm tra xem khung giờ đó của ngày đó đã có ai đăng ký chưa
+  // 2. POLICY: Double Booking Check
   const isBooked = bookings.some(b => b.date === date && String(b.slotId) === String(slotId));
   if (isBooked) {
     return res.status(400).json({ error: 'Khung giờ này đã được đăng ký bởi nhóm khác' });
   }
 
+  // 3. POLICY: Weekly Quota Check (Chỉ áp dụng cho Student / người đại diện, Manager/Admin được override nếu cần)
+  const maxWeeklySetting = getSystemSetting('maxBookingSlotsPerWeek');
+  const maxWeeklyQuota = maxWeeklySetting !== undefined ? Number(maxWeeklySetting) : 4;
+  if (maxWeeklyQuota > 0 && req.user.normalizedRole === 'student') {
+    const targetMonday = getMondayOfWeek(date);
+    const currentWeekCount = bookings.filter(b => 
+      b.representativeMssv === representativeMssv && getMondayOfWeek(b.date) === targetMonday
+    ).length;
+
+    if (currentWeekCount + 1 > maxWeeklyQuota) {
+      return res.status(400).json({ error: `Bạn đã đạt giới hạn tối đa ${maxWeeklyQuota} ca đặt phòng trong tuần này` });
+    }
+  }
+
   // Xác thực các thành viên và người đại diện
-  // Thử tìm trong 'members' trước, fallback sang 'users'
   const members = readCollection('members');
   const users = readCollection('users');
   const findPerson = (mssv) => members.find(m => m.mssv === mssv) || users.find(u => u.mssv === mssv);
@@ -1510,15 +1960,29 @@ app.post('/api/bookings', (req, res) => {
   for (const [mssv, cardId] of Object.entries(scannedCards)) {
     const person = findPerson(mssv);
     if (person && cardId) {
-      // Đánh dấu hành động: nếu là đại diện thì action là 'book_representative', ngược lại là 'book_member'
       const actionType = (mssv === representativeMssv) ? 'book_representative' : 'book_member';
       logRfidAction(cardId, person.mssv, person.name, actionType, 'room_booking', true);
     }
   }
 
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CREATE',
+    targetType: 'room_booking',
+    targetId: newBooking.id,
+    newValue: {
+      date: newBooking.date,
+      slotId: newBooking.slotId,
+      representativeMssv: newBooking.representativeMssv,
+      representativeName: newBooking.representativeName,
+      participantsCount: newBooking.participantsCount
+    },
+    success: true
+  });
+
   res.status(201).json(newBooking);
 
-  // Gửi thông báo cho Quản lý
+  // Gửi thông báo cho Quản lý & các bên liên quan
   createNotification(
     'room_booking',
     'Lịch đăng ký phòng mới',
@@ -1527,6 +1991,7 @@ app.post('/api/bookings', (req, res) => {
       bookingId: newBooking.id,
       date,
       slotId,
+      mssv: repUser.mssv,
       representativeName: repUser.name,
       participantsCount: membersInfo.length,
       members: membersInfo
@@ -1534,11 +1999,29 @@ app.post('/api/bookings', (req, res) => {
   );
 });
 
-app.post('/api/bookings/bulk', (req, res) => {
-  const { slots, representativeMssv, memberMssvs, purpose = 'Sử dụng chung', scannedCards = {} } = req.body;
+app.post('/api/bookings/bulk', authenticateToken, (req, res) => {
+  const { slots, memberMssvs, purpose = 'Sử dụng chung', scannedCards = {} } = req.body;
+  
+  let representativeMssv = req.user.mssv;
+  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
+    if (req.body.representativeMssv && String(req.body.representativeMssv).trim()) {
+      representativeMssv = String(req.body.representativeMssv).trim();
+    }
+  }
+
   if (!slots || !Array.isArray(slots) || slots.length === 0 || !representativeMssv || !memberMssvs || !Array.isArray(memberMssvs)) {
     return res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ thông tin đăng ký (danh sách buổi, người đại diện, danh sách MSSV)' });
   }
+
+  const advanceDaysSetting = getSystemSetting('roomBookingAdvanceDays');
+  const advanceDays = advanceDaysSetting !== undefined ? Number(advanceDaysSetting) : 14;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const maxBookingDate = new Date(today);
+  maxBookingDate.setDate(today.getDate() + advanceDays);
+
+  const maxWeeklySetting = getSystemSetting('maxBookingSlotsPerWeek');
+  const maxWeeklyQuota = maxWeeklySetting !== undefined ? Number(maxWeeklySetting) : 4;
 
   const bookings = readCollection('bookings');
   const members = readCollection('members');
@@ -1560,16 +2043,51 @@ app.post('/api/bookings/bulk', (req, res) => {
     membersInfo.push({ mssv: person.mssv, name: person.name });
   }
 
+  // Đếm số lượng booking đã có trong từng tuần của representative (dùng cho quota)
+  const weeklyBookingCount = {};
+  if (maxWeeklyQuota > 0 && req.user.normalizedRole === 'student') {
+    bookings.forEach(b => {
+      if (b.representativeMssv === representativeMssv) {
+        const mon = getMondayOfWeek(b.date);
+        weeklyBookingCount[mon] = (weeklyBookingCount[mon] || 0) + 1;
+      }
+    });
+  }
+
   const newBookings = [];
   const failedSlots = [];
 
   for (const slot of slots) {
     const { date, slotId } = slot;
-    const isBooked = bookings.some(b => b.date === date && String(b.slotId) === String(slotId));
 
+    // 1. Advance window check
+    if (advanceDays > 0) {
+      const [bYear, bMonth, bDay] = date.split('-').map(Number);
+      const targetBookingDate = new Date(bYear, bMonth - 1, bDay);
+      targetBookingDate.setHours(0, 0, 0, 0);
+
+      if (targetBookingDate < today || targetBookingDate > maxBookingDate) {
+        failedSlots.push({ date, slotId, reason: `Ngoài phạm vi cho phép (${advanceDays} ngày)` });
+        continue;
+      }
+    }
+
+    // 2. Double booking check
+    const isBooked = bookings.some(b => b.date === date && String(b.slotId) === String(slotId));
     if (isBooked) {
-      failedSlots.push({ date, slotId });
+      failedSlots.push({ date, slotId, reason: 'Trùng lịch' });
       continue;
+    }
+
+    // 3. Weekly quota check
+    if (maxWeeklyQuota > 0 && req.user.normalizedRole === 'student') {
+      const targetMonday = getMondayOfWeek(date);
+      const currentCount = weeklyBookingCount[targetMonday] || 0;
+      if (currentCount >= maxWeeklyQuota) {
+        failedSlots.push({ date, slotId, reason: `Vượt quá hạn mức ${maxWeeklyQuota} ca/tuần` });
+        continue;
+      }
+      weeklyBookingCount[targetMonday] = currentCount + 1;
     }
 
     const newBooking = {
@@ -1599,12 +2117,30 @@ app.post('/api/bookings/bulk', (req, res) => {
       }
     }
 
-    // Gửi thông báo cho Quản lý (Bulk Notification)
+    // Ghi nhận Audit Log
+    logAuditEvent(req, {
+      action: 'CREATE',
+      targetType: 'room_booking_bulk',
+      newValue: {
+        bookedCount: newBookings.length,
+        representativeMssv,
+        representativeName: repUser.name,
+        slots: newBookings.map(b => ({ date: b.date, slotId: b.slotId }))
+      },
+      metadata: {
+        failedCount: failedSlots.length,
+        purpose
+      },
+      success: true
+    });
+
+    // Gửi thông báo cho Quản lý & các bên liên quan (Bulk Notification)
     createNotification(
       'room_booking_bulk',
       'Đăng ký phòng (Nhiều buổi)',
       `${repUser.name} (${repUser.mssv}) vừa đăng ký ${newBookings.length} buổi phòng Lab`,
       {
+        mssv: repUser.mssv,
         representativeName: repUser.name,
         participantsCount: membersInfo.length,
         members: membersInfo,
@@ -1621,13 +2157,8 @@ app.post('/api/bookings/bulk', (req, res) => {
   });
 });
 
-app.post('/api/bookings/:id/cancel', (req, res) => {
+app.post('/api/bookings/:id/cancel', authenticateToken, (req, res) => {
   const { id } = req.params;
-  const { mssv } = req.body;
-
-  if (!mssv) {
-    return res.status(400).json({ error: 'Vui lòng cung cấp MSSV người đại diện để xác thực hủy lịch' });
-  }
 
   const bookings = readCollection('bookings');
   const index = bookings.findIndex(b => b.id === id);
@@ -1637,12 +2168,47 @@ app.post('/api/bookings/:id/cancel', (req, res) => {
   }
 
   const booking = bookings[index];
-  if (booking.representativeMssv !== mssv) {
-    return res.status(403).json({ error: 'Chỉ người đại diện đăng ký phòng mới có quyền hủy lịch' });
+
+  // Student chỉ có quyền hủy booking của chính mình; Manager/SuperAdmin có quyền hủy theo yêu cầu
+  if (req.user.normalizedRole === 'student') {
+    if (booking.representativeMssv !== req.user.mssv) {
+      return res.status(403).json({ error: 'Chỉ người đại diện đăng ký phòng mới có quyền hủy lịch' });
+    }
+
+    // POLICY: Cancellation Deadline Enforcement
+    const cancelDeadlineSetting = getSystemSetting('roomBookingCancelDeadlineHours');
+    const cancelDeadlineHours = cancelDeadlineSetting !== undefined ? Number(cancelDeadlineSetting) : 2;
+
+    if (cancelDeadlineHours > 0) {
+      const slotStartTime = getSlotStartDateTime(booking.date, booking.slotId);
+      const now = new Date();
+      const diffHours = (slotStartTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      if (diffHours < cancelDeadlineHours) {
+        return res.status(400).json({ 
+          error: `Không thể hủy đăng ký khi chỉ còn ít hơn ${cancelDeadlineHours} giờ trước giờ vào phòng hoặc ca trực đã diễn ra` 
+        });
+      }
+    }
   }
 
+  const deletedBooking = { ...booking };
   const filtered = bookings.filter(b => b.id !== id);
   writeCollection('bookings', filtered);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CANCEL',
+    targetType: 'room_booking',
+    targetId: id,
+    oldValue: {
+      date: deletedBooking.date,
+      slotId: deletedBooking.slotId,
+      representativeMssv: deletedBooking.representativeMssv,
+      representativeName: deletedBooking.representativeName
+    },
+    success: true
+  });
 
   res.json({ message: 'Hủy đăng ký mượn phòng thành công' });
 });
@@ -2147,41 +2713,225 @@ app.get('/api/reports/comprehensive', (req, res) => {
 });
 
 // ==========================================
-// API THÔNG BÁO (NOTIFICATIONS)
+// API THÔNG BÁO (NOTIFICATIONS) & REALTIME SSE STREAM
 // ==========================================
 
-app.get('/api/notifications', (req, res) => {
-  res.json(readCollection('notifications'));
+// SSE Endpoint: Realtime stream thông báo cho client (hỗ trợ Header hoặc Query Token cho EventSource)
+app.get('/api/notifications/stream', (req, res) => {
+  // Lấy token từ header Authorization hoặc query param (dành cho EventSource)
+  const authHeader = req.headers['authorization'];
+  let token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+  if (!token && req.query && typeof req.query.token === 'string' && req.query.token.trim()) {
+    token = req.query.token.trim();
+  }
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Yêu cầu mã xác thực (Token missing)' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err || !decoded) {
+      return res.status(401).json({ success: false, error: 'Token không hợp lệ hoặc đã hết hạn' });
+    }
+
+    const user = {
+      ...decoded,
+      normalizedRole: normalizeRole(decoded.role)
+    };
+
+    // Đăng ký client vào SSE Connection Manager
+    registerClient({ user, res, req });
+  });
 });
 
-app.post('/api/notifications/:id/read', (req, res) => {
+app.get('/api/notifications', authenticateToken, (req, res) => {
+  const notifications = readCollection('notifications');
+  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
+    return res.json(notifications);
+  }
+  // Đối với sinh viên, lọc thông báo liên quan đến MSSV hoặc thông báo chung
+  const studentNotifs = notifications.filter(n => {
+    if (!n.details) return true; // Thông báo chung
+    if (n.details.mssv && n.details.mssv === req.user.mssv) return true;
+    if (n.details.members && Array.isArray(n.details.members)) {
+      return n.details.members.some(m => (typeof m === 'string' ? m : m.mssv) === req.user.mssv);
+    }
+    return !n.details.mssv; // Broadcast
+  });
+  res.json(studentNotifs);
+});
+
+app.post('/api/notifications/:id/read', authenticateToken, (req, res) => {
   const { id } = req.params;
   const notifications = readCollection('notifications');
   const index = notifications.findIndex(n => n.id === id);
-  if (index !== -1) {
-    notifications[index].read = true;
-    writeCollection('notifications', notifications);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Không tìm thấy thông báo' });
   }
-  res.json({ success: true });
-});
 
-app.post('/api/notifications/read-all', (req, res) => {
-  const notifications = readCollection('notifications');
-  notifications.forEach(n => n.read = true);
+  const notif = notifications[index];
+
+  // Student chỉ có quyền đánh dấu đã đọc thông báo của chính mình hoặc thông báo chung
+  if (req.user.normalizedRole === 'student') {
+    if (notif.details && notif.details.mssv && notif.details.mssv !== req.user.mssv) {
+      return res.status(403).json({ error: 'Bạn không có quyền thao tác trên thông báo của người khác' });
+    }
+  }
+
+  notifications[index].read = true;
   writeCollection('notifications', notifications);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'MARK_READ',
+    targetType: 'notification',
+    targetId: id,
+    newValue: { read: true },
+    metadata: {
+      title: notif.title,
+      type: notif.type
+    },
+    success: true
+  });
+
   res.json({ success: true });
 });
 
-// Phân quyền & Đăng nhập
-app.post('/api/login', (req, res) => {
-  const { password } = req.body;
-  const currentAdminPass = getSystemSetting('adminPassword') || 'admin123';
+app.post('/api/notifications/read-all', authenticateToken, (req, res) => {
+  const notifications = readCollection('notifications');
+  let count = 0;
 
-  if (password === currentAdminPass) {
-    return res.json({ success: true, role: 'admin', message: 'Đăng nhập Quản lý thành công' });
+  if (req.user.normalizedRole === 'student') {
+    notifications.forEach(n => {
+      const isMine = !n.details || !n.details.mssv || n.details.mssv === req.user.mssv;
+      if (isMine && !n.read) {
+        n.read = true;
+        count++;
+      }
+    });
+  } else {
+    notifications.forEach(n => {
+      if (!n.read) {
+        n.read = true;
+        count++;
+      }
+    });
+  }
+
+  writeCollection('notifications', notifications);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'MARK_ALL_READ',
+    targetType: 'notification',
+    targetId: 'batch',
+    newValue: { read: true, updatedCount: count },
+    success: true
+  });
+
+  res.json({ success: true, count });
+});
+
+// Phân quyền & Đăng nhập (Hỗ trợ identifier: MSSV / Username / Email hoặc Mật khẩu Quản trị chung)
+app.post('/api/login', async (req, res) => {
+  const { identifier, password } = req.body;
+
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ success: false, error: 'Vui lòng cung cấp mật khẩu' });
+  }
+
+  const trimmedPassword = password.trim();
+  const users = readCollection('users', []);
+
+  // 1. Trường hợp có Identifier (MSSV, Username hoặc Email)
+  if (identifier && typeof identifier === 'string' && identifier.trim()) {
+    const cleanId = identifier.trim().toLowerCase();
+    const user = users.find(u => 
+      (u.mssv && u.mssv.toLowerCase() === cleanId) ||
+      (u.username && u.username.toLowerCase() === cleanId) ||
+      (u.email && u.email.toLowerCase() === cleanId)
+    );
+
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác' });
+    }
+
+    if (user.accountStatus && user.accountStatus !== 'active') {
+      return res.status(403).json({ success: false, error: 'Tài khoản đã bị khóa hoặc tạm dừng' });
+    }
+
+    let isPasswordValid = false;
+    if (user.passwordHash) {
+      isPasswordValid = await bcrypt.compare(trimmedPassword, user.passwordHash);
+    } else {
+      // Fallback nếu tài khoản chưa có hash cá nhân: so khớp mật khẩu admin hệ thống
+      const currentAdminPass = getSystemSetting('adminPassword') || 'admin123';
+      isPasswordValid = (trimmedPassword === currentAdminPass);
+    }
+
+    if (isPasswordValid) {
+      const isManagerRole = ['admin', 'quản lý', 'chủ nhiệm', 'trưởng ban kỹ thuật'].includes(String(user.role).toLowerCase());
+      const role = isManagerRole ? 'admin' : 'student';
+      
+      const payload = {
+        id: user.id,
+        mssv: user.mssv,
+        name: user.name,
+        role
+      };
+
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+      return res.json({
+        success: true,
+        token,
+        user: payload,
+        message: 'Đăng nhập thành công'
+      });
+    } else {
+      return res.status(401).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác' });
+    }
+  }
+
+  // 2. Trường hợp Đăng nhập Quản lý bằng Mật khẩu Admin chung (Backward compatibility)
+  const currentAdminPass = getSystemSetting('adminPassword') || 'admin123';
+  let isMatch = false;
+
+  if (currentAdminPass.startsWith('$2a$') || currentAdminPass.startsWith('$2b$')) {
+    isMatch = await bcrypt.compare(trimmedPassword, currentAdminPass);
+  } else {
+    isMatch = (trimmedPassword === currentAdminPass);
+  }
+
+  if (isMatch) {
+    const payload = {
+      id: 'admin-root',
+      mssv: 'ADMIN',
+      name: 'Quản trị viên Lab',
+      role: 'admin'
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+    return res.json({
+      success: true,
+      token,
+      user: payload,
+      message: 'Đăng nhập Quản lý thành công'
+    });
   } else {
     return res.status(401).json({ success: false, error: 'Mật khẩu quản lý không chính xác' });
   }
+});
+
+// Endpoint xác thực danh tính người dùng hiện tại (Test JWT Authentication)
+app.get('/api/auth/me', authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user
+  });
 });
 
 // ==========================================
@@ -2206,7 +2956,7 @@ app.get('/api/settings', (req, res) => {
   res.json(settingsObj);
 });
 
-app.put('/api/settings', (req, res) => {
+app.put('/api/settings', authenticateToken, authorizeRoles('super_admin'), (req, res) => {
   const updates = req.body;
   if (!updates || typeof updates !== 'object') {
     return res.status(400).json({ error: 'Dữ liệu cấu hình không hợp lệ' });
@@ -2215,20 +2965,36 @@ app.put('/api/settings', (req, res) => {
   let settingsList = readCollection('settings', []);
   const validKeys = Object.keys(DEFAULT_SETTINGS);
 
+  const changedOld = {};
+  const changedNew = {};
+
   validKeys.forEach(key => {
     if (updates[key] !== undefined) {
       let val = updates[key];
+      const prevEntry = settingsList.find(s => s.key === key);
+      const prevVal = prevEntry ? prevEntry.value : DEFAULT_SETTINGS[key];
+
       // Nếu là adminPassword và rỗng hoặc chỉ có khoảng trắng thì bỏ qua không ghi đè
       if (key === 'adminPassword') {
         if (typeof val !== 'string' || !val.trim()) {
           return;
         }
-        val = val.trim();
+        val = bcrypt.hashSync(val.trim(), 10);
+        changedOld[key] = '[REDACTED]';
+        changedNew[key] = '[REDACTED]';
       } else if (typeof DEFAULT_SETTINGS[key] === 'number') {
         const num = Number(val);
         val = isNaN(num) ? String(DEFAULT_SETTINGS[key]) : String(num);
+        if (String(prevVal) !== String(val)) {
+          changedOld[key] = prevVal;
+          changedNew[key] = val;
+        }
       } else {
         val = String(val).trim();
+        if (String(prevVal) !== String(val)) {
+          changedOld[key] = prevVal;
+          changedNew[key] = val;
+        }
       }
 
       const idx = settingsList.findIndex(s => s.key === key);
@@ -2257,7 +3023,252 @@ app.put('/api/settings', (req, res) => {
   // Bảo mật: Không trả adminPassword ra client
   delete settingsObj.adminPassword;
 
+  // Cập nhật lại lịch trình Auto Backup nếu có thay đổi cài đặt
+  scheduleAutoBackup(getSystemSetting);
+
+  // Ghi nhận Audit Log cho thay đổi cài đặt hệ thống
+  if (Object.keys(changedNew).length > 0) {
+    logAuditEvent(req, {
+      action: 'SETTINGS_CHANGE',
+      targetType: 'system_settings',
+      targetId: 'global',
+      oldValue: changedOld,
+      newValue: changedNew,
+      success: true
+    });
+  }
+
   res.json({ message: 'Cập nhật cài đặt hệ thống thành công', settings: settingsObj });
+});
+
+// ==========================================
+// API BACKUP & RESTORE (QUẢN TRỊ SAO LƯU SQLITE - SUPER_ADMIN ONLY)
+// ==========================================
+
+// Danh sách các bản backup
+app.get('/api/backups', authenticateToken, authorizeRoles('super_admin'), (req, res) => {
+  try {
+    const backups = listBackups();
+    res.json({ success: true, backups });
+  } catch (err) {
+    res.status(500).json({ error: 'Không thể lấy danh sách bản sao lưu' });
+  }
+});
+
+// Tạo bản backup mới
+app.post('/api/backups', authenticateToken, authorizeRoles('super_admin'), async (req, res) => {
+  try {
+    const backup = await createBackup('manual');
+
+    // Ghi nhận Audit Log
+    logAuditEvent(req, {
+      action: 'BACKUP',
+      targetType: 'sqlite_database',
+      targetId: backup.filename,
+      metadata: {
+        filename: backup.filename,
+        size: backup.size,
+        type: 'manual'
+      },
+      success: true
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Tạo bản sao lưu thành công',
+      backup
+    });
+  } catch (err) {
+    console.error('Backup creation error:', err);
+    logAuditEvent(req, {
+      action: 'BACKUP',
+      targetType: 'sqlite_database',
+      success: false,
+      metadata: { error: err.message }
+    });
+    res.status(500).json({ error: 'Tạo bản sao lưu thất bại' });
+  }
+});
+
+// Khôi phục database từ file backup
+app.post('/api/backups/:filename/restore', authenticateToken, authorizeRoles('super_admin'), async (req, res) => {
+  const { filename } = req.params;
+  try {
+    const result = await restoreBackup(filename);
+
+    // Ghi nhận Audit Log sau khi restore thành công
+    logAuditEvent(req, {
+      action: 'RESTORE',
+      targetType: 'sqlite_database',
+      targetId: filename,
+      metadata: {
+        restoredFrom: filename,
+        safetyBackup: result.safetyBackup
+      },
+      success: true
+    });
+
+    res.json({
+      success: true,
+      message: 'Khôi phục cơ sở dữ liệu thành công',
+      ...result
+    });
+  } catch (err) {
+    console.error('Restore error:', err);
+    logAuditEvent(req, {
+      action: 'RESTORE',
+      targetType: 'sqlite_database',
+      targetId: filename,
+      success: false,
+      metadata: { error: err.message }
+    });
+    res.status(400).json({ error: err.message || 'Khôi phục cơ sở dữ liệu thất bại' });
+  }
+});
+
+// ==========================================
+// API AUDIT LOGS (Nhật ký kiểm toán hệ thống - RBAC: Manager & Super Admin)
+// ==========================================
+
+const MANAGER_ALLOWED_TARGET_TYPES = [
+  'equipment',
+  'equipment_catalog',
+  'category',
+  'component',
+  'borrow_ticket',
+  'reserve_ticket',
+  'maintenance_ticket',
+  'room_booking',
+  'room_booking_bulk',
+  'schedule_shift',
+  'attendance_record',
+  'rfid_card',
+  'notification',
+  'user',
+  'user_points'
+];
+
+app.get('/api/audit-logs', authenticateToken, authorizeRoles('manager', 'super_admin'), async (req, res) => {
+  try {
+    const {
+      action,
+      targetType,
+      actorUserId,
+      actorRole,
+      dateFrom,
+      dateTo,
+      success,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC'
+    } = req.query;
+
+    const where = {};
+
+    // 1. RBAC Scoping: Manager chỉ xem được các nhóm nghiệp vụ được phép, Super Admin xem toàn bộ
+    if (req.user.normalizedRole === 'manager') {
+      if (targetType) {
+        if (!MANAGER_ALLOWED_TARGET_TYPES.includes(targetType)) {
+          return res.status(403).json({ error: 'Bạn không có quyền truy cập nhật ký kiểm toán cho phân hệ này' });
+        }
+        where.targetType = targetType;
+      } else {
+        where.targetType = { [Op.in]: MANAGER_ALLOWED_TARGET_TYPES };
+      }
+    } else if (targetType) {
+      where.targetType = targetType;
+    }
+
+    // 2. Filters
+    if (action) {
+      where.action = action;
+    }
+    if (actorUserId) {
+      where.actorUserId = actorUserId;
+    }
+    if (actorRole) {
+      where.actorRole = actorRole;
+    }
+    if (success !== undefined && success !== '') {
+      where.success = (success === 'true' || success === true || success === '1' || success === 1);
+    }
+
+    // Date range filter
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) {
+        where.createdAt[Op.gte] = String(dateFrom);
+      }
+      if (dateTo) {
+        // Nếu dateTo là định dạng ngày YYYY-MM-DD, thêm cuối ngày
+        const toVal = String(dateTo).length === 10 ? `${dateTo}T23:59:59.999Z` : String(dateTo);
+        where.createdAt[Op.lte] = toVal;
+      }
+    }
+
+    // 3. Search (actorName, actorMssv, targetId)
+    if (search && String(search).trim()) {
+      const q = `%${String(search).trim()}%`;
+      where[Op.or] = [
+        { actorName: { [Op.like]: q } },
+        { actorMssv: { [Op.like]: q } },
+        { targetId: { [Op.like]: q } }
+      ];
+    }
+
+    // 4. Pagination
+    let page = parseInt(req.query.page, 10);
+    if (isNaN(page) || page < 1) page = 1;
+
+    let limit = parseInt(req.query.limit, 10);
+    if (isNaN(limit) || limit < 1) limit = 20;
+    if (limit > 100) limit = 100; // Giới hạn clamp max 100
+
+    const offset = (page - 1) * limit;
+
+    // 5. Sorting Whitelist
+    const ALLOWED_SORT_FIELDS = ['createdAt', 'action', 'targetType', 'actorName', 'actorRole'];
+    const validSortBy = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : 'createdAt';
+    const validSortOrder = String(sortOrder).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    // 6. DB Query
+    const { count, rows } = await AuditLog.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [[validSortBy, validSortOrder]]
+    });
+
+    // 7. Format & Response Sanitization
+    const data = rows.map(r => {
+      const plain = r.get({ plain: true });
+
+      // Parse JSON strings back to objects if needed
+      ['oldValue', 'newValue', 'metadata'].forEach(key => {
+        if (typeof plain[key] === 'string') {
+          try {
+            plain[key] = JSON.parse(plain[key]);
+          } catch (e) {}
+        }
+      });
+
+      // Bắt buộc sanitize trước khi trả ra client
+      return sanitizeData(plain);
+    });
+
+    res.json({
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count,
+        totalPages: Math.ceil(count / limit) || 1
+      }
+    });
+  } catch (err) {
+    console.error('Lỗi khi truy vấn Audit Logs:', err);
+    res.status(500).json({ error: 'Không thể tải nhật ký kiểm toán hệ thống' });
+  }
 });
 
 // ==========================================
@@ -2268,7 +3279,7 @@ app.get('/api/settings/catalog', (req, res) => {
   res.json(readCollection('equipment_catalog'));
 });
 
-app.post('/api/settings/catalog', (req, res) => {
+app.post('/api/settings/catalog', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { name, codePrefix, category, assetType, unit, lifespanHours, description } = req.body;
   if (!name || !codePrefix) {
     return res.status(400).json({ error: 'Vui lòng điền đủ Tên và Mã thiết bị (Prefix)' });
@@ -2292,10 +3303,20 @@ app.post('/api/settings/catalog', (req, res) => {
 
   catalog.push(newItem);
   writeCollection('equipment_catalog', catalog);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CREATE',
+    targetType: 'equipment_catalog',
+    targetId: newItem.id,
+    newValue: newItem,
+    success: true
+  });
+
   res.status(201).json(newItem);
 });
 
-app.put('/api/settings/catalog/:id', (req, res) => {
+app.put('/api/settings/catalog/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const { name, codePrefix, category, assetType, unit, lifespanHours, description } = req.body;
   
@@ -2304,6 +3325,8 @@ app.put('/api/settings/catalog/:id', (req, res) => {
   if (index === -1) {
     return res.status(404).json({ error: 'Không tìm thấy mục trong Danh mục gốc' });
   }
+
+  const oldItem = { ...catalog[index] };
 
   catalog[index] = {
     ...catalog[index],
@@ -2317,20 +3340,42 @@ app.put('/api/settings/catalog/:id', (req, res) => {
   };
 
   writeCollection('equipment_catalog', catalog);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'UPDATE',
+    targetType: 'equipment_catalog',
+    targetId: id,
+    oldValue: oldItem,
+    newValue: catalog[index],
+    success: true
+  });
+
   res.json(catalog[index]);
 });
 
-app.delete('/api/settings/catalog/:id', (req, res) => {
+app.delete('/api/settings/catalog/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   let catalog = readCollection('equipment_catalog');
-  const initialLength = catalog.length;
-  catalog = catalog.filter(c => c.id !== id);
+  const index = catalog.findIndex(c => c.id === id);
 
-  if (catalog.length === initialLength) {
+  if (index === -1) {
     return res.status(404).json({ error: 'Không tìm thấy mục để xóa' });
   }
 
+  const deletedItem = catalog[index];
+  catalog = catalog.filter(c => c.id !== id);
   writeCollection('equipment_catalog', catalog);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'DELETE',
+    targetType: 'equipment_catalog',
+    targetId: id,
+    oldValue: deletedItem,
+    success: true
+  });
+
   res.json({ success: true, message: 'Đã xóa thành công' });
 });
 
@@ -2343,7 +3388,7 @@ app.get('/api/categories', (req, res) => {
   res.json(categories);
 });
 
-app.post('/api/categories', (req, res) => {
+app.post('/api/categories', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { name, description } = req.body;
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'Tên danh mục không được để trống' });
@@ -2364,10 +3409,20 @@ app.post('/api/categories', (req, res) => {
 
   categories.push(newCategory);
   writeCollection('categories', categories);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CREATE',
+    targetType: 'category',
+    targetId: newCategory.id,
+    newValue: newCategory,
+    success: true
+  });
+
   res.status(201).json(newCategory);
 });
 
-app.put('/api/categories/:id', (req, res) => {
+app.put('/api/categories/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
@@ -2388,6 +3443,8 @@ app.put('/api/categories/:id', (req, res) => {
   }
 
   const oldName = categories[index].name;
+  const oldCategory = { ...categories[index] };
+
   categories[index] = {
     ...categories[index],
     name: trimmedName,
@@ -2419,10 +3476,20 @@ app.put('/api/categories/:id', (req, res) => {
     if (catUpdated) writeCollection('equipment_catalog', catalog);
   }
 
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'UPDATE',
+    targetType: 'category',
+    targetId: id,
+    oldValue: oldCategory,
+    newValue: categories[index],
+    success: true
+  });
+
   res.json(categories[index]);
 });
 
-app.delete('/api/categories/:id', (req, res) => {
+app.delete('/api/categories/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const categories = readCollection('categories', []);
   const index = categories.findIndex(c => c.id === id);
@@ -2441,6 +3508,18 @@ app.delete('/api/categories/:id', (req, res) => {
   const inUseByCatalog = catalog.filter(c => c.category === categoryToDelete.name);
 
   if (inUseByEquipment.length > 0 || inUseByCatalog.length > 0) {
+    logAuditEvent(req, {
+      action: 'DELETE',
+      targetType: 'category',
+      targetId: id,
+      success: false,
+      metadata: {
+        reason: 'In use by equipment or catalog',
+        equipmentCount: inUseByEquipment.length,
+        catalogCount: inUseByCatalog.length
+      }
+    });
+
     return res.status(400).json({
       error: `Không thể xóa danh mục "${categoryToDelete.name}" vì đang có ${inUseByEquipment.length} thiết bị và ${inUseByCatalog.length} mẫu danh mục gốc đang sử dụng.`
     });
@@ -2448,6 +3527,16 @@ app.delete('/api/categories/:id', (req, res) => {
 
   const filtered = categories.filter(c => c.id !== id);
   writeCollection('categories', filtered);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'DELETE',
+    targetType: 'category',
+    targetId: id,
+    oldValue: categoryToDelete,
+    success: true
+  });
+
   res.json({ success: true, message: `Đã xóa danh mục "${categoryToDelete.name}" thành công` });
 });
 
@@ -2460,7 +3549,7 @@ app.get('/api/maintenance', (req, res) => {
   res.json(maintenance);
 });
 
-app.post('/api/maintenance', (req, res) => {
+app.post('/api/maintenance', authenticateToken, (req, res) => {
   const { equipmentId, equipmentName, issueDescription, status, cost } = req.body;
   if (!equipmentId || !issueDescription) {
     return res.status(400).json({ error: 'Thiếu thông tin thiết bị hoặc mô tả lỗi' });
@@ -2480,10 +3569,26 @@ app.post('/api/maintenance', (req, res) => {
 
   maintenance.push(newTicket);
   writeCollection('maintenance', maintenance);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CREATE',
+    targetType: 'maintenance_ticket',
+    targetId: newTicket.id,
+    newValue: {
+      equipmentId: newTicket.equipmentId,
+      equipmentName: newTicket.equipmentName,
+      issueDescription: newTicket.issueDescription,
+      status: newTicket.status,
+      cost: newTicket.cost
+    },
+    success: true
+  });
+
   res.status(201).json(newTicket);
 });
 
-app.put('/api/maintenance/:id', (req, res) => {
+app.put('/api/maintenance/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const { issueDescription, status, cost, newNote } = req.body;
 
@@ -2494,6 +3599,7 @@ app.put('/api/maintenance/:id', (req, res) => {
   }
 
   const current = maintenance[index];
+  const oldTicket = { ...current };
   let resolvedDate = current.resolvedDate;
   let notes = current.notes || [];
 
@@ -2521,19 +3627,61 @@ app.put('/api/maintenance/:id', (req, res) => {
   };
 
   writeCollection('maintenance', maintenance);
+
+  // Ghi nhận Audit Log
+  const changedOld = {};
+  const changedNew = {};
+  ['issueDescription', 'status', 'cost', 'resolvedDate'].forEach(field => {
+    if (oldTicket[field] !== maintenance[index][field]) {
+      changedOld[field] = oldTicket[field];
+      changedNew[field] = maintenance[index][field];
+    }
+  });
+
+  logAuditEvent(req, {
+    action: 'UPDATE',
+    targetType: 'maintenance_ticket',
+    targetId: id,
+    oldValue: changedOld,
+    newValue: changedNew,
+    metadata: {
+      equipmentId: maintenance[index].equipmentId,
+      equipmentName: maintenance[index].equipmentName,
+      addedNote: !!newNote
+    },
+    success: true
+  });
+
   res.json(maintenance[index]);
 });
 
-app.delete('/api/maintenance/:id', (req, res) => {
+app.delete('/api/maintenance/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
   const maintenance = readCollection('maintenance');
-  const filtered = maintenance.filter(m => m.id !== id);
+  const ticketToDelete = maintenance.find(m => m.id === id);
 
-  if (filtered.length === maintenance.length) {
+  if (!ticketToDelete) {
     return res.status(404).json({ error: 'Không tìm thấy phiếu bảo trì' });
   }
 
+  const filtered = maintenance.filter(m => m.id !== id);
   writeCollection('maintenance', filtered);
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'DELETE',
+    targetType: 'maintenance_ticket',
+    targetId: id,
+    oldValue: {
+      equipmentId: ticketToDelete.equipmentId,
+      equipmentName: ticketToDelete.equipmentName,
+      issueDescription: ticketToDelete.issueDescription,
+      status: ticketToDelete.status,
+      cost: ticketToDelete.cost
+    },
+    success: true
+  });
+
   res.json({ message: 'Xóa phiếu bảo trì thành công' });
 });
 

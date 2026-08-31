@@ -32,7 +32,10 @@ export default function Login({ setRole }) {
       const data = await res.json();
       
       if (res.ok && data.success) {
-        setRole('admin');
+        if (data.token) {
+          localStorage.setItem('lab_auth_token', data.token);
+        }
+        setRole(data.user?.role || 'admin');
       } else {
         setError(data.error || 'Mật khẩu không chính xác');
       }

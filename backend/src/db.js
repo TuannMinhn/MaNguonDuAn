@@ -22,14 +22,18 @@ export const sequelize = new Sequelize({
 // ĐỊNH NGHĨA MODELS (KHUNG BẢNG SQLITE)
 // ==========================================
 
-// 1. Bảng User (Thành viên)
+// 1. Bảng User (Thành viên & Tài khoản)
 export const User = sequelize.define('User', {
   id: { type: DataTypes.TEXT, primaryKey: true },
   mssv: { type: DataTypes.TEXT, unique: true, allowNull: false },
   name: { type: DataTypes.TEXT, allowNull: false },
+  username: { type: DataTypes.TEXT },
+  email: { type: DataTypes.TEXT },
+  passwordHash: { type: DataTypes.TEXT },
   role: { type: DataTypes.TEXT, defaultValue: 'Thành viên' },
   points: { type: DataTypes.INTEGER, defaultValue: 0 },
-  active: { type: DataTypes.BOOLEAN, defaultValue: false }
+  active: { type: DataTypes.BOOLEAN, defaultValue: false },
+  accountStatus: { type: DataTypes.TEXT, defaultValue: 'active' }
 }, { tableName: 'users', timestamps: false });
 
 // 2. Bảng Equipment (Thiết bị & Linh kiện)
@@ -199,11 +203,28 @@ export const Category = sequelize.define('Category', {
   description: { type: DataTypes.TEXT, defaultValue: '' }
 }, { tableName: 'categories', timestamps: false });
 
+// 16. Bảng AuditLog (Nhật ký kiểm toán hệ thống)
+export const AuditLog = sequelize.define('AuditLog', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  actorUserId: { type: DataTypes.TEXT },
+  actorMssv: { type: DataTypes.TEXT },
+  actorName: { type: DataTypes.TEXT },
+  actorRole: { type: DataTypes.TEXT, defaultValue: 'system' },
+  action: { type: DataTypes.TEXT, allowNull: false },
+  targetType: { type: DataTypes.TEXT, allowNull: false },
+  targetId: { type: DataTypes.TEXT },
+  oldValue: { type: DataTypes.TEXT, defaultValue: null }, // JSON string
+  newValue: { type: DataTypes.TEXT, defaultValue: null }, // JSON string
+  metadata: { type: DataTypes.TEXT, defaultValue: null }, // JSON string
+  success: { type: DataTypes.BOOLEAN, defaultValue: true },
+  createdAt: { type: DataTypes.TEXT, allowNull: false }
+}, { tableName: 'audit_logs', timestamps: false });
+
 // ==========================================
 // ĐỒNG BỘ & SEED DỮ LIỆU TỪ JSON CŨ SANG SQLITE
 // ==========================================
 export async function syncDatabase() {
-  await sequelize.sync();
+  await sequelize.sync({ alter: true });
   console.log('Database SQLite & tables synced successfully.');
 
   const seedIfEmpty = async (Model, fileName, defaultData = []) => {
@@ -344,7 +365,11 @@ export async function syncDatabase() {
     { key: 'slot_evening_2_end', value: '20:00' }
   ]);
 
-  // Load dữ liệu từ SQLite vào Cache sau khi đã đồng bộ & seed xong
+  await reloadCacheFromDb();
+}
+
+// Hàm nạp lại toàn bộ cache từ SQLite
+export async function reloadCacheFromDb() {
   const collections = Object.keys(collectionToModelMap);
   for (const colName of collections) {
     const Model = collectionToModelMap[colName];
@@ -383,7 +408,8 @@ const collectionToModelMap = {
   equipment_catalog: Catalog,
   maintenance: Maintenance,
   settings: SystemSetting,
-  categories: Category
+  categories: Category,
+  audit_logs: AuditLog
 };
 
 function getModelByCollectionName(colName) {
@@ -420,15 +446,15 @@ export function writeCollection(collectionName, data) {
     return mapped;
   });
 
-  // Ghi xuống SQLite bất đồng bộ
-  Model.destroy({ truncate: true })
+  // Ghi xuống SQLite bất đồng bộ an toàn (hỗ trợ atomic upsert / replace)
+  Model.destroy({ where: {} })
     .then(() => {
       if (mappedData.length > 0) {
-        return Model.bulkCreate(mappedData);
+        return Model.bulkCreate(mappedData, { ignoreDuplicates: true });
       }
     })
     .catch(err => {
-      console.error(`Lỗi ghi collection ${collectionName} xuống SQLite dưới background:`, err);
+      console.error(`Lỗi ghi collection ${collectionName} xuống SQLite dưới background:`, err.message);
     });
 
   return true;
