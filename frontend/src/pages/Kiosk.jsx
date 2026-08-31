@@ -8,9 +8,21 @@ export default function Kiosk() {
   const [status, setStatus] = useState('idle'); // 'idle', 'success', 'error'
   const [message, setMessage] = useState('');
   const [subMessage, setSubMessage] = useState('');
+  const [idleTimeoutSec, setIdleTimeoutSec] = useState(30);
   const scanningRef = useRef(false);
 
   const [pendingCard, setPendingCard] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/settings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.kioskIdleTimeoutSeconds === 'number' && data.kioskIdleTimeoutSeconds >= 0) {
+          setIdleTimeoutSec(data.kioskIdleTimeoutSeconds);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handleKeyPress = async (e) => {
@@ -53,24 +65,26 @@ export default function Kiosk() {
         setSubMessage(scanData.message);
       }
       
+      const resetDelay = (idleTimeoutSec > 0 ? idleTimeoutSec : 30) * 1000;
       setTimeout(() => {
         setStatus('idle');
         setMessage('');
         setSubMessage('');
         scanningRef.current = false;
-      }, 3000);
+      }, resetDelay);
       
     } catch (error) {
       setStatus('error');
       setMessage('Lỗi hệ thống');
       setSubMessage('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
       
+      const resetDelay = (idleTimeoutSec > 0 ? idleTimeoutSec : 30) * 1000;
       setTimeout(() => {
         setStatus('idle');
         setMessage('');
         setSubMessage('');
         scanningRef.current = false;
-      }, 3000);
+      }, resetDelay);
     }
   };
 
@@ -134,19 +148,19 @@ export default function Kiosk() {
 
           <h1 style={{
             fontSize: '2rem',
-            margin: '0 0 1rem 0',
+            margin: '0 0 0.75rem 0',
             fontWeight: '700',
             letterSpacing: '-0.5px',
-            color: 'var(--text-primary)'
+            color: status === 'success' ? 'var(--accent-green)' : status === 'error' ? 'var(--accent-red)' : 'var(--text-primary)'
           }}>
             {status === 'idle' ? 'Chạm thẻ RFID' : message}
           </h1>
           
           <div style={{
-            fontSize: '1.125rem',
+            fontSize: '1.1rem',
             color: 'var(--text-secondary)',
             margin: 0,
-            minHeight: '56px',
+            minHeight: '60px',
             lineHeight: '1.5',
             display: 'flex',
             flexDirection: 'column',
@@ -155,13 +169,13 @@ export default function Kiosk() {
           }}>
             {status === 'idle' ? (
               <>
-                <span>Vui lòng đặt thẻ của bạn lên thiết bị đọc</span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-                  (Nhấn phím 1, 2, 3, 4 để giả lập quét)
+                <span style={{ fontWeight: '500' }}>Vui lòng đặt thẻ của bạn lên thiết bị đọc</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+                  (Nhấn phím 1, 2, 3, 4 để giả lập quét thẻ)
                 </span>
               </>
             ) : (
-              <span>{subMessage}</span>
+              <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{subMessage}</span>
             )}
           </div>
         </Card>
@@ -174,6 +188,8 @@ export default function Kiosk() {
           position: 'absolute',
           bottom: '2rem',
         }}
+        title="Thoát và tải lại trang chính"
+        aria-label="Thoát chế độ Kiosk"
       >
         Thoát chế độ Kiosk
       </Button>

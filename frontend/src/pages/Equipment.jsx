@@ -1100,10 +1100,10 @@ export default function Equipment({ activeTab = 'list' }) {
         const minThreshold = row.minThreshold || 0;
         const isLowStock = isConsumable ? (row.totalQty <= minThreshold && row.totalQty > 0) : (available <= minThreshold && available > 0);
         return (
-          <div style={{ fontWeight: '700', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <div style={{ fontWeight: '700', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             {isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-red)' }} title="Hết hàng" />}
             {isLowStock && !isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-amber)' }} title="Sắp hết hàng" />}
-            {row.code || 'N/A'}
+            <span>{row.code || 'N/A'}</span>
           </div>
         );
       }
@@ -1111,22 +1111,29 @@ export default function Equipment({ activeTab = 'list' }) {
     {
       accessorKey: 'name',
       header: 'Tên thiết bị',
-      width: '45%',
+      width: '42%',
       sortable: true,
       align: 'left',
       cell: (row) => {
         const isConsumable = row.assetType === 'Linh kiện tiêu hao' || row.assetType === 'Vật tư tiêu hao';
         return (
-          <div style={{ fontWeight: '600', textAlign: 'left' }}>
-            <div>{row.name}</div>
-            {isConsumable && <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '1px 4px', borderRadius: '4px' }}>Tiêu hao</span>}
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.35 }}>{row.name}</div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{row.category || 'Khác'}</span>
+              {isConsumable && (
+                <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '1px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '500' }}>
+                  Tiêu hao
+                </span>
+              )}
+            </div>
           </div>
         );
       }
     },
     {
       accessorKey: 'totalQty',
-      header: 'Còn lại',
+      header: 'Tồn kho',
       width: '18%',
       sortable: true,
       align: 'right',
@@ -1139,19 +1146,20 @@ export default function Equipment({ activeTab = 'list' }) {
         if (isConsumable) {
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
-              <span style={{ color: row.totalQty > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+              <span style={{ color: row.totalQty > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: '0.95rem' }}>
                 {row.totalQty}
               </span>
-              {isLowStock && <span style={{ fontSize: '0.65rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.1)', padding: '2px 4px', borderRadius: '4px' }}>Sắp hết</span>}
+              {isLowStock && <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '2px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '600' }}>Sắp hết</span>}
             </div>
           );
         }
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
-            <div>
-              <span style={{ color: available > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>{available}</span> / {row.totalQty}
+            <div style={{ fontSize: '0.95rem' }}>
+              <span style={{ color: available > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>{available}</span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 'normal', fontSize: '0.85rem' }}> / {row.totalQty}</span>
             </div>
-            {isLowStock && <span style={{ fontSize: '0.65rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.1)', padding: '2px 4px', borderRadius: '4px' }}>Sắp hết</span>}
+            {isLowStock && <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '2px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '600' }}>Sắp hết</span>}
           </div>
         );
       }
@@ -1159,7 +1167,7 @@ export default function Equipment({ activeTab = 'list' }) {
     {
       accessorKey: 'actions',
       header: 'Thao tác',
-      width: '20%',
+      width: '25%',
       sortable: false,
       align: 'right',
       cell: (row) => {
@@ -1167,35 +1175,67 @@ export default function Equipment({ activeTab = 'list' }) {
         const isConsumable = row.assetType === 'Linh kiện tiêu hao' || row.assetType === 'Vật tư tiêu hao';
         const isOutOfStock = isConsumable ? row.totalQty <= 0 : available <= 0;
         return (
-          <div style={{ display: 'inline-flex', gap: '0.35rem', flexDirection: 'column', alignItems: 'flex-end', width: '100%' }}>
-            {isOutOfStock && equipmentWaitlists[row.id] > 0 && <div style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', marginBottom: '0.3rem' }}><User size={10} /> {equipmentWaitlists[row.id]} chờ</div>}
-            <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end', width: '100%' }}>
+            {isOutOfStock && equipmentWaitlists[row.id] > 0 && (
+              <div style={{ fontSize: '0.75rem', color: 'var(--accent-amber)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}>
+                <User size={12} /> {equipmentWaitlists[row.id]} đang chờ
+              </div>
+            )}
+            <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center' }}>
               {isOutOfStock && !isConsumable ? (
-                <Button size="sm" variant="secondary" style={{ borderColor: 'var(--accent-amber)', color: 'var(--accent-amber)' }} onClick={() => { setSelectedEquip(row); setShowWaitlistModal(true); }}>🔔 Đăng ký chờ</Button>
+                <Button 
+                  size="sm" 
+                  variant="secondary" 
+                  style={{ borderColor: 'var(--accent-amber)', color: 'var(--accent-amber)', height: '32px' }} 
+                  onClick={() => { setSelectedEquip(row); setShowWaitlistModal(true); }}
+                >
+                  🔔 Đăng ký chờ
+                </Button>
               ) : (
-                <Button size="sm" variant="primary" onClick={() => { 
-                  setSelectedEquip(row); 
-                  const firstReadyInst = row.instances?.find(i => i.status === 'Sẵn sàng');
-                  setBorrowForm({ 
-                    mssv: '', 
-                    qty: 1, 
-                    selectedInstanceIds: firstReadyInst ? [firstReadyInst.id] : [],
-                    expectedReturnDate: getTodayDateString(), 
-                    expectedReturnTime: systemSettings?.defaultReturnTime || '17:00', 
-                    initialCondition: 'Tốt / Hoạt động bình thường', 
-                    borrowNotes: '' 
-                  }); 
-                  setShowBorrowModal(true); 
-                }}>{isConsumable ? 'Xuất kho' : 'Mượn'}</Button>
+                <Button 
+                  size="sm" 
+                  variant="primary" 
+                  style={{ height: '32px' }}
+                  onClick={() => { 
+                    setSelectedEquip(row); 
+                    const firstReadyInst = row.instances?.find(i => i.status === 'Sẵn sàng');
+                    setBorrowForm({ 
+                      mssv: '', 
+                      qty: 1, 
+                      selectedInstanceIds: firstReadyInst ? [firstReadyInst.id] : [],
+                      expectedReturnDate: getTodayDateString(), 
+                      expectedReturnTime: systemSettings?.defaultReturnTime || '17:00', 
+                      initialCondition: 'Tốt / Hoạt động bình thường', 
+                      borrowNotes: '' 
+                    }); 
+                    setShowBorrowModal(true); 
+                  }}
+                >
+                  {isConsumable ? 'Xuất kho' : 'Mượn TB'}
+                </Button>
               )}
-              <Button size="sm" variant="ghost" icon={Edit3} onClick={() => { setEditingEquip(row); setShowEditModal(true); }} />
-              <Button size="sm" variant="danger" icon={Trash2} onClick={() => handleDeleteEquip(row.id, row.name)} />
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                icon={Edit3} 
+                title="Sửa thông tin" 
+                aria-label="Sửa thiết bị"
+                onClick={() => { setEditingEquip(row); setShowEditModal(true); }} 
+              />
+              <Button 
+                size="sm" 
+                variant="danger-ghost" 
+                icon={Trash2} 
+                title="Xóa thiết bị" 
+                aria-label="Xóa thiết bị"
+                onClick={() => handleDeleteEquip(row.id, row.name)} 
+              />
             </div>
           </div>
         );
       }
     }
-  ], [equipmentWaitlists]);
+  ], [equipmentWaitlists, systemSettings]);
 
   const borrowColumns = useMemo(() => [
     {

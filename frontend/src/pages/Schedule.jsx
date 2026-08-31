@@ -138,6 +138,7 @@ export default function Schedule() {
         <Card
           title="Lịch trực tuần hiện tại"
           icon={Calendar}
+          style={{ color: 'var(--accent-blue)' }}
         >
           {/* Lịch trực Grid container có scroll ngang an toàn trên màn hình nhỏ */}
           <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '0.5rem' }}>
@@ -165,23 +166,26 @@ export default function Schedule() {
                         className={`schedule-cell ${isRegistered ? 'has-registrations' : ''}`}
                         onClick={() => handleRegisterClick(day, shiftName)}
                         style={{ cursor: 'pointer' }}
-                        title="Click để Đăng ký / Hủy đăng ký"
+                        title="Nhấn để Đăng ký hoặc Hủy đăng ký ca trực"
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && handleRegisterClick(day, shiftName)}
                       >
                         <div>
                           <div className="shift-title">{shiftName.split(' ')[0]}</div>
-                          <div className="shift-members">
+                          <div className="shift-members" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.35rem' }}>
                             {shiftData && shiftData.members.map((member, mIdx) => (
-                              <span key={mIdx} className="shift-member-tag">
+                              <span key={mIdx} className="shift-member-tag" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--accent-blue)', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 500 }}>
                                 {member.name}
                               </span>
                             ))}
                             {(!shiftData || shiftData.members.length === 0) && (
-                              <span className="text-xs text-muted" style={{ fontStyle: 'italic' }}>Trống ca trực</span>
+                              <span className="text-xs text-muted" style={{ fontStyle: 'italic', padding: '0.2rem 0' }}>Trống ca trực</span>
                             )}
                           </div>
                         </div>
-                        <div className="text-xs" style={{ display: 'flex', justifyContent: 'flex-end', color: 'var(--accent-blue)', fontWeight: '500' }}>
-                          <span>Đăng ký →</span>
+                        <div className="text-xs" style={{ display: 'flex', justifyContent: 'flex-end', color: isRegistered ? 'var(--accent-blue)' : 'var(--text-muted)', fontWeight: '500', marginTop: '0.5rem' }}>
+                          <span>{isRegistered ? 'Đổi / Hủy →' : '+ Đăng ký'}</span>
                         </div>
                       </div>
                     );
@@ -196,8 +200,9 @@ export default function Schedule() {
       <Card
         title="Lưu ý quy định trực Lab"
         icon={HelpCircle}
+        style={{ color: 'var(--accent-amber)' }}
       >
-        <p className="text-sm" style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
           Ca trực sáng từ <strong>08:00 đến 11:30</strong>. Ca trực chiều từ <strong>13:30 đến 17:00</strong>. Ca trực tối từ <strong>18:00 đến 21:00</strong>. 
           Vui lòng bấm trực tiếp vào ca trực để đăng ký MSSV của bạn (hoặc nhập lại MSSV đã đăng ký để <strong>HỦY</strong> ca trực). 
           Khi check-in vào phòng Lab trùng với ca trực đã đăng ký, bạn sẽ nhận được điểm tích lũy chuyên cần cao hơn.

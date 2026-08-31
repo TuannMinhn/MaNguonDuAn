@@ -119,91 +119,91 @@ export default function ReplacementForecast() {
           <CalendarClock className="text-amber-500" size={20} />
           Dự báo Thay thế & Khấu hao
         </h2>
-        <p className="page-subtitle" style={{ marginTop: '0.35rem' }}>Theo dõi tuổi thọ phần cứng và lập kế hoạch ngân sách mua mới</p>
+        <p className="page-subtitle">Theo dõi tuổi thọ phần cứng và lập kế hoạch ngân sách mua mới</p>
       </div>
 
       {/* KPI Cards - 4 columns */}
-      <div style={{
+      <div className="stats-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '1.25rem',
         marginBottom: '1.5rem'
       }}>
         {/* Nguy kịch */}
-        <div className="glass-card" style={{
+        <div className="glass-card stat-card" style={{
           display: 'flex', alignItems: 'center', gap: '1rem',
-          padding: '1.25rem', borderLeft: '4px solid var(--accent-red)'
+          padding: 'var(--space-lg)', borderLeft: '4px solid var(--accent-red)'
         }}>
           <div style={{
             background: 'rgba(239, 68, 68, 0.15)', padding: '0.75rem',
-            borderRadius: '50%', color: 'var(--accent-red)',
+            borderRadius: 'var(--radius-md)', color: 'var(--accent-red)',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <ShieldAlert size={24} />
+            <ShieldAlert size={22} />
           </div>
           <div>
-            <p className="text-label">Cần thay thế gấp</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem', color: 'var(--accent-red)' }}>
+            <p className="stat-label">Cần thay thế gấp</p>
+            <h2 className="stat-value" style={{ marginTop: '0.25rem', color: 'var(--accent-red)', fontVariantNumeric: 'tabular-nums' }}>
               {highRiskCount} <span className="stat-unit">thiết bị</span>
             </h2>
           </div>
         </div>
 
         {/* Cảnh báo */}
-        <div className="glass-card" style={{
+        <div className="glass-card stat-card" style={{
           display: 'flex', alignItems: 'center', gap: '1rem',
-          padding: '1.25rem', borderLeft: '4px solid var(--accent-amber)'
+          padding: 'var(--space-lg)', borderLeft: '4px solid var(--accent-amber)'
         }}>
           <div style={{
             background: 'rgba(251, 191, 36, 0.15)', padding: '0.75rem',
-            borderRadius: '50%', color: 'var(--accent-amber)',
+            borderRadius: 'var(--radius-md)', color: 'var(--accent-amber)',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <AlertTriangle size={24} />
+            <AlertTriangle size={22} />
           </div>
           <div>
-            <p className="text-label">Lên kế hoạch thay</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem', color: 'var(--accent-amber)' }}>
+            <p className="stat-label">Lên kế hoạch thay</p>
+            <h2 className="stat-value" style={{ marginTop: '0.25rem', color: 'var(--accent-amber)', fontVariantNumeric: 'tabular-nums' }}>
               {warningCount} <span className="stat-unit">thiết bị</span>
             </h2>
           </div>
         </div>
 
         {/* Còn tốt */}
-        <div className="glass-card" style={{
+        <div className="glass-card stat-card" style={{
           display: 'flex', alignItems: 'center', gap: '1rem',
-          padding: '1.25rem', borderLeft: '4px solid var(--accent-green)'
+          padding: 'var(--space-lg)', borderLeft: '4px solid var(--accent-green)'
         }}>
           <div style={{
             background: 'rgba(52, 211, 153, 0.15)', padding: '0.75rem',
-            borderRadius: '50%', color: 'var(--accent-green)',
+            borderRadius: 'var(--radius-md)', color: 'var(--accent-green)',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <CheckCircle size={24} />
+            <CheckCircle size={22} />
           </div>
           <div>
-            <p className="text-label">Tình trạng tốt</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem', color: 'var(--accent-green)' }}>
+            <p className="stat-label">Tình trạng tốt</p>
+            <h2 className="stat-value" style={{ marginTop: '0.25rem', color: 'var(--accent-green)', fontVariantNumeric: 'tabular-nums' }}>
               {healthyCount} <span className="stat-unit">thiết bị</span>
             </h2>
           </div>
         </div>
 
         {/* Trung bình khấu hao */}
-        <div className="glass-card" style={{
+        <div className="glass-card stat-card" style={{
           display: 'flex', alignItems: 'center', gap: '1rem',
-          padding: '1.25rem', borderLeft: '4px solid var(--accent-blue)'
+          padding: 'var(--space-lg)', borderLeft: '4px solid var(--accent-blue)'
         }}>
           <div style={{
             background: 'rgba(96, 165, 250, 0.15)', padding: '0.75rem',
-            borderRadius: '50%', color: 'var(--accent-blue)',
+            borderRadius: 'var(--radius-md)', color: 'var(--accent-blue)',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <Gauge size={24} />
+            <Gauge size={22} />
           </div>
           <div>
-            <p className="text-label">TB khấu hao</p>
-            <h2 className="stat-value" style={{ marginTop: '0.25rem' }}>
+            <p className="stat-label">TB khấu hao</p>
+            <h2 className="stat-value" style={{ marginTop: '0.25rem', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
               {avgDepreciation}% <span className="stat-unit">trung bình</span>
             </h2>
           </div>
@@ -225,13 +225,15 @@ export default function ReplacementForecast() {
 
       {/* Table Card */}
       <Card
-        title={`Danh sách thiết bị cảnh báo (${forecastData.length})`}
+        title={`Danh sách thiết bị theo dõi (${forecastData.length})`}
         icon={Calendar}
+        style={{ color: 'var(--accent-amber)' }}
       >
         <DataTable
           data={forecastData}
           columns={forecastColumns}
           searchKeys={['name', 'code']}
+          searchPlaceholder="Tìm theo tên thiết bị hoặc mã code..."
         />
       </Card>
     </div>

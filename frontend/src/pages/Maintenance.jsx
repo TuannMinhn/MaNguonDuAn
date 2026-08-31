@@ -421,7 +421,7 @@ export default function Maintenance() {
               whiteSpace: 'nowrap'
             }}
             onClick={() => handleViewDetailClick(row)}
-            title="Click để xem chi tiết phiếu bảo trì"
+            title="Nhấn để xem chi tiết phiếu bảo trì"
           >
             {row.equipmentName}
           </span>
@@ -430,7 +430,7 @@ export default function Maintenance() {
       { 
         accessorKey: 'issueDescription', 
         header: 'Mô tả lỗi', 
-        width: '25%', 
+        width: '26%', 
         sortable: true, 
         cell: (row) => (
           <span 
@@ -438,27 +438,82 @@ export default function Maintenance() {
               color: 'var(--text-secondary)',
               cursor: 'pointer',
               display: 'inline-block',
-              maxWidth: '220px',
+              maxWidth: '240px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
             }}
             onClick={() => handleViewDetailClick(row)}
-            title="Click để xem chi tiết phiếu bảo trì"
+            title="Nhấn để xem chi tiết"
           >
             {row.issueDescription}
           </span>
         ) 
       },
-      { accessorKey: 'reportedDate', header: 'Ngày báo hỏng', width: '13%', sortable: true, cell: (row) => new Date(row.reportedDate).toLocaleDateString('vi-VN') },
-      { accessorKey: 'status', header: 'Trạng thái', width: '14%', sortable: true, cell: (row) => <span className={`badge ${row.status === 'Đã sửa' ? 'badge-success' : 'badge-warning'}`}>{row.status}</span> },
-      { accessorKey: 'cost', header: 'Chi phí', width: '10%', sortable: true, align: 'right', cell: (row) => row.cost ? `${row.cost.toLocaleString('vi-VN')} đ` : '-' },
-      { accessorKey: 'actions', header: 'Thao tác', width: '10%', sortable: false, align: 'right', cell: (row) => (
-        <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
-          <Button size="sm" variant="ghost" icon={Edit3} onClick={() => handleEditClick(row)} />
-          <Button size="sm" variant="danger" icon={Trash2} onClick={() => handleDeleteClick(row.id)} />
-        </div>
-      ) }
+      { 
+        accessorKey: 'reportedDate', 
+        header: 'Ngày báo hỏng', 
+        width: '14%', 
+        sortable: true, 
+        cell: (row) => (
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+            {new Date(row.reportedDate).toLocaleDateString('vi-VN')}
+          </span>
+        )
+      },
+      { 
+        accessorKey: 'status', 
+        header: 'Trạng thái', 
+        width: '14%', 
+        sortable: true, 
+        cell: (row) => {
+          const isResolved = row.status === 'Đã sửa';
+          return (
+            <span className={`badge ${isResolved ? 'badge-success' : 'badge-warning'}`}>
+              {row.status}
+            </span>
+          );
+        }
+      },
+      { 
+        accessorKey: 'cost', 
+        header: 'Chi phí', 
+        width: '10%', 
+        sortable: true, 
+        align: 'right', 
+        cell: (row) => (
+          <span style={{ fontWeight: row.cost ? '600' : 'normal', color: row.cost ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+            {row.cost ? `${row.cost.toLocaleString('vi-VN')} đ` : '-'}
+          </span>
+        )
+      },
+      { 
+        accessorKey: 'actions', 
+        header: 'Thao tác', 
+        width: '8%', 
+        sortable: false, 
+        align: 'right', 
+        cell: (row) => (
+          <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              icon={Edit3} 
+              title="Cập nhật tiến độ" 
+              aria-label="Cập nhật ticket"
+              onClick={() => handleEditClick(row)} 
+            />
+            <Button 
+              size="sm" 
+              variant="danger-ghost" 
+              icon={Trash2} 
+              title="Xóa phiếu" 
+              aria-label="Xóa phiếu"
+              onClick={() => handleDeleteClick(row.id)} 
+            />
+          </div>
+        ) 
+      }
     );
     return cols;
   }, [activeTab, selectedIds, filteredList]);

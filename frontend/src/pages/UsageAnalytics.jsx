@@ -577,20 +577,22 @@ export default function UsageAnalytics() {
 
   return (
     <div className="page-container fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 className="page-header">
             <BarChart2 className="text-pink-500" size={20} />
             Phân tích Sử dụng
           </h2>
-          <p className="page-subtitle" style={{ marginTop: '0.25rem' }}>Đo lường hiệu suất và tần suất sử dụng thiết bị trong Lab</p>
+          <p className="page-subtitle">Đo lường hiệu suất và tần suất sử dụng thiết bị trong Lab</p>
         </div>
         <Button
           variant="secondary"
           icon={Download}
           iconPosition="left"
           onClick={() => setIsExportModalOpen(true)}
-        >Xuất báo cáo sử dụng</Button>
+        >
+          Xuất báo cáo sử dụng
+        </Button>
       </div>
 
       {isLoading ? (
@@ -601,7 +603,14 @@ export default function UsageAnalytics() {
           <div className="glass-card kpi-status-summary" style={{ marginBottom: '1.5rem' }}>
             <div className="kpi-group-static">
               {/* KPI 1 */}
-              <div className="kpi-item-neutral" onClick={() => handleKpiClick('eq')}>
+              <div 
+                className="kpi-item-neutral" 
+                onClick={() => handleKpiClick('eq')}
+                title="Bấm để xem danh sách chi tiết mượn thiết bị"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleKpiClick('eq')}
+              >
                 <span className="kpi-status-dot dot-blue"></span>
                 <div>
                   <p className="kpi-label">Mượn Thiết Bị</p>
@@ -612,7 +621,14 @@ export default function UsageAnalytics() {
               </div>
 
               {/* KPI 2 */}
-              <div className="kpi-item-neutral" onClick={() => handleKpiClick('cons')}>
+              <div 
+                className="kpi-item-neutral" 
+                onClick={() => handleKpiClick('cons')}
+                title="Bấm để xem danh sách chi tiết xuất tiêu hao"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleKpiClick('cons')}
+              >
                 <span className="kpi-status-dot dot-purple"></span>
                 <div>
                   <p className="kpi-label">Xuất Tiêu Hao</p>
@@ -625,7 +641,14 @@ export default function UsageAnalytics() {
 
             <div className="kpi-group-active">
               {/* KPI 3 */}
-              <div className="kpi-item-active active-amber" onClick={() => handleKpiClick('month')}>
+              <div 
+                className="kpi-item-active active-amber" 
+                onClick={() => handleKpiClick('month')}
+                title="Bấm để xem chi tiết lượt mượn trong tháng"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleKpiClick('month')}
+              >
                 <div>
                   <p className="kpi-label" style={{ color: 'var(--accent-amber)' }}>Tháng này</p>
                   <h4 className="kpi-value" style={{ color: 'var(--accent-amber)' }}>
@@ -635,7 +658,14 @@ export default function UsageAnalytics() {
               </div>
 
               {/* KPI 4 */}
-              <div className="kpi-item-active active-green" onClick={() => handleKpiClick('users')}>
+              <div 
+                className="kpi-item-active active-green" 
+                onClick={() => handleKpiClick('users')}
+                title="Bấm để xem danh sách thành viên mượn"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleKpiClick('users')}
+              >
                 <div>
                   <p className="kpi-label" style={{ color: 'var(--accent-green)' }}>Thành viên mượn</p>
                   <h4 className="kpi-value" style={{ color: 'var(--accent-green)' }}>

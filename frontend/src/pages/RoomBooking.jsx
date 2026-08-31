@@ -20,7 +20,7 @@ const DAYS = [
   { key: 'sat', label: 'Thứ 7' },
 ];
 
-const SESSIONS = [
+const DEFAULT_SESSIONS = [
   {
     key: 'morning', label: 'Sáng', color: 'var(--accent-amber)',
     bgColor: 'rgba(245, 158, 11, 0.08)', borderColor: 'rgba(245, 158, 11, 0.3)',
@@ -73,6 +73,37 @@ function avatarColor(str = '') {
 export default function RoomBooking({ userRole }) {
   const [weekStart, setWeekStart] = useState(getWeekStart());
   const { data: members = [] } = useSWR(`${API_BASE_URL}/members`, fetcher);
+  const { data: systemSettings } = useSWR(`${API_BASE_URL}/settings`, fetcher);
+
+  const SESSIONS = useMemo(() => {
+    if (!systemSettings) return DEFAULT_SESSIONS;
+    return [
+      {
+        key: 'morning', label: 'Sáng', color: 'var(--accent-amber)',
+        bgColor: 'rgba(245, 158, 11, 0.08)', borderColor: 'rgba(245, 158, 11, 0.3)',
+        slots: [
+          { id: 'morning_1', label: `${systemSettings.slot_morning_1_start || '07:00'} – ${systemSettings.slot_morning_1_end || '09:00'}` },
+          { id: 'morning_2', label: `${systemSettings.slot_morning_2_start || '09:00'} – ${systemSettings.slot_morning_2_end || '11:00'}` },
+        ],
+      },
+      {
+        key: 'afternoon', label: 'Chiều', color: 'var(--accent-blue)',
+        bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)',
+        slots: [
+          { id: 'afternoon_1', label: `${systemSettings.slot_afternoon_1_start || '12:00'} – ${systemSettings.slot_afternoon_1_end || '14:00'}` },
+          { id: 'afternoon_2', label: `${systemSettings.slot_afternoon_2_start || '14:00'} – ${systemSettings.slot_afternoon_2_end || '16:00'}` },
+        ],
+      },
+      {
+        key: 'evening', label: 'Tối', color: 'var(--accent-purple)',
+        bgColor: 'rgba(139, 92, 246, 0.08)', borderColor: 'rgba(139, 92, 246, 0.3)',
+        slots: [
+          { id: 'evening_1', label: `${systemSettings.slot_evening_1_start || '16:00'} – ${systemSettings.slot_evening_1_end || '18:00'}` },
+          { id: 'evening_2', label: `${systemSettings.slot_evening_2_start || '18:00'} – ${systemSettings.slot_evening_2_end || '20:00'}` },
+        ],
+      },
+    ];
+  }, [systemSettings]);
 
   // Slot selection
   const [selected, setSelected] = useState(new Set());
@@ -848,65 +879,84 @@ export default function RoomBooking({ userRole }) {
 function SlotCell({ slot, session, booking, selected, onToggle, onCancel, onViewDetails, userRole }) {
   const booked = !!booking;
   const bg     = booked ? 'rgba(239,68,68,0.08)' : selected ? 'rgba(59,130,246,0.18)' : session.bgColor;
-  const border = booked ? '1px solid rgba(239,68,68,0.3)' : selected ? '2px solid #3b82f6' : `1px solid ${session.borderColor}`;
+  const border = booked ? '1px solid rgba(239,68,68,0.3)' : selected ? '2px solid var(--accent-blue)' : `1px solid ${session.borderColor}`;
 
   return (
     <div onClick={!booked ? onToggle : undefined}
-      style={{ background:bg, border, borderRadius:'8px', padding:'0.5rem 0.65rem', cursor: booked?'default':'pointer', transition:'all 0.15s ease', userSelect:'none' }}>
+      style={{ 
+        background: bg, 
+        border, 
+        borderRadius: 'var(--radius-md)', 
+        padding: '0.6rem 0.75rem', 
+        cursor: booked ? 'default' : 'pointer', 
+        userSelect: 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.35rem'
+      }}>
 
       {/* Hàng 1: nhãn giờ */}
-      <div style={{ display:'flex', alignItems:'center', gap:'0.35rem', marginBottom:'0.25rem' }}>
-        <Clock size={11} style={{ color: booked?'var(--accent-red)':session.color, flexShrink:0 }} />
-        <span style={{ fontSize:'var(--text-xs)', fontWeight:'600', color: booked?'var(--accent-red)':session.color }}>{slot.label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Clock size={12} style={{ color: booked ? 'var(--accent-red)' : session.color, flexShrink: 0 }} />
+          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: booked ? 'var(--accent-red)' : session.color }}>{slot.label}</span>
+        </div>
         {selected && !booked && (
-          <span style={{ marginLeft:'auto', width:14, height:14, borderRadius:'50%', background:'var(--accent-blue)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <span style={{ color:'var(--text-primary)', fontSize:'var(--text-2xs)', fontWeight:'900' }}>✓</span>
+          <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--accent-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: '#fff', fontSize: '10px', fontWeight: 'bold' }}>✓</span>
           </span>
         )}
       </div>
 
       {booked ? (
-        /* Hàng 2: tên + số người bên trái, nút Hủy bên phải — cùng 1 hàng */
-        <div style={{ display:'flex', flexDirection:'column', gap:'0.25rem' }}>
-          <div style={{ display:'flex', alignItems:'flex-start', gap:'0.5rem' }}>
-            <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:'var(--text-xs)', color:'var(--text-primary)', fontWeight:'500', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+        /* Đã đặt: đại diện, số người, nút Thao tác */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {booking.representativeName}
               </div>
-              <div style={{ fontSize:'var(--text-2xs)', color:'var(--text-secondary)', marginTop:'1px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '1px' }}>
                 {booking.participantsCount || booking.members?.length || 1} người
               </div>
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:'4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <button
+                type="button"
                 onClick={e => { e.stopPropagation(); onViewDetails(); }}
-                style={{ flexShrink:0, display:'flex', alignItems:'center', gap:'2px', fontSize:'var(--text-2xs)', background:'rgba(59, 130, 246, 0.15)', color:'var(--accent-blue)', border:'1px solid rgba(59, 130, 246, 0.25)', borderRadius:'5px', padding:'0.22rem 0.5rem', cursor:'pointer' }}
+                title="Xem chi tiết phiên"
+                aria-label="Chi tiết phiên đặt"
+                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.75rem', background: 'rgba(59, 130, 246, 0.15)', color: 'var(--accent-blue)', border: '1px solid rgba(59, 130, 246, 0.25)', borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
               >
-                <Info size={9} /> Chi tiết
+                <Info size={11} /> Chi tiết
               </button>
               <button
+                type="button"
                 onClick={e => { e.stopPropagation(); onCancel(); }}
-                style={{ flexShrink:0, display:'flex', alignItems:'center', gap:'2px', fontSize:'var(--text-2xs)', background:'rgba(239,68,68,0.15)', color:'var(--accent-red)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:'5px', padding:'0.22rem 0.5rem', cursor:'pointer' }}
+                title="Hủy lịch đặt"
+                aria-label="Hủy lịch đặt"
+                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.75rem', background: 'rgba(239,68,68,0.15)', color: 'var(--accent-red)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
               >
-                <Trash2 size={9} /> Hủy
+                <Trash2 size={11} /> Hủy
               </button>
             </div>
           </div>
+
           {/* Trạng thái Check-in / Check-out */}
           {booking.checkedIn && !booking.checkedOut && (
-            <div style={{ display:'inline-block', alignSelf:'flex-start', fontSize:'var(--text-2xs)', background:'rgba(16, 185, 129, 0.15)', color:'var(--accent-green)', padding:'0.15rem 0.4rem', borderRadius:'4px', fontWeight:'600', border:'1px solid rgba(16, 185, 129, 0.3)' }}>
+            <div style={{ display: 'inline-block', alignSelf: 'flex-start', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)', padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-sm)', fontWeight: '600', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
               🟢 Đang sử dụng
             </div>
           )}
           {booking.checkedOut && (
-            <div style={{ display:'inline-block', alignSelf:'flex-start', fontSize:'var(--text-2xs)', background:'rgba(255, 255, 255, 0.1)', color:'var(--text-secondary)', padding:'0.15rem 0.4rem', borderRadius:'4px', fontWeight:'600', border:'1px solid rgba(255, 255, 255, 0.15)' }}>
+            <div style={{ display: 'inline-block', alignSelf: 'flex-start', fontSize: '0.75rem', background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-secondary)', padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-sm)', fontWeight: '600', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               ⚪ Đã trả phòng
             </div>
           )}
         </div>
       ) : (
-        <div style={{ fontSize:'var(--text-xs)', color:'#475569', fontStyle:'italic' }}>
-          {selected ? 'Đã chọn' : 'Trống – nhấn để chọn'}
+        <div style={{ fontSize: '0.8rem', color: selected ? 'var(--accent-blue)' : 'var(--text-muted)', fontStyle: selected ? 'normal' : 'italic', fontWeight: selected ? '600' : 'normal' }}>
+          {selected ? 'Đã chọn ca này' : '+ Nhấn để đăng ký'}
         </div>
       )}
     </div>

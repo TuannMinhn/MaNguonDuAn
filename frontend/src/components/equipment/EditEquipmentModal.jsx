@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { Settings } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
+import { fetcher } from '../../utils/fetcher';
 import { CATEGORIES, ASSET_TYPES } from '../../utils/constants';
 import Select from '../Select';
 import Modal from '../Modal';
 
 const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) => {
   const [editingEquip, setEditingEquip] = useState(null);
+  const { data: categoriesData = [] } = useSWR(`${API_BASE_URL}/categories`, fetcher);
+  
+  const categoryOptions = categoriesData.length > 0 
+    ? categoriesData.map(c => ({ value: c.name, label: c.name }))
+    : CATEGORIES.map(c => ({ value: c, label: c }));
 
   useEffect(() => {
     if (editingEquip && editingEquip.assetType === 'Thiết bị' && editingEquip.code) {
@@ -155,7 +162,7 @@ const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) 
               <Select
                 value={editingEquip.category || 'Khác'}
                 onChange={(val) => setEditingEquip({ ...editingEquip, category: val })}
-                options={CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+                options={categoryOptions}
               />
             </div>
             <div className="form-group">

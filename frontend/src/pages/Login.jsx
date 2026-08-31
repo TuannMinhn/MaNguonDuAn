@@ -118,6 +118,9 @@ export default function Login({ setRole }) {
               <h3 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '0.25rem', fontWeight: '500' }}>Xác thực quyền Quản lý</h3>
               
               <div className="form-group" style={{ margin: 0, textAlign: 'left' }}>
+                <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                  Mật khẩu Quản trị
+                </label>
                 <TextInput
                   type="password"
                   placeholder="Nhập mật khẩu Admin..."
@@ -129,7 +132,19 @@ export default function Login({ setRole }) {
                 />
               </div>
               
-              {error && <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', textAlign: 'left' }}>{error}</div>}
+              {error && (
+                <div style={{ 
+                  color: 'var(--accent-red)', 
+                  background: 'rgba(239, 68, 68, 0.1)', 
+                  border: '1px solid rgba(239, 68, 68, 0.25)', 
+                  borderRadius: 'var(--radius-md)', 
+                  padding: '0.6rem 0.85rem', 
+                  fontSize: '0.82rem', 
+                  textAlign: 'left' 
+                }}>
+                  {error}
+                </div>
+              )}
               
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
                 <Button 
@@ -147,7 +162,7 @@ export default function Login({ setRole }) {
                   disabled={loading || !password.trim()}
                   style={{ flex: 1 }}
                 >
-                  Đăng nhập
+                  {loading ? 'Đang xác thực...' : 'Đăng nhập'}
                 </Button>
               </div>
             </form>

@@ -192,6 +192,13 @@ export const SystemSetting = sequelize.define('SystemSetting', {
   value: { type: DataTypes.TEXT, allowNull: false }
 }, { tableName: 'system_settings', timestamps: false });
 
+// 15. Bảng Category (Danh mục thiết bị hệ thống)
+export const Category = sequelize.define('Category', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  name: { type: DataTypes.TEXT, unique: true, allowNull: false },
+  description: { type: DataTypes.TEXT, defaultValue: '' }
+}, { tableName: 'categories', timestamps: false });
+
 // ==========================================
 // ĐỒNG BỘ & SEED DỮ LIỆU TỪ JSON CŨ SANG SQLITE
 // ==========================================
@@ -293,6 +300,21 @@ export async function syncDatabase() {
   await seedIfEmpty(Session, 'sessions', []);
   await seedIfEmpty(Catalog, 'equipment_catalog', []);
   await seedIfEmpty(Maintenance, 'maintenance', []);
+  await seedIfEmpty(Category, 'categories', [
+    { id: 'cat-1', name: 'Thiết bị đo lường', description: 'Máy hiện sóng, đồng hồ vạn năng, máy phát xung' },
+    { id: 'cat-2', name: 'Kit phát triển', description: 'Arduino, ESP32, STM32, Raspberry Pi' },
+    { id: 'cat-3', name: 'Module chức năng', description: 'Module relay, giao tiếp không dây, GPS, RFID' },
+    { id: 'cat-4', name: 'Cảm biến', description: 'Cảm biến nhiệt độ, khoảng cách, khí gas, gia tốc' },
+    { id: 'cat-5', name: 'Thiết bị hiển thị', description: 'Màn hình LCD, OLED, LED ma trận' },
+    { id: 'cat-6', name: 'Cơ cấu chấp hành & Động cơ', description: 'Động cơ bước, servo, motor DC' },
+    { id: 'cat-7', name: 'Dụng cụ cơ khí & Gia công', description: 'Mỏ hàn, kìm, tua vít, máy khoan bàn' },
+    { id: 'cat-8', name: 'Máy tính & Máy chủ', description: 'PC lab, màn hình, máy in 3D' },
+    { id: 'cat-9', name: 'Thiết bị mạng', description: 'Router, switch, access point, cáp mạng' },
+    { id: 'cat-10', name: 'Hạ tầng nguồn & Lưu trữ', description: 'Nguồn DC đa năng, pin sạc, biến áp' },
+    { id: 'cat-11', name: 'Vật tư tiêu hao', description: 'Thiếc hàn, điện trở, tụ điện, dây cắm testboard' },
+    { id: 'cat-12', name: 'Thiết bị đa phương tiện & Giảng dạy', description: 'Máy chiếu, loa, micro, bảng viết' },
+    { id: 'cat-13', name: 'Khác', description: 'Các thiết bị và phụ kiện khác' }
+  ]);
   await seedIfEmpty(SystemSetting, 'settings', [
     { key: 'defaultBorrowDays', value: '7' },
     { key: 'defaultReturnTime', value: '17:00' },
@@ -306,7 +328,20 @@ export async function syncDatabase() {
     { key: 'adminPassword', value: 'admin123' },
     { key: 'maxNotificationHistory', value: '500' },
     { key: 'rfidScanCooldownSeconds', value: '5' },
-    { key: 'defaultLabLocation', value: 'Kho Lab' }
+    { key: 'defaultLabLocation', value: 'Kho Lab' },
+    { key: 'kioskIdleTimeoutSeconds', value: '30' },
+    { key: 'slot_morning_1_start', value: '07:00' },
+    { key: 'slot_morning_1_end', value: '09:00' },
+    { key: 'slot_morning_2_start', value: '09:00' },
+    { key: 'slot_morning_2_end', value: '11:00' },
+    { key: 'slot_afternoon_1_start', value: '12:00' },
+    { key: 'slot_afternoon_1_end', value: '14:00' },
+    { key: 'slot_afternoon_2_start', value: '14:00' },
+    { key: 'slot_afternoon_2_end', value: '16:00' },
+    { key: 'slot_evening_1_start', value: '16:00' },
+    { key: 'slot_evening_1_end', value: '18:00' },
+    { key: 'slot_evening_2_start', value: '18:00' },
+    { key: 'slot_evening_2_end', value: '20:00' }
   ]);
 
   // Load dữ liệu từ SQLite vào Cache sau khi đã đồng bộ & seed xong
@@ -347,7 +382,8 @@ const collectionToModelMap = {
   sessions: Session,
   equipment_catalog: Catalog,
   maintenance: Maintenance,
-  settings: SystemSetting
+  settings: SystemSetting,
+  categories: Category
 };
 
 function getModelByCollectionName(colName) {

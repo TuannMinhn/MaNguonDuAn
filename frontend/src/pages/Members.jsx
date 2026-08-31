@@ -142,49 +142,93 @@ export default function Members() {
   const [activeTab, setActiveTab] = useState('managers');
 
   const membersColumns = React.useMemo(() => [
-    { accessorKey: 'mssv', header: activeTab === 'managers' ? 'Mã số' : 'MSSV', sortable: true, cell: (row) => <span style={{ fontWeight: '500' }}>{row.mssv}</span> },
-    { accessorKey: 'name', header: 'Họ Tên', sortable: true, cell: (row) => <span style={{ fontWeight: '500' }}>{row.name}</span> },
-    { accessorKey: 'role', header: 'Chức vụ', sortable: true, cell: (row) => {
-      const isManager = !['Thành viên', 'Cộng tác viên'].includes(row.role);
-      return (
-        <span className={`badge ${isManager ? 'badge-warning' : 'badge-info'}`} style={isManager ? { backgroundColor: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)', border: '1px solid rgba(245, 158, 11, 0.3)' } : {}}>
-          {row.role}
+    { 
+      accessorKey: 'mssv', 
+      header: activeTab === 'managers' ? 'Mã số' : 'MSSV', 
+      width: '18%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontWeight: '700', color: 'var(--accent-purple)', fontVariantNumeric: 'tabular-nums' }}>
+          {row.mssv}
         </span>
-      );
-    }},
-    { accessorKey: 'active', header: 'Trạng thái', sortable: true, cell: (row) => (
-      row.active ? (
-        <span className="badge badge-success">Đang trực Lab</span>
-      ) : (
-        <span className="badge badge-danger" style={{ backgroundColor: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>Vắng mặt</span>
+      ) 
+    },
+    { 
+      accessorKey: 'name', 
+      header: 'Họ và Tên', 
+      width: '32%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+          {row.name}
+        </span>
+      ) 
+    },
+    { 
+      accessorKey: 'role', 
+      header: 'Chức vụ', 
+      width: '24%',
+      sortable: true, 
+      cell: (row) => {
+        const isManager = !['Thành viên', 'Cộng tác viên'].includes(row.role);
+        return (
+          <span 
+            className={`badge ${isManager ? 'badge-warning' : 'badge-info'}`} 
+            style={isManager ? { backgroundColor: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)', border: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: '600' } : { fontWeight: '500' }}
+          >
+            {row.role}
+          </span>
+        );
+      }
+    },
+    { 
+      accessorKey: 'active', 
+      header: 'Trạng thái', 
+      width: '16%',
+      sortable: true, 
+      cell: (row) => (
+        row.active ? (
+          <span className="badge badge-success" style={{ fontWeight: '600' }}>
+            🟢 Đang trực Lab
+          </span>
+        ) : (
+          <span className="badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.06)', color: 'var(--text-muted)' }}>
+            ⚪ Vắng mặt
+          </span>
+        )
       )
-    )},
-    { accessorKey: 'actions', header: 'Thao tác', align: 'right', sortable: false, cell: (row) => (
-      <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
-        <Button 
-          variant="secondary" 
-          size="sm"
-          icon={Edit3}
-          title="Sửa thông tin"
-          onClick={() => {
-            setEditingMember(row);
-            setErrorMsg('');
-            setShowEditModal(true);
-          }}
-        >
-          Sửa
-        </Button>
-        <Button 
-          variant="danger-tertiary" 
-          size="sm"
-          icon={Trash2}
-          title="Xóa thành viên"
-          onClick={() => handleDeleteMember(row.id, row.name)}
-        >
-          Xóa
-        </Button>
-      </div>
-    )}
+    },
+    { 
+      accessorKey: 'actions', 
+      header: 'Thao tác', 
+      width: '10%',
+      align: 'right', 
+      sortable: false, 
+      cell: (row) => (
+        <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            icon={Edit3}
+            title="Sửa thông tin thành viên"
+            aria-label="Sửa thành viên"
+            onClick={() => {
+              setEditingMember(row);
+              setErrorMsg('');
+              setShowEditModal(true);
+            }}
+          />
+          <Button 
+            variant="danger-ghost" 
+            size="sm"
+            icon={Trash2}
+            title="Xóa thành viên khỏi Lab"
+            aria-label="Xóa thành viên"
+            onClick={() => handleDeleteMember(row.id, row.name)}
+          />
+        </div>
+      )
+    }
   ], [activeTab]);
 
   const addMemberFooter = (
@@ -204,17 +248,19 @@ export default function Members() {
   return (
     <div className="page-container fade-in">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ paddingRight: '60px' }}>
-          <h2 className="page-header">
-            <Users className="text-blue-500" size={20} />
-            Quản lý thành viên
-          </h2>
-          <p className="page-subtitle">Quản lý hồ sơ thành viên và vai trò hoạt động trong CLB</p>
-        </div>
-        <div style={{ alignSelf: 'flex-end' }}>
-          <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => { setErrorMsg(''); setSuccessMsg(''); setShowAddModal(true); }}>
-            Thêm thành viên mới
-          </Button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2 className="page-header">
+              <Users className="text-blue-500" size={20} />
+              Quản lý thành viên
+            </h2>
+            <p className="page-subtitle">Quản lý hồ sơ thành viên và vai trò hoạt động trong CLB</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginRight: '4.5rem' }}>
+            <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => { setErrorMsg(''); setSuccessMsg(''); setShowAddModal(true); }}>
+              Thêm thành viên mới
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -225,12 +271,14 @@ export default function Members() {
       {/* 2 Bảng danh sách */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
         <button 
+          type="button"
           onClick={() => { setActiveTab('managers'); setSearchTerm(''); }}
           style={{ background: 'none', border: 'none', padding: '0.75rem 1rem', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold', color: activeTab === 'managers' ? 'var(--accent-blue)' : 'var(--text-secondary)', borderBottom: activeTab === 'managers' ? '2px solid var(--accent-blue)' : '2px solid transparent', transition: 'all 0.2s' }}
         >
           Ban Quản Lý ({managers.length})
         </button>
         <button 
+          type="button"
           onClick={() => { setActiveTab('students'); setSearchTerm(''); }}
           style={{ background: 'none', border: 'none', padding: '0.75rem 1rem', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold', color: activeTab === 'students' ? 'var(--accent-blue)' : 'var(--text-secondary)', borderBottom: activeTab === 'students' ? '2px solid var(--accent-blue)' : '2px solid transparent', transition: 'all 0.2s' }}
         >
@@ -241,12 +289,14 @@ export default function Members() {
       <Card
         title={`${activeTab === 'managers' ? 'Danh sách Ban quản lý' : 'Danh sách Sinh viên & Thành viên'} (${activeTab === 'managers' ? managers.length : students.length})`}
         icon={Users}
+        style={{ color: 'var(--accent-blue)' }}
       >
         <DataTable
           data={activeTab === 'managers' ? managers : students}
           columns={membersColumns}
           globalFilter={searchTerm}
           setGlobalFilter={setSearchTerm}
+          searchPlaceholder="Tìm theo tên, MSSV hoặc chức vụ..."
         />
       </Card>
 

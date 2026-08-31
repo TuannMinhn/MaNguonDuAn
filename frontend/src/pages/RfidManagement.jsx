@@ -325,78 +325,164 @@ export default function RfidManagement({ userRole }) {
   };
 
   const cardsColumns = React.useMemo(() => [
-    { accessorKey: 'cardId', header: 'Mã thẻ', sortable: true, cell: (row) => (
-      <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-blue)', padding: '0.25rem 0.65rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'monospace' }}>
-        {row.cardId}
-      </span>
-    )},
-    { accessorKey: 'mssv', header: 'MSSV', sortable: true, cell: (row) => <span style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{row.mssv}</span> },
-    { accessorKey: 'userName', header: 'Họ và tên', sortable: true, cell: (row) => row.userName },
-    { accessorKey: 'status', header: 'Trạng thái', sortable: true, align: 'center', cell: (row) => (
-      <button
-        onClick={() => handleToggleStatus(row)}
-        className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}
-        style={{ cursor: 'pointer', border: 'none', background: row.status === 'active' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', fontFamily: 'var(--font-family)', color: row.status === 'active' ? 'var(--accent-green)' : 'var(--accent-red)' }}
-        title="Nhấn để đổi trạng thái"
-      >
-        {row.status === 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}
-      </button>
-    )},
-    { accessorKey: 'createdAt', header: 'Ngày đăng ký', sortable: true, cell: (row) => formatTime(row.createdAt) },
-    { accessorKey: 'lastUsed', header: 'Lần quét cuối', sortable: true, cell: (row) => formatTime(row.lastUsed) },
-    { accessorKey: 'usageCount', header: 'Tổng lượt', align: 'center', sortable: true, cell: (row) => (
-      <span className="badge badge-info">{row.usageCount || 0}</span>
-    )},
-    { accessorKey: 'actions', header: 'Hành động', align: 'right', sortable: false, cell: (row) => (
-      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
-        <Button size="sm" variant="ghost" icon={Edit2} onClick={() => { setEditCard(row); setShowEditModal(true); }} title="Cập nhật thẻ" />
-        <Button size="sm" variant="danger" icon={Trash2} onClick={() => setShowDeleteConfirm(row)} title="Xóa thẻ" />
-      </div>
-    )}
+    { 
+      accessorKey: 'cardId', 
+      header: 'Mã thẻ', 
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ color: 'var(--accent-purple)', fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem' }}>
+          {row.cardId}
+        </span>
+      )
+    },
+    { 
+      accessorKey: 'mssv', 
+      header: 'MSSV', 
+      sortable: true, 
+      cell: (row) => <span style={{ fontFamily: 'monospace', fontSize: '0.88rem' }}>{row.mssv}</span> 
+    },
+    { 
+      accessorKey: 'userName', 
+      header: 'Họ và tên', 
+      sortable: true, 
+      cell: (row) => <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{row.userName}</span> 
+    },
+    { 
+      accessorKey: 'status', 
+      header: 'Trạng thái', 
+      sortable: true, 
+      align: 'center', 
+      cell: (row) => (
+        <button
+          onClick={() => handleToggleStatus(row)}
+          className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}
+          style={{ cursor: 'pointer', border: 'none', background: row.status === 'active' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', fontFamily: 'var(--font-family)', color: row.status === 'active' ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 600 }}
+          title="Nhấn để đổi trạng thái thẻ"
+          aria-label="Đổi trạng thái thẻ"
+        >
+          {row.status === 'active' ? '🟢 Hoạt động' : '🔴 Vô hiệu'}
+        </button>
+      )
+    },
+    { 
+      accessorKey: 'createdAt', 
+      header: 'Ngày đăng ký', 
+      sortable: true, 
+      cell: (row) => <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{formatTime(row.createdAt)}</span> 
+    },
+    { 
+      accessorKey: 'lastUsed', 
+      header: 'Lần quét cuối', 
+      sortable: true, 
+      cell: (row) => <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{formatTime(row.lastUsed)}</span> 
+    },
+    { 
+      accessorKey: 'usageCount', 
+      header: 'Tổng lượt', 
+      align: 'right', 
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontWeight: 600, color: 'var(--accent-blue)', fontVariantNumeric: 'tabular-nums' }}>
+          {row.usageCount || 0}
+        </span>
+      )
+    },
+    { 
+      accessorKey: 'actions', 
+      header: 'Thao tác', 
+      align: 'right', 
+      sortable: false, 
+      cell: (row) => (
+        <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+          <Button size="sm" variant="ghost" icon={Edit2} onClick={() => { setEditCard(row); setShowEditModal(true); }} title="Cập nhật thẻ" aria-label="Cập nhật thẻ" />
+          <Button size="sm" variant="danger-ghost" icon={Trash2} onClick={() => setShowDeleteConfirm(row)} title="Xóa thẻ" aria-label="Xóa thẻ" />
+        </div>
+      )
+    }
   ], []);
 
   const historyColumns = React.useMemo(() => [
-    { accessorKey: 'timestamp', header: 'Thời gian', sortable: true, cell: (row) => (
-      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-        <Clock size={13} style={{ display: 'inline', marginRight: '0.35rem', verticalAlign: 'middle' }} />
-        {formatTime(row.timestamp)}
-      </span>
-    )},
-    { accessorKey: 'cardId', header: 'Mã thẻ', sortable: true, cell: (row) => (
-      <span style={{ fontFamily: 'monospace', background: 'rgba(59,130,246,0.1)', color: 'var(--accent-blue)', padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.82rem' }}>
-        {row.cardId}
-      </span>
-    )},
-    { accessorKey: 'mssv', header: 'MSSV', sortable: true, cell: (row) => <span style={{ fontFamily: 'monospace', fontSize: '0.88rem' }}>{row.mssv || '—'}</span> },
-    { accessorKey: 'userName', header: 'Họ và tên', sortable: true, cell: (row) => row.userName || '—' },
-    { accessorKey: 'module', header: 'Module', sortable: true, cell: (row) => <span className="badge badge-info">{moduleLabel(row.module)}</span> },
-    { accessorKey: 'action', header: 'Hành động', sortable: true, cell: (row) => (
-      <span style={{ fontSize: '0.85rem', fontWeight: 500, color: row.action === 'attendance-denied' || row.action === 'delete' ? 'var(--accent-red)' : 'var(--text-primary)' }}>
-        {actionLabel(row.action)}
-      </span>
-    )},
-    { accessorKey: 'status', header: 'Kết quả', sortable: true, cell: (row) => (
-      row.success ? (
-        <span className="badge badge-success"><CheckCircle size={12} style={{ marginRight: '0.25rem' }} /> OK</span>
-      ) : (
-        <span className="badge badge-danger"><XCircle size={12} style={{ marginRight: '0.25rem' }} /> Lỗi</span>
+    { 
+      accessorKey: 'timestamp', 
+      header: 'Thời gian', 
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+          <Clock size={13} style={{ display: 'inline', marginRight: '0.35rem', verticalAlign: 'middle' }} />
+          {formatTime(row.timestamp)}
+        </span>
       )
-    )}
+    },
+    { 
+      accessorKey: 'cardId', 
+      header: 'Mã thẻ', 
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontFamily: 'monospace', color: 'var(--accent-purple)', fontWeight: 600, fontSize: '0.85rem' }}>
+          {row.cardId}
+        </span>
+      )
+    },
+    { 
+      accessorKey: 'mssv', 
+      header: 'MSSV', 
+      sortable: true, 
+      cell: (row) => <span style={{ fontFamily: 'monospace', fontSize: '0.88rem' }}>{row.mssv || '—'}</span> 
+    },
+    { 
+      accessorKey: 'userName', 
+      header: 'Họ và tên', 
+      sortable: true, 
+      cell: (row) => <span style={{ fontWeight: 500 }}>{row.userName || '—'}</span> 
+    },
+    { 
+      accessorKey: 'module', 
+      header: 'Module', 
+      sortable: true, 
+      cell: (row) => <span className="badge badge-info">{moduleLabel(row.module)}</span> 
+    },
+    { 
+      accessorKey: 'action', 
+      header: 'Hành động', 
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontSize: '0.85rem', fontWeight: 500, color: row.action === 'attendance-denied' || row.action === 'delete' ? 'var(--accent-red)' : 'var(--text-primary)' }}>
+          {actionLabel(row.action)}
+        </span>
+      )
+    },
+    { 
+      accessorKey: 'status', 
+      header: 'Kết quả', 
+      sortable: true, 
+      align: 'right',
+      cell: (row) => (
+        row.success ? (
+          <span className="badge badge-success"><CheckCircle size={12} style={{ marginRight: '0.25rem' }} /> Thành công</span>
+        ) : (
+          <span className="badge badge-danger"><XCircle size={12} style={{ marginRight: '0.25rem' }} /> Thất bại</span>
+        )
+      )
+    }
   ], []);
 
   return (
     <div className="page-container fade-in">
       {/* Header */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ paddingRight: '60px' }}>
-          <h2 className="page-header">
-            <CreditCard className="text-purple-500" size={20} />
-            Quản lý thẻ RFID
-          </h2>
-          <p className="page-subtitle" style={{ marginTop: '0.25rem' }}>Đăng ký, quản lý và theo dõi lịch sử quét thẻ RFID</p>
-        </div>
-        <div style={{ alignSelf: 'flex-end' }}>
-          <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => setShowAddModal(true)}>Đăng ký thẻ mới</Button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2 className="page-header">
+              <CreditCard className="text-purple-500" size={20} />
+              Quản lý thẻ RFID
+            </h2>
+            <p className="page-subtitle">Đăng ký, quản lý và theo dõi lịch sử quét thẻ RFID</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginRight: '4.5rem' }}>
+            <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => setShowAddModal(true)}>
+              Đăng ký thẻ mới
+            </Button>
+          </div>
         </div>
       </div>
 

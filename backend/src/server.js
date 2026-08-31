@@ -28,7 +28,20 @@ const DEFAULT_SETTINGS = {
   adminPassword: 'admin123',
   maxNotificationHistory: 500,
   rfidScanCooldownSeconds: 5,
-  defaultLabLocation: 'Kho Lab'
+  defaultLabLocation: 'Kho Lab',
+  kioskIdleTimeoutSeconds: 30,
+  slot_morning_1_start: '07:00',
+  slot_morning_1_end: '09:00',
+  slot_morning_2_start: '09:00',
+  slot_morning_2_end: '11:00',
+  slot_afternoon_1_start: '12:00',
+  slot_afternoon_1_end: '14:00',
+  slot_afternoon_2_start: '14:00',
+  slot_afternoon_2_end: '16:00',
+  slot_evening_1_start: '16:00',
+  slot_evening_1_end: '18:00',
+  slot_evening_2_start: '18:00',
+  slot_evening_2_end: '20:00'
 };
 
 function getSystemSetting(key) {
@@ -1767,13 +1780,30 @@ app.post('/api/bookings/rfid-access', (req, res) => {
 
   let currentSlotId = overrideSlotId;
   if (!currentSlotId) {
-    const hours = now.getHours();
-    if (hours >= 7 && hours < 9) currentSlotId = 'morning_1';
-    else if (hours >= 9 && hours < 11) currentSlotId = 'morning_2';
-    else if (hours >= 12 && hours < 14) currentSlotId = 'afternoon_1';
-    else if (hours >= 14 && hours < 16) currentSlotId = 'afternoon_2';
-    else if (hours >= 16 && hours < 18) currentSlotId = 'evening_1';
-    else if (hours >= 18 && hours < 20) currentSlotId = 'evening_2';
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const timeToMins = (timeStr, fallback) => {
+      try {
+        const parts = (timeStr || fallback).split(':').map(Number);
+        return parts[0] * 60 + (parts[1] || 0);
+      } catch (e) {
+        const parts = fallback.split(':').map(Number);
+        return parts[0] * 60 + (parts[1] || 0);
+      }
+    };
+
+    const slotsConfig = [
+      { id: 'morning_1', start: timeToMins(getSystemSetting('slot_morning_1_start'), '07:00'), end: timeToMins(getSystemSetting('slot_morning_1_end'), '09:00') },
+      { id: 'morning_2', start: timeToMins(getSystemSetting('slot_morning_2_start'), '09:00'), end: timeToMins(getSystemSetting('slot_morning_2_end'), '11:00') },
+      { id: 'afternoon_1', start: timeToMins(getSystemSetting('slot_afternoon_1_start'), '12:00'), end: timeToMins(getSystemSetting('slot_afternoon_1_end'), '14:00') },
+      { id: 'afternoon_2', start: timeToMins(getSystemSetting('slot_afternoon_2_start'), '14:00'), end: timeToMins(getSystemSetting('slot_afternoon_2_end'), '16:00') },
+      { id: 'evening_1', start: timeToMins(getSystemSetting('slot_evening_1_start'), '16:00'), end: timeToMins(getSystemSetting('slot_evening_1_end'), '18:00') },
+      { id: 'evening_2', start: timeToMins(getSystemSetting('slot_evening_2_start'), '18:00'), end: timeToMins(getSystemSetting('slot_evening_2_end'), '20:00') }
+    ];
+
+    const matchingSlot = slotsConfig.find(s => currentMinutes >= s.start && currentMinutes < s.end);
+    if (matchingSlot) {
+      currentSlotId = matchingSlot.id;
+    }
   }
 
   if (!currentSlotId) {
@@ -2011,9 +2041,18 @@ app.get('/api/reports/comprehensive', (req, res) => {
   });
 
   const SESSIONS_DATA = [
-    { key: 'morning', label: 'Sáng', slots: [{ id: 'morning_1', label: '7:00 – 9:00' }, { id: 'morning_2', label: '9:00 – 11:00' }] },
-    { key: 'afternoon', label: 'Chiều', slots: [{ id: 'afternoon_1', label: '12:00 – 14:00' }, { id: 'afternoon_2', label: '14:00 – 16:00' }] },
-    { key: 'evening', label: 'Tối', slots: [{ id: 'evening_1', label: '16:00 – 18:00' }, { id: 'evening_2', label: '18:00 – 20:00' }] },
+    { key: 'morning', label: 'Sáng', slots: [
+      { id: 'morning_1', label: `${getSystemSetting('slot_morning_1_start') || '07:00'} – ${getSystemSetting('slot_morning_1_end') || '09:00'}` },
+      { id: 'morning_2', label: `${getSystemSetting('slot_morning_2_start') || '09:00'} – ${getSystemSetting('slot_morning_2_end') || '11:00'}` }
+    ] },
+    { key: 'afternoon', label: 'Chiều', slots: [
+      { id: 'afternoon_1', label: `${getSystemSetting('slot_afternoon_1_start') || '12:00'} – ${getSystemSetting('slot_afternoon_1_end') || '14:00'}` },
+      { id: 'afternoon_2', label: `${getSystemSetting('slot_afternoon_2_start') || '14:00'} – ${getSystemSetting('slot_afternoon_2_end') || '16:00'}` }
+    ] },
+    { key: 'evening', label: 'Tối', slots: [
+      { id: 'evening_1', label: `${getSystemSetting('slot_evening_1_start') || '16:00'} – ${getSystemSetting('slot_evening_1_end') || '18:00'}` },
+      { id: 'evening_2', label: `${getSystemSetting('slot_evening_2_start') || '18:00'} – ${getSystemSetting('slot_evening_2_end') || '20:00'}` }
+    ] },
   ];
 
   let peakSlotLabel = 'Chưa có';
@@ -2293,6 +2332,123 @@ app.delete('/api/settings/catalog/:id', (req, res) => {
 
   writeCollection('equipment_catalog', catalog);
   res.json({ success: true, message: 'Đã xóa thành công' });
+});
+
+// ==========================================
+// API SYSTEM CATEGORIES (Quản lý Danh mục phân loại)
+// ==========================================
+
+app.get('/api/categories', (req, res) => {
+  const categories = readCollection('categories', []);
+  res.json(categories);
+});
+
+app.post('/api/categories', (req, res) => {
+  const { name, description } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Tên danh mục không được để trống' });
+  }
+
+  const trimmedName = name.trim();
+  const categories = readCollection('categories', []);
+
+  if (categories.some(c => c.name.toLowerCase() === trimmedName.toLowerCase())) {
+    return res.status(400).json({ error: `Danh mục "${trimmedName}" đã tồn tại` });
+  }
+
+  const newCategory = {
+    id: uuidv4(),
+    name: trimmedName,
+    description: description ? description.trim() : ''
+  };
+
+  categories.push(newCategory);
+  writeCollection('categories', categories);
+  res.status(201).json(newCategory);
+});
+
+app.put('/api/categories/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
+
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Tên danh mục không được để trống' });
+  }
+
+  const trimmedName = name.trim();
+  const categories = readCollection('categories', []);
+  const index = categories.findIndex(c => c.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Không tìm thấy danh mục' });
+  }
+
+  if (categories.some(c => c.id !== id && c.name.toLowerCase() === trimmedName.toLowerCase())) {
+    return res.status(400).json({ error: `Danh mục "${trimmedName}" đã tồn tại` });
+  }
+
+  const oldName = categories[index].name;
+  categories[index] = {
+    ...categories[index],
+    name: trimmedName,
+    description: description !== undefined ? description.trim() : categories[index].description
+  };
+
+  writeCollection('categories', categories);
+
+  // Nếu đổi tên danh mục, cập nhật đồng bộ các thiết bị và catalog đang dùng danh mục này
+  if (oldName !== trimmedName) {
+    const equipment = readCollection('equipment', []);
+    let eqUpdated = false;
+    equipment.forEach(e => {
+      if (e.category === oldName) {
+        e.category = trimmedName;
+        eqUpdated = true;
+      }
+    });
+    if (eqUpdated) writeCollection('equipment', equipment);
+
+    const catalog = readCollection('equipment_catalog', []);
+    let catUpdated = false;
+    catalog.forEach(c => {
+      if (c.category === oldName) {
+        c.category = trimmedName;
+        catUpdated = true;
+      }
+    });
+    if (catUpdated) writeCollection('equipment_catalog', catalog);
+  }
+
+  res.json(categories[index]);
+});
+
+app.delete('/api/categories/:id', (req, res) => {
+  const { id } = req.params;
+  const categories = readCollection('categories', []);
+  const index = categories.findIndex(c => c.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Không tìm thấy danh mục' });
+  }
+
+  const categoryToDelete = categories[index];
+
+  // Kiểm tra ràng buộc dữ liệu: xem có thiết bị hoặc catalog nào đang sử dụng danh mục này không
+  const equipment = readCollection('equipment', []);
+  const inUseByEquipment = equipment.filter(e => e.category === categoryToDelete.name);
+
+  const catalog = readCollection('equipment_catalog', []);
+  const inUseByCatalog = catalog.filter(c => c.category === categoryToDelete.name);
+
+  if (inUseByEquipment.length > 0 || inUseByCatalog.length > 0) {
+    return res.status(400).json({
+      error: `Không thể xóa danh mục "${categoryToDelete.name}" vì đang có ${inUseByEquipment.length} thiết bị và ${inUseByCatalog.length} mẫu danh mục gốc đang sử dụng.`
+    });
+  }
+
+  const filtered = categories.filter(c => c.id !== id);
+  writeCollection('categories', filtered);
+  res.json({ success: true, message: `Đã xóa danh mục "${categoryToDelete.name}" thành công` });
 });
 
 // ==========================================

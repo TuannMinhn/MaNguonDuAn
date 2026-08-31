@@ -29,6 +29,7 @@ export default function Dashboard() {
   const { data: rfidHistory } = useSWR(`${API_BASE_URL}/rfid-history`, fetcher);
   const { data: borrows } = useSWR(`${API_BASE_URL}/equipment-borrows`, fetcher);
   const { data: allBookings } = useSWR(`${API_BASE_URL}/bookings/all`, fetcher);
+  const { data: systemSettings } = useSWR(`${API_BASE_URL}/settings`, fetcher);
 
   // Tối ưu O(1) — tính toán 1 lần khi data đổi
   const dashboardData = useMemo(() => {
@@ -59,67 +60,57 @@ export default function Dashboard() {
     let i = 0;
     while (i < sortedHistory.length) {
       const current = sortedHistory[i];
-      if (current.module === 'room_booking' && current.action.startsWith('book_')) {
-        let count = 1;
-        const groupTime = new Date(current.timestamp).getTime();
-        let j = i + 1;
-        while (j < sortedHistory.length && sortedHistory[j].module === 'room_booking' && sortedHistory[j].action.startsWith('book_')) {
-          if (Math.abs(groupTime - new Date(sortedHistory[j].timestamp).getTime()) < 5000) { count++; j++; }
-          else break;
-        }
-        if (count > 1) {
-          const groupMembers = [];
-          for (let k = i; k < j; k++) groupMembers.push(`- ${sortedHistory[k].userName} (${sortedHistory[k].mssv})`);
-          groupedHistory.push({ ...current, id: current.id + '_group', userName: `Nhóm ${count} người`, mssv: 'Nhiều thành viên', action: 'book_group', groupMembers });
-          i = j; continue;
-        }
+      const match = borrows.find(b => b.mssv === current.mssv && b.borrowDate && Math.abs(new Date(b.borrowDate) - new Date(current.timestamp)) < 60000);
+      if (match) {
+        groupedHistory.push({ ...current, equipmentName: match.equipmentName, equipmentCode: match.equipmentCode });
+      } else {
+        groupedHistory.push(current);
       }
-      groupedHistory.push(current);
       i++;
     }
 
     // 4. Charts Data
-    const categories = {};
-    equip.forEach(e => { categories[e.category] = (categories[e.category] || 0) + e.totalQty; });
-    const equipCategoryData = Object.entries(categories).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
+    const equipCategory = equip.reduce((acc, item) => {
+      acc[item.category] = (acc[item.category] || 0) + item.totalQty;
+      return acc;
+    }, {});
+    const equipCategoryData = Object.entries(equipCategory).map(([name, value]) => ({ name, value }));
 
-    const last7Days = Array.from({length: 7}).map((_, idx) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (6 - idx));
-      return { date: d.toISOString().split('T')[0], display: `${d.getDate()}/${d.getMonth()+1}`, attendanceCount: 0, bookingCount: 0, borrowCount: 0 };
-    });
-    const dayMap = new Map();
-    last7Days.forEach(d => dayMap.set(d.date, d));
-    rfidHistory.forEach(h => {
-      const dayData = dayMap.get(h.timestamp.split('T')[0]);
-      if (dayData) {
-        if (h.module === 'attendance' && (h.action === 'check-in' || h.action === 'scan')) dayData.attendanceCount++;
-        else if (h.module === 'room_booking' && h.action.startsWith('book_')) dayData.bookingCount++;
-        else if (h.module === 'equipment' && h.action === 'borrow') dayData.borrowCount++;
-      }
-    });
-
-    const validDates = last7Days.map(d => d.date);
+    // Traffic Trends (Last 7 Days)
+    const last7Days = [];
+    const validDates = [];
+    for (let d = 6; d >= 0; d--) {
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - d);
+      const dateStr = targetDate.toISOString().split('T')[0];
+      validDates.push(dateStr);
+      const dayName = targetDate.toLocaleDateString('vi-VN', { weekday: 'short' });
+      const dayHistory = rfidHistory.filter(h => h.timestamp && h.timestamp.startsWith(dateStr));
+      last7Days.push({
+        name: dayName,
+        checkIn: dayHistory.filter(h => h.action.includes('checkin') || h.action.includes('check-in')).length,
+        checkOut: dayHistory.filter(h => h.action.includes('checkout') || h.action.includes('check-out')).length
+      });
+    }
 
     // 5. Top Equipment & Top Slots
     const equipmentMap = {};
     borrows.forEach(b => {
-      if (validDates.includes(b.borrowDate?.split('T')[0])) {
-        equipmentMap[b.equipmentName] = (equipmentMap[b.equipmentName] || 0) + (b.qty || 1);
-      }
+      equipmentMap[b.equipmentName] = (equipmentMap[b.equipmentName] || 0) + (b.qty || 1);
     });
     const topEquipment = Object.entries(equipmentMap)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
 
+    const s = systemSettings || {};
     const slotLabels = [
-      { id: 'morning_1', label: '7:30–9:30' },
-      { id: 'morning_2', label: '9:30–11:30' },
-      { id: 'afternoon_1', label: '12:00–14:00' },
-      { id: 'afternoon_2', label: '14:00–16:30' },
-      { id: 'evening_1', label: '16:30–18:30' },
-      { id: 'evening_2', label: '18:30–20:30' }
+      { id: 'morning_1', label: `${s.slot_morning_1_start || '07:00'}–${s.slot_morning_1_end || '09:00'}` },
+      { id: 'morning_2', label: `${s.slot_morning_2_start || '09:00'}–${s.slot_morning_2_end || '11:00'}` },
+      { id: 'afternoon_1', label: `${s.slot_afternoon_1_start || '12:00'}–${s.slot_afternoon_1_end || '14:00'}` },
+      { id: 'afternoon_2', label: `${s.slot_afternoon_2_start || '14:00'}–${s.slot_afternoon_2_end || '16:00'}` },
+      { id: 'evening_1', label: `${s.slot_evening_1_start || '16:00'}–${s.slot_evening_1_end || '18:00'}` },
+      { id: 'evening_2', label: `${s.slot_evening_2_start || '18:00'}–${s.slot_evening_2_end || '20:00'}` }
     ];
     const topSlots = slotLabels.map(slot => ({
       name: slot.label,
@@ -127,7 +118,7 @@ export default function Dashboard() {
     }));
 
     return { stats, activeMembersList: active, overdueEquip: overdue, recentActivities: groupedHistory.slice(0, 10), chartData: { equipCategory: equipCategoryData, trafficTrends: last7Days, topEquipment, topSlots } };
-  }, [members, equip, rfidHistory, borrows, allBookings]);
+  }, [members, equip, rfidHistory, borrows, allBookings, systemSettings]);
 
   const formatTime = (isoString) => {
     if (!isoString) return '-';
@@ -553,13 +544,37 @@ export default function Dashboard() {
 
           {/* Đang trực Lab */}
           <div className="glass-card chart-card">
-            <h3 className="chart-header">
-              <Users size={16} style={{ color: 'var(--accent-green)' }} />
-              Đang trực Lab
-              <span style={{ marginLeft: 'auto', fontSize: '0.72rem', background: activeMembersList.length > 0 ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)', color: activeMembersList.length > 0 ? 'var(--accent-green)' : 'var(--text-muted)', padding: '2px 8px', borderRadius: 20, fontWeight: 600, textTransform: 'none', letterSpacing: 0 }}>
-                {activeMembersList.length} người
-              </span>
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="chart-header" style={{ margin: 0 }}>
+                <Users size={16} style={{ color: 'var(--accent-green)' }} />
+                Đang trực Lab
+                <span style={{ fontSize: '0.72rem', background: activeMembersList.length > 0 ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)', color: activeMembersList.length > 0 ? 'var(--accent-green)' : 'var(--text-muted)', padding: '2px 8px', borderRadius: 20, fontWeight: 600, textTransform: 'none', letterSpacing: 0 }}>
+                  {activeMembersList.length} người
+                </span>
+              </h3>
+              {activeMembersList.length > 0 && (
+                <button
+                  onClick={() => handleOpenDetail('active')}
+                  title="Bấm để xem chi tiết danh sách đang trực Lab"
+                  aria-label="Xem chi tiết danh sách đang trực Lab"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--accent-green)',
+                    fontSize: '0.78rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                >
+                  Xem chi tiết <ArrowRight size={14} />
+                </button>
+              )}
+            </div>
             {activeMembersList.length === 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.75rem 1rem', color: 'var(--text-muted)', gap: '0.5rem', textAlign: 'center' }}>
                 <Clock size={28} style={{ opacity: 0.35 }} />
@@ -575,7 +590,12 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {activeMembersList.map(member => (
-                    <tr key={member.id}>
+                    <tr 
+                      key={member.id} 
+                      style={{ cursor: 'pointer' }} 
+                      onClick={() => handleOpenDetail('active')}
+                      title="Bấm để xem danh sách đang trực Lab"
+                    >
                       <td>
                         <div style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.82rem' }}>{member.name}</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{member.mssv}</div>

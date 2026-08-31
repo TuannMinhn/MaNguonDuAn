@@ -230,6 +230,7 @@ export default function Settings() {
       <Card
         title="Quy định Mượn Trả & Quản lý Kho"
         icon={Sliders}
+        style={{ color: 'var(--accent-blue)' }}
       >
         <form onSubmit={handleSaveSysConfig}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
@@ -339,6 +340,7 @@ export default function Settings() {
       <Card
         title="Chính sách Trực Lab & Điểm thưởng"
         icon={Tag}
+        style={{ color: 'var(--accent-amber)' }}
       >
         <form onSubmit={handleSaveSysConfig}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
@@ -434,6 +436,7 @@ export default function Settings() {
       <Card
         title="Vận hành Hệ thống & Bảo mật"
         icon={SettingsIcon}
+        style={{ color: 'var(--accent-green)' }}
       >
         <form onSubmit={handleSaveSysConfig}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>

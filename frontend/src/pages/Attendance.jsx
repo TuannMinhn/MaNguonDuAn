@@ -110,44 +110,106 @@ export default function Attendance() {
   };
 
   const attendanceColumns = React.useMemo(() => [
-    { accessorKey: 'mssv', header: 'MSSV', sortable: true, cell: (row) => <span style={{ fontWeight: '500' }}>{row.mssv}</span> },
-    { accessorKey: 'name', header: 'Họ Tên', sortable: true, cell: (row) => <span style={{ fontWeight: '500' }}>{row.name}</span> },
-    { accessorKey: 'checkInTime', header: 'Thời gian Check-in', sortable: true, cell: (row) => formatTime(row.checkInTime) },
-    { accessorKey: 'checkOutTime', header: 'Thời gian Check-out', sortable: true, cell: (row) => formatTime(row.checkOutTime) },
-    { accessorKey: 'duration', header: 'Thời lượng', sortable: true, cell: (row) => (
-      <span style={{ fontWeight: '600', color: 'var(--accent-green)' }}>
-        {row.duration !== null ? `${row.duration} giờ` : '-'}
-      </span>
-    )},
-    { accessorKey: 'status', header: 'Trạng thái', sortable: true, cell: (row) => (
-      row.checkOutTime ? (
-        <span className="badge badge-info">Đã hoàn thành</span>
-      ) : (
-        <span className="badge badge-success">Đang trực Lab</span>
+    { 
+      accessorKey: 'mssv', 
+      header: 'MSSV', 
+      width: '16%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontWeight: '700', color: 'var(--accent-purple)', fontVariantNumeric: 'tabular-nums' }}>
+          {row.mssv}
+        </span>
+      ) 
+    },
+    { 
+      accessorKey: 'name', 
+      header: 'Họ và Tên', 
+      width: '24%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+          {row.name}
+        </span>
+      ) 
+    },
+    { 
+      accessorKey: 'checkInTime', 
+      header: 'Thời gian Vào', 
+      width: '20%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+          {formatTime(row.checkInTime)}
+        </span>
+      ) 
+    },
+    { 
+      accessorKey: 'checkOutTime', 
+      header: 'Thời gian Ra', 
+      width: '20%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+          {row.checkOutTime ? formatTime(row.checkOutTime) : <span style={{ color: 'var(--text-muted)' }}>-</span>}
+        </span>
+      ) 
+    },
+    { 
+      accessorKey: 'duration', 
+      header: 'Thời lượng', 
+      width: '10%',
+      sortable: true, 
+      align: 'right',
+      cell: (row) => (
+        <span style={{ fontWeight: '600', color: row.duration !== null ? 'var(--accent-blue)' : 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+          {row.duration !== null ? `${row.duration}h` : '-'}
+        </span>
       )
-    )}
+    },
+    { 
+      accessorKey: 'status', 
+      header: 'Trạng thái', 
+      width: '10%',
+      sortable: true, 
+      align: 'right',
+      cell: (row) => (
+        row.checkOutTime ? (
+          <span className="badge badge-info" style={{ fontWeight: '500' }}>
+            Đã về
+          </span>
+        ) : (
+          <span className="badge badge-success" style={{ fontWeight: '600' }}>
+            🟢 Đang trực
+          </span>
+        )
+      )
+    }
   ], []);
 
   return (
     <div className="page-container fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h2 className="page-header">
-            <Clock className="text-blue-500" size={20} />
-            Nhật ký điểm danh trực Lab
-          </h2>
-          <p className="page-subtitle">Lịch sử chi tiết hoạt động Check-in và Check-out của các thành viên CLB</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2 className="page-header">
+              <Clock className="text-blue-500" size={20} />
+              Nhật ký điểm danh trực Lab
+            </h2>
+            <p className="page-subtitle">Lịch sử chi tiết hoạt động Check-in và Check-out của các thành viên CLB</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginRight: '4.5rem' }}>
+            <Button 
+              variant="primary" 
+              onClick={() => {
+                setShowRfidModal(true);
+                setScannedUser(null);
+                setCheckResult(null);
+              }}
+            >
+              🔐 Quét thẻ điểm danh
+            </Button>
+          </div>
         </div>
-        <Button 
-          variant="primary" 
-          onClick={() => {
-            setShowRfidModal(true);
-            setScannedUser(null);
-            setCheckResult(null);
-          }}
-        >
-          🔐 Quét thẻ điểm danh
-        </Button>
       </div>
 
       {/* Thống kê nhanh */}
@@ -193,6 +255,7 @@ export default function Attendance() {
       <Card
         title={`Lịch sử chi tiết (${logs.length})`}
         icon={Clock}
+        style={{ color: 'var(--accent-blue)' }}
       >
         <DataTable
           data={logs}

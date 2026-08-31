@@ -127,49 +127,80 @@ export default function StudentEquipment() {
 
 
   const equipmentColumns = React.useMemo(() => [
-    { accessorKey: 'code', header: 'Mã / Danh mục', sortable: true, cell: (row) => (
-      <div>
-        <div style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{row.code}</div>
-        <div className="text-muted" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-          <Package size={12} /> {row.category || 'Khác'}
+    { 
+      accessorKey: 'code', 
+      header: 'Mã thiết bị', 
+      width: '18%',
+      sortable: true, 
+      cell: (row) => (
+        <div>
+          <span style={{ color: 'var(--accent-purple)', fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem' }}>
+            {row.code}
+          </span>
+          <div className="text-muted" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.2rem', fontSize: '0.75rem' }}>
+            <Package size={12} /> {row.category || 'Khác'}
+          </div>
         </div>
-      </div>
-    )},
-    { accessorKey: 'name', header: activeTab === 'equipment' ? 'Tên thiết bị' : 'Tên linh kiện', sortable: true, cell: (row) => (
-      <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{row.name}</span>
-    )},
-    { accessorKey: 'location', header: 'Vị trí', sortable: true, cell: (row) => (
-      <span style={{ color: 'var(--text-secondary)' }}>{row.location || 'Kho Lab'}</span>
-    )},
-    { accessorKey: 'availability', header: 'Còn lại / Tổng', sortable: true, align: 'center', cell: (row) => {
-      const isComponent = row.assetType && (row.assetType.toLowerCase().includes('linh kiện') || row.assetType.toLowerCase().includes('vật tư'));
-      const available = isComponent ? row.totalQty : row.totalQty - (row.borrowedQty || 0);
-      const isAvailable = available > 0;
-      return (
-        <span>
-          <span style={{ fontWeight: '600', color: isAvailable ? 'var(--accent-green)' : 'var(--accent-red)' }}>{available}</span>
-          {!isComponent && <span style={{ color: 'var(--text-muted)' }}>/{row.totalQty}</span>}
-        </span>
-      );
-    }},
-    { accessorKey: 'assetType', header: 'Phân loại', sortable: true, align: 'center', cell: (row) => (
-      <span className="text-muted">{row.assetType || 'Thiết bị'}</span>
-    )},
-    { accessorKey: 'actions', header: 'Thao tác', sortable: false, align: 'right', cell: (row) => {
-      const isComponent = row.assetType && (row.assetType.toLowerCase().includes('linh kiện') || row.assetType.toLowerCase().includes('vật tư'));
-      const available = isComponent ? row.totalQty : row.totalQty - (row.borrowedQty || 0);
-      const isAvailable = available > 0;
-      return (
-        <Button
-          size="sm"
-          variant="primary"
-          onClick={() => { setSelectedEq(row); setShowModal(true); setAlert(null); setQty(1); }}
-          disabled={!isAvailable}
-        >
-          {activeTab === 'equipment' ? 'Mượn' : 'Xin cấp phát'}
-        </Button>
-      );
-    }}
+      )
+    },
+    { 
+      accessorKey: 'name', 
+      header: activeTab === 'equipment' ? 'Tên thiết bị' : 'Tên linh kiện', 
+      width: '32%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{row.name}</span>
+      )
+    },
+    { 
+      accessorKey: 'location', 
+      header: 'Vị trí lưu kho', 
+      width: '18%',
+      sortable: true, 
+      cell: (row) => (
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{row.location || 'Kho Lab'}</span>
+      )
+    },
+    { 
+      accessorKey: 'availability', 
+      header: 'Khả dụng / Tổng', 
+      width: '18%',
+      sortable: true, 
+      align: 'center', 
+      cell: (row) => {
+        const isComponent = row.assetType && (row.assetType.toLowerCase().includes('linh kiện') || row.assetType.toLowerCase().includes('vật tư'));
+        const available = isComponent ? row.totalQty : row.totalQty - (row.borrowedQty || 0);
+        const isAvailable = available > 0;
+        return (
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontWeight: '700', color: isAvailable ? 'var(--accent-green)' : 'var(--accent-red)' }}>{available}</span>
+            {!isComponent && <span style={{ color: 'var(--text-muted)' }}>/{row.totalQty}</span>}
+          </span>
+        );
+      }
+    },
+    { 
+      accessorKey: 'actions', 
+      header: 'Thao tác', 
+      width: '14%',
+      sortable: false, 
+      align: 'right', 
+      cell: (row) => {
+        const isComponent = row.assetType && (row.assetType.toLowerCase().includes('linh kiện') || row.assetType.toLowerCase().includes('vật tư'));
+        const available = isComponent ? row.totalQty : row.totalQty - (row.borrowedQty || 0);
+        const isAvailable = available > 0;
+        return (
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => { setSelectedEq(row); setShowModal(true); setAlert(null); setQty(1); }}
+            disabled={!isAvailable}
+          >
+            {activeTab === 'equipment' ? 'Mượn' : 'Xin cấp phát'}
+          </Button>
+        );
+      }
+    }
   ], [activeTab]);
 
   return (
@@ -182,32 +213,34 @@ export default function StudentEquipment() {
           <Package className="text-blue-500" size={20} />
           Kho thiết bị & Dụng cụ
         </h2>
-        <p className="page-subtitle">Xem trước số lượng và đặt mượn online. Vui lòng đến phòng Lab quét thẻ RFID để nhận thiết bị.</p>
+        <p className="page-subtitle">Xem trước số lượng và đặt mượn online. Vui lòng đến phòng Lab quét thẻ RFID để nhận thiết bị</p>
       </div>
 
       <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
         <button
-          onClick={() => setActiveTab('equipment')}
+          onClick={() => { setActiveTab('equipment'); setSelectedCategory('Tất cả'); setSearchTerm(''); }}
           style={{
             padding: '0.75rem 1rem',
             background: 'none', border: 'none', cursor: 'pointer',
             fontWeight: activeTab === 'equipment' ? '600' : '500',
             color: activeTab === 'equipment' ? 'var(--accent-blue)' : 'var(--text-secondary)',
             borderBottom: activeTab === 'equipment' ? '2px solid var(--accent-blue)' : '2px solid transparent',
-            display: 'flex', alignItems: 'center', gap: '0.5rem'
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            fontFamily: 'var(--font-family)', fontSize: '0.95rem'
           }}
         >
           <Package size={18} /> Thiết bị
         </button>
         <button
-          onClick={() => setActiveTab('components')}
+          onClick={() => { setActiveTab('components'); setSelectedCategory('Tất cả'); setSearchTerm(''); }}
           style={{
             padding: '0.75rem 1rem',
             background: 'none', border: 'none', cursor: 'pointer',
             fontWeight: activeTab === 'components' ? '600' : '500',
             color: activeTab === 'components' ? 'var(--accent-blue)' : 'var(--text-secondary)',
             borderBottom: activeTab === 'components' ? '2px solid var(--accent-blue)' : '2px solid transparent',
-            display: 'flex', alignItems: 'center', gap: '0.5rem'
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            fontFamily: 'var(--font-family)', fontSize: '0.95rem'
           }}
         >
           <Package size={18} /> Linh kiện / Vật tư
@@ -215,8 +248,9 @@ export default function StudentEquipment() {
       </div>
 
       <Card
-        title={`Danh sách thiết bị / linh kiện (${filteredEq.length})`}
+        title={`Danh sách ${activeTab === 'equipment' ? 'thiết bị' : 'linh kiện'} (${filteredEq.length})`}
         icon={Package}
+        style={{ color: 'var(--accent-blue)' }}
         action={
           <div style={{ width: '240px', flexShrink: 0 }}>
             <Select
@@ -233,7 +267,10 @@ export default function StudentEquipment() {
         <DataTable
           data={filteredEq}
           columns={equipmentColumns}
+          globalFilter={searchTerm}
+          setGlobalFilter={setSearchTerm}
           searchKeys={['name', 'code', 'category', 'location']}
+          searchPlaceholder="Tìm theo tên, mã thiết bị hoặc vị trí..."
         />
       </Card>
 

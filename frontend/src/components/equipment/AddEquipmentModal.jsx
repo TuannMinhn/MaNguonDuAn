@@ -24,6 +24,10 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
   });
 
   const { data: catalog } = useSWR(`${API_BASE_URL}/settings/catalog`, fetcher);
+  const { data: categoriesData = [] } = useSWR(`${API_BASE_URL}/categories`, fetcher);
+  const categoryOptions = categoriesData.length > 0 
+    ? categoriesData.map(c => ({ value: c.name, label: c.name }))
+    : CATEGORIES.map(c => ({ value: c, label: c }));
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredCatalog, setFilteredCatalog] = useState([]);
@@ -277,7 +281,7 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
                 <Select
                   value={newEquip.category}
                   onChange={(val) => setNewEquip({ ...newEquip, category: val })}
-                  options={CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+                  options={categoryOptions}
                 />
               </div>
               <div className="form-group">

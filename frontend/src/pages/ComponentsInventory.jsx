@@ -203,21 +203,34 @@ export default function ComponentsInventory() {
         const isOutOfStock = row.totalQty <= 0;
         const isLowStock = row.totalQty <= minThreshold && row.totalQty > 0;
         return (
-          <div style={{ fontWeight: '700', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <div style={{ fontWeight: '700', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             {isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-red)' }} title="Hết hàng" />}
             {isLowStock && !isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-amber)' }} title="Sắp hết hàng" />}
-            {row.code || 'N/A'}
+            <span>{row.code || 'N/A'}</span>
           </div>
         );
       }
     },
     {
       accessorKey: 'name',
-      header: 'Tên linh kiện',
-      width: '45%',
+      header: 'Tên linh kiện / Vị trí',
+      width: '42%',
       sortable: true,
       align: 'left',
-      cell: (row) => <div style={{ fontWeight: '600', textAlign: 'left' }}>{row.name}</div>
+      cell: (row) => (
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.35 }}>{row.name}</div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <span>{row.category || 'Khác'}</span>
+            {row.location && (
+              <>
+                <span>·</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Vị trí: <strong>{row.location}</strong></span>
+              </>
+            )}
+          </div>
+        </div>
+      )
     },
     {
       accessorKey: 'totalQty',
@@ -227,11 +240,24 @@ export default function ComponentsInventory() {
       align: 'right',
       cell: (row) => {
         const minThreshold = row.minThreshold || 0;
+        const isOutOfStock = row.totalQty <= 0;
+        const isLowStock = row.totalQty <= minThreshold && row.totalQty > 0;
+        const unit = row.unit || 'Cái';
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
-            <span style={{ color: row.totalQty > minThreshold ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-              {row.totalQty}
-            </span>
+            <div style={{ fontSize: '0.95rem' }}>
+              <span style={{ color: isOutOfStock ? 'var(--accent-red)' : isLowStock ? 'var(--accent-amber)' : 'var(--accent-green)' }}>
+                {row.totalQty}
+              </span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 'normal', fontSize: '0.8rem', marginLeft: '0.25rem' }}>
+                {unit}
+              </span>
+            </div>
+            {isOutOfStock ? (
+              <span style={{ fontSize: '0.7rem', color: 'var(--accent-red)', background: 'rgba(239,68,68,0.12)', padding: '2px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '600' }}>Hết hàng</span>
+            ) : isLowStock ? (
+              <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '2px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '600' }}>Sắp hết</span>
+            ) : null}
           </div>
         );
       }
@@ -239,17 +265,36 @@ export default function ComponentsInventory() {
     {
       accessorKey: 'actions',
       header: 'Thao tác',
-      width: '20%',
+      width: '25%',
       sortable: false,
       align: 'right',
       cell: (row) => (
-        <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end', width: '100%' }}>
-          <Button size="sm" variant="primary"
+        <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center', width: '100%' }}>
+          <Button 
+            size="sm" 
+            variant="primary"
+            style={{ height: '32px' }}
             onClick={() => handleBorrowClick(row)}
             disabled={row.totalQty === 0}
-          >Xuất kho</Button>
-          <Button size="sm" variant="ghost" icon={Edit3} onClick={() => handleEditClick(row)} />
-          <Button size="sm" variant="danger" icon={Trash2} onClick={() => handleDeleteEquip(row.id, row.name)} />
+          >
+            Xuất kho
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            icon={Edit3} 
+            title="Sửa thông tin"
+            aria-label="Sửa linh kiện"
+            onClick={() => handleEditClick(row)} 
+          />
+          <Button 
+            size="sm" 
+            variant="danger-ghost" 
+            icon={Trash2} 
+            title="Xóa linh kiện"
+            aria-label="Xóa linh kiện"
+            onClick={() => handleDeleteEquip(row.id, row.name)} 
+          />
         </div>
       )
     }

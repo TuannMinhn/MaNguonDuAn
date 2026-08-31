@@ -13,7 +13,7 @@ import Card from '../components/Card';
 import EmptyState from '../components/EmptyState';
 import { Users, Clock, Calendar, Info, X, CheckCircle, XCircle, UserPlus, Download, Zap, Briefcase, FileText, Plus } from 'lucide-react';
 
-const SESSIONS = [
+const DEFAULT_SESSIONS = [
   {
     key: 'morning', label: 'Sáng',
     slots: [
@@ -43,6 +43,34 @@ export default function RoomHistory() {
   const [customEnd, setCustomEnd] = useState('');
   const [reportUrl, setReportUrl] = useState('');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const { data: systemSettings } = useSWR(`${API_BASE_URL}/settings`, fetcher);
+
+  const SESSIONS = useMemo(() => {
+    if (!systemSettings) return DEFAULT_SESSIONS;
+    return [
+      {
+        key: 'morning', label: 'Sáng',
+        slots: [
+          { id: 'morning_1', label: `${systemSettings.slot_morning_1_start || '07:00'} – ${systemSettings.slot_morning_1_end || '09:00'}` },
+          { id: 'morning_2', label: `${systemSettings.slot_morning_2_start || '09:00'} – ${systemSettings.slot_morning_2_end || '11:00'}` },
+        ],
+      },
+      {
+        key: 'afternoon', label: 'Chiều',
+        slots: [
+          { id: 'afternoon_1', label: `${systemSettings.slot_afternoon_1_start || '12:00'} – ${systemSettings.slot_afternoon_1_end || '14:00'}` },
+          { id: 'afternoon_2', label: `${systemSettings.slot_afternoon_2_start || '14:00'} – ${systemSettings.slot_afternoon_2_end || '16:00'}` },
+        ],
+      },
+      {
+        key: 'evening', label: 'Tối',
+        slots: [
+          { id: 'evening_1', label: `${systemSettings.slot_evening_1_start || '16:00'} – ${systemSettings.slot_evening_1_end || '18:00'}` },
+          { id: 'evening_2', label: `${systemSettings.slot_evening_2_start || '18:00'} – ${systemSettings.slot_evening_2_end || '20:00'}` },
+        ],
+      },
+    ];
+  }, [systemSettings]);
 
   useEffect(() => {
     let start, end;
@@ -257,46 +285,49 @@ export default function RoomHistory() {
 
   return (
     <div className="page-container fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h2 className="page-header">
-            <Calendar className="text-blue-500" size={20} />
-            Lịch sử sử dụng phòng
-          </h2>
-          <p className="page-subtitle">Xem lại các ca đăng ký phòng trong quá khứ và đánh giá tình trạng tham gia.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginRight: '4.5rem' }}>
-          <div style={{ width: '280px' }}>
-            <Select 
-              value={period}
-              onChange={setPeriod}
-              options={[
-                { value: "all", label: "Tất cả các ca" },
-                { value: "1week", label: "1 Tuần qua" },
-                { value: "1month", label: "1 Tháng qua" },
-                { value: "1quarter", label: "1 Quý (3 tháng) qua" },
-                { value: "1year", label: "1 Năm qua" },
-                { value: "custom", label: "Tùy chỉnh..." }
-              ]}
-            />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h2 className="page-header">
+              <Calendar className="text-blue-500" size={20} />
+              Lịch sử sử dụng phòng
+            </h2>
+            <p className="page-subtitle">Xem lại các ca đăng ký phòng trong quá khứ và đánh giá tình trạng tham gia</p>
           </div>
-
-          {period === 'custom' && (
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <input type="date" className="search-input" value={customStart} onChange={e => setCustomStart(e.target.value)} />
-              <span> - </span>
-              <input type="date" className="search-input" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ width: '220px' }}>
+              <Select 
+                value={period}
+                onChange={setPeriod}
+                options={[
+                  { value: "all", label: "Tất cả các ca" },
+                  { value: "1week", label: "1 Tuần qua" },
+                  { value: "1month", label: "1 Tháng qua" },
+                  { value: "1quarter", label: "1 Quý (3 tháng) qua" },
+                  { value: "1year", label: "1 Năm qua" },
+                  { value: "custom", label: "Tùy chỉnh..." }
+                ]}
+              />
             </div>
-          )}
 
-          <Button 
-            variant="secondary"
-            icon={Download}
-            onClick={() => setIsExportModalOpen(true)}
-            disabled={!report || !history}
-          >
-            Xuất báo cáo
-          </Button>
+            {period === 'custom' && (
+              <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                <input type="date" className="search-input" style={{ width: '135px' }} value={customStart} onChange={e => setCustomStart(e.target.value)} />
+                <span style={{ color: 'var(--text-muted)' }}>-</span>
+                <input type="date" className="search-input" style={{ width: '135px' }} value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+              </div>
+            )}
+
+            <Button 
+              variant="secondary"
+              icon={Download}
+              iconPosition="left"
+              onClick={() => setIsExportModalOpen(true)}
+              disabled={!report || !history}
+            >
+              Xuất báo cáo
+            </Button>
+          </div>
         </div>
       </div>
 
