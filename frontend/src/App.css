@@ -178,6 +178,7 @@ body {
 
 .main-content {
   flex: 1;
+  position: relative;
   padding-inline: var(--site-gutter-inline);
   padding-block: var(--site-gutter-block);
   min-height: 100vh;

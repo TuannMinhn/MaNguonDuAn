@@ -7,7 +7,17 @@ import { CATEGORIES, ASSET_TYPES } from '../../utils/constants';
 import Select from '../Select';
 import Modal from '../Modal';
 
-const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) => {
+const EditEquipmentModal = ({ 
+  isOpen, 
+  onClose, 
+  equip, 
+  selectedEquip, 
+  onSuccess, 
+  mutateEquip, 
+  setSuccessMsg, 
+  setErrorMsg 
+}) => {
+  const activeEquip = equip || selectedEquip;
   const [editingEquip, setEditingEquip] = useState(null);
   const { data: categoriesData = [] } = useSWR(`${API_BASE_URL}/categories`, fetcher);
   
@@ -47,15 +57,15 @@ const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) 
   }, [editingEquip?.totalQty, editingEquip?.assetType, editingEquip?.code]);
 
   useEffect(() => {
-    if (equip) {
-      setEditingEquip({ ...equip });
+    if (activeEquip) {
+      setEditingEquip({ ...activeEquip });
     }
-  }, [equip]);
+  }, [activeEquip]);
 
   const handleEditEquip = async (e) => {
     e.preventDefault();
-    if (!editingEquip.name.trim() || !editingEquip.code.trim() || Number(editingEquip.totalQty) <= 0) {
-      setErrorMsg('Thông tin không hợp lệ');
+    if (!editingEquip.name?.trim() || !editingEquip.code?.trim() || Number(editingEquip.totalQty) <= 0) {
+      if (setErrorMsg) setErrorMsg('Thông tin không hợp lệ');
       return;
     }
 
@@ -68,12 +78,15 @@ const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) 
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.error || 'Lỗi chỉnh sửa thiết bị');
+        if (setErrorMsg) setErrorMsg(data.error || 'Lỗi chỉnh sửa thông tin');
       } else {
-        onSuccess();
+        if (onSuccess) onSuccess();
+        if (mutateEquip) mutateEquip();
+        if (setSuccessMsg) setSuccessMsg(`Đã cập nhật thông tin "${editingEquip.name}"`);
+        onClose();
       }
     } catch (error) {
-      setErrorMsg('Lỗi kết nối tới server');
+      if (setErrorMsg) setErrorMsg('Lỗi kết nối tới server');
     }
   };
 
@@ -91,7 +104,7 @@ const EditEquipmentModal = ({ isOpen, onClose, equip, onSuccess, setErrorMsg }) 
       isOpen={isOpen}
       onClose={onClose}
       title="Sửa thông tin thiết bị"
-      size="lg"
+      size="xl"
       footer={modalFooter}
     >
       <style>{`

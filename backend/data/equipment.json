@@ -109,7 +109,7 @@
     "category": "Thiết bị đo lường",
     "location": "Kho Lab",
     "totalQty": 10,
-    "borrowedQty": 1,
+    "borrowedQty": 0,
     "assetType": "Thiết bị",
     "status": "Sẵn sàng",
     "instances": [
@@ -418,7 +418,7 @@
     "category": "Thiết bị đo lường",
     "location": "Kho Lab",
     "totalQty": 10,
-    "borrowedQty": 2,
+    "borrowedQty": 0,
     "assetType": "Thiết bị",
     "status": "Sẵn sàng",
     "instances": [
@@ -933,7 +933,7 @@
     "category": "Kit phát triển",
     "location": "Kho Lab",
     "totalQty": 10,
-    "borrowedQty": 1,
+    "borrowedQty": 0,
     "assetType": "Thiết bị",
     "status": "Sẵn sàng",
     "instances": [
@@ -6104,8 +6104,8 @@
     "code": "CON-03",
     "category": "Dụng cụ thực hành",
     "location": "Kho Lab",
-    "totalQty": 3,
-    "borrowedQty": 4,
+    "totalQty": 6,
+    "borrowedQty": 0,
     "assetType": "Vật tư tiêu hao",
     "status": "Sẵn sàng"
   },
@@ -6115,8 +6115,8 @@
     "code": "CON-04",
     "category": "Dụng cụ thực hành",
     "location": "Kho Lab",
-    "totalQty": 10,
-    "borrowedQty": 1,
+    "totalQty": 11,
+    "borrowedQty": 0,
     "assetType": "Vật tư tiêu hao",
     "status": "Sẵn sàng"
   },

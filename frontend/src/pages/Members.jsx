@@ -16,6 +16,7 @@ import DataTable from '../components/DataTable';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
 import TextInput from '../components/TextInput';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 
 export default function Members() {
   const { data: members = [], mutate } = useSWR(`${API_BASE_URL}/members`, fetcher);
@@ -23,6 +24,9 @@ export default function Members() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingMember, setDeletingMember] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Form states
   const [newMember, setNewMember] = useState({ mssv: '', name: '', role: 'Thành viên' });
@@ -91,24 +95,31 @@ export default function Members() {
 
 
 
-  const handleDeleteMember = async (id, name) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa thành viên ${name} khỏi phòng Lab?`)) {
-      return;
-    }
+  const handleDeleteMember = (member) => {
+    setDeletingMember(member);
+    setShowDeleteModal(true);
+  };
 
+  const handleConfirmDeleteMember = async () => {
+    if (!deletingMember) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/members/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/members/${deletingMember.id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
-        setSuccessMsg(`Đã xóa thành viên ${name}`);
+        setSuccessMsg(`Đã xóa thành viên ${deletingMember.name}`);
         mutate();
+        setShowDeleteModal(false);
+        setDeletingMember(null);
       } else {
         const data = await res.json();
         setErrorMsg(data.error || 'Không thể xóa thành viên');
       }
     } catch (error) {
       setErrorMsg('Lỗi kết nối tới server');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -201,11 +212,11 @@ export default function Members() {
     { 
       accessorKey: 'actions', 
       header: 'Thao tác', 
-      width: '10%',
+      width: '12%',
       align: 'right', 
       sortable: false, 
       cell: (row) => (
-        <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '0.5rem' }}>
           <Button 
             variant="ghost" 
             size="sm"
@@ -224,7 +235,7 @@ export default function Members() {
             icon={Trash2}
             title="Xóa thành viên khỏi Lab"
             aria-label="Xóa thành viên"
-            onClick={() => handleDeleteMember(row.id, row.name)}
+            onClick={() => handleDeleteMember(row)}
           />
         </div>
       )
@@ -393,6 +404,19 @@ export default function Members() {
         )}
       </Modal>
 
+      {/* Confirm Delete Member Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setDeletingMember(null); }}
+        onConfirm={handleConfirmDeleteMember}
+        title="Xác nhận xóa thành viên"
+        itemName={deletingMember?.name}
+        itemCode={deletingMember?.mssv ? `MSSV: ${deletingMember.mssv}` : ''}
+        itemCategory={deletingMember?.role ? `Chức vụ: ${deletingMember.role}` : ''}
+        warningMessage="Thành viên này sẽ bị xóa hoàn toàn khỏi hệ thống Lab. Không thể hoàn tác sau khi thực hiện!"
+        confirmText="Xác nhận xóa thành viên"
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

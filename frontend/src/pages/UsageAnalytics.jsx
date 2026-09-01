@@ -78,6 +78,7 @@ export default function UsageAnalytics() {
   const [modalCategoryFilter, setModalCategoryFilter] = useState('Tất cả danh mục');
 
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [rankingTab, setRankingTab] = useState('equipment'); // 'equipment' | 'consumable'
 
   const handleExportUsage = async (config) => {
     const { scope, startDate, endDate, format, aggregation } = config;
@@ -265,6 +266,25 @@ export default function UsageAnalytics() {
     }
   };
 
+  const isConsumableRecord = (b, equip) => {
+    if (b.status === 'Đã xuất tiêu hao' || b.status === 'Đã dùng') return true;
+    if (b.assetType && (
+      b.assetType === 'Linh kiện tiêu hao' || 
+      b.assetType === 'Vật tư tiêu hao' ||
+      b.assetType.toLowerCase().includes('linh kiện') || 
+      b.assetType.toLowerCase().includes('tiêu hao') ||
+      b.assetType.toLowerCase().includes('vật tư')
+    )) return true;
+    if (equip && equip.assetType && (
+      equip.assetType === 'Linh kiện tiêu hao' || 
+      equip.assetType === 'Vật tư tiêu hao' ||
+      equip.assetType.toLowerCase().includes('linh kiện') || 
+      equip.assetType.toLowerCase().includes('tiêu hao') ||
+      equip.assetType.toLowerCase().includes('vật tư')
+    )) return true;
+    return false;
+  };
+
   const detailsForDate = useMemo(() => {
     if (!selectedDate) return [];
     return borrows.filter(b => {
@@ -281,33 +301,49 @@ export default function UsageAnalytics() {
       }
     }).map(b => {
       const equip = equipmentList.find(e => e.id === b.equipmentId);
+      const isCons = isConsumableRecord(b, equip);
       return {
         ...b,
-        assetType: equip ? equip.assetType : 'Thiết bị'
+        assetType: isCons ? 'Linh kiện tiêu hao' : (equip ? equip.assetType : 'Thiết bị')
       };
     });
   }, [selectedDate, borrows, equipmentList, viewMode, selectedMonth]);
 
+  // Lọc danh sách mượn theo mốc thời gian đang chọn (Tháng hoặc Khoảng tháng)
+  const periodBorrows = useMemo(() => {
+    return borrows.filter(b => {
+      if (b.status === 'Đã hủy' || b.status === 'cancelled' || b.status === 'Hủy') return false;
+      if (!b.borrowDate) return false;
+      if (viewMode === 'month') {
+        return b.borrowDate.startsWith(selectedMonth);
+      } else {
+        const ym = b.borrowDate.slice(0, 7);
+        return ym >= startMonth && ym <= endMonth;
+      }
+    });
+  }, [borrows, viewMode, selectedMonth, startMonth, endMonth]);
+
   const { eqBorrows, consBorrows } = useMemo(() => {
-    if (!borrows.length || !equipmentList.length) return { eqBorrows: [], consBorrows: [] };
+    if (!periodBorrows.length || !equipmentList.length) return { eqBorrows: [], consBorrows: [] };
     const eq = [];
     const cons = [];
-    borrows.forEach(b => {
+    periodBorrows.forEach(b => {
       const equip = equipmentList.find(e => e.id === b.equipmentId);
-      if (equip && equip.assetType === 'Linh kiện tiêu hao') {
+      if (isConsumableRecord(b, equip)) {
         cons.push(b);
       } else {
         eq.push(b);
       }
     });
     return { eqBorrows: eq, consBorrows: cons };
-  }, [borrows, equipmentList]);
+  }, [periodBorrows, equipmentList]);
 
-  // Thiết bị được mượn nhiều nhất (giới hạn 10)
+  // Thiết bị được mượn nhiều nhất trong kỳ (giới hạn 10)
   const topEquipments = useMemo(() => {
     const counts = {};
     eqBorrows.forEach(b => {
-      counts[b.equipmentName] = (counts[b.equipmentName] || 0) + 1;
+      const name = b.equipmentName || 'Thiết bị';
+      counts[name] = (counts[name] || 0) + 1;
     });
 
     return Object.keys(counts)
@@ -316,11 +352,12 @@ export default function UsageAnalytics() {
       .slice(0, 10);
   }, [eqBorrows]);
 
-  // Tiêu hao nhiều nhất (giới hạn 10)
+  // Tiêu hao nhiều nhất trong kỳ (giới hạn 10)
   const topConsumables = useMemo(() => {
     const counts = {};
     consBorrows.forEach(b => {
-      counts[b.equipmentName] = (counts[b.equipmentName] || 0) + (Number(b.qty) || 1);
+      const name = b.equipmentName || 'Linh kiện';
+      counts[name] = (counts[name] || 0) + (Number(b.qty) || 1);
     });
 
     return Object.keys(counts)
@@ -328,45 +365,6 @@ export default function UsageAnalytics() {
       .sort((a, b) => b['Số lượng tiêu hao'] - a['Số lượng tiêu hao'])
       .slice(0, 10);
   }, [consBorrows]);
-
-  // Top Thành viên mượn nhiều nhất
-  const topBorrowers = useMemo(() => {
-    const users = {};
-    borrows.forEach(b => {
-      if (!users[b.mssv]) {
-        users[b.mssv] = { mssv: b.mssv, name: b.borrowerName, count: 0 };
-      }
-      users[b.mssv].count += 1;
-    });
-
-    return Object.values(users)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  }, [borrows]);
-
-  const topBorrowersColumns = React.useMemo(() => [
-    { accessorKey: 'top', header: 'Top', sortable: false, align: 'center', cell: (row) => {
-      const index = topBorrowers.findIndex(u => u.mssv === row.mssv);
-      return (
-        <span style={{
-          display: 'inline-block',
-          width: '24px',
-          height: '24px',
-          lineHeight: '24px',
-          borderRadius: '50%',
-          background: index === 0 ? '#fbbf24' : index === 1 ? '#9ca3af' : index === 2 ? '#b45309' : 'rgba(255,255,255,0.1)',
-          color: index < 3 ? '#000' : 'var(--text-primary)',
-          fontWeight: 'bold',
-          fontSize: 'var(--text-sm)'
-        }}>
-          {index + 1}
-        </span>
-      );
-    }},
-    { accessorKey: 'mssv', header: 'Mã sinh viên', sortable: true, cell: (row) => <span style={{ fontFamily: 'monospace' }}>{row.mssv}</span> },
-    { accessorKey: 'name', header: 'Họ và Tên', sortable: true, cell: (row) => <span style={{ fontWeight: '500' }}>{row.name}</span> },
-    { accessorKey: 'count', header: 'Số lượt mượn', sortable: true, align: 'center', cell: (row) => <span style={{ fontWeight: 'bold', color: 'var(--accent-blue)' }}>{row.count}</span> }
-  ], [topBorrowers]);
 
   const detailsColumns = React.useMemo(() => [
     { accessorKey: 'borrowerName', header: 'Người mượn', sortable: true, cell: (row) => (
@@ -426,7 +424,7 @@ export default function UsageAnalytics() {
         }
         users[b.mssv].count += 1;
         const equip = equipmentList.find(e => e.id === b.equipmentId);
-        if (equip && equip.assetType === 'Linh kiện tiêu hao') {
+        if (isConsumableRecord(b, equip)) {
            users[b.mssv].consCount += 1;
         } else {
            users[b.mssv].eqCount += 1;
@@ -439,9 +437,10 @@ export default function UsageAnalytics() {
     if (type !== 'users') {
       data = data.map(b => {
         const equip = equipmentList.find(e => e.id === b.equipmentId);
+        const isCons = isConsumableRecord(b, equip);
         return {
           ...b,
-          assetType: equip ? equip.assetType : 'Thiết bị'
+          assetType: isCons ? 'Linh kiện tiêu hao' : (equip ? equip.assetType : 'Thiết bị')
         };
       });
     }
@@ -533,6 +532,7 @@ export default function UsageAnalytics() {
     }
 
     borrows.forEach(b => {
+      if (b.status === 'Đã hủy' || b.status === 'cancelled' || b.status === 'Hủy') return;
       if (b.borrowDate) {
         const bd = new Date(b.borrowDate);
         
@@ -540,7 +540,7 @@ export default function UsageAnalytics() {
           const key = `${bd.getMonth() + 1}/${bd.getFullYear()}`;
           if (dates[key]) {
             const equip = equipmentList.find(e => e.id === b.equipmentId);
-            if (equip && equip.assetType === 'Linh kiện tiêu hao') {
+            if (isConsumableRecord(b, equip)) {
               dates[key]['Tiêu hao'] += 1;
             } else {
               dates[key]['Thiết bị'] += 1;
@@ -550,7 +550,7 @@ export default function UsageAnalytics() {
           const dateStr = `${bd.getDate()}/${bd.getMonth() + 1}`;
           if (dates[dateStr] && dates[dateStr].year === bd.getFullYear()) {
             const equip = equipmentList.find(e => e.id === b.equipmentId);
-            if (equip && equip.assetType === 'Linh kiện tiêu hao') {
+            if (isConsumableRecord(b, equip)) {
               dates[dateStr]['Tiêu hao'] += 1;
             } else {
               dates[dateStr]['Thiết bị'] += 1;
@@ -565,19 +565,21 @@ export default function UsageAnalytics() {
 
   const currentMonthBorrowsCount = useMemo(() => {
     return borrows.filter(b => {
+      if (b.status === 'Đã hủy' || b.status === 'cancelled' || b.status === 'Hủy') return false;
       if (!b.borrowDate) return false;
       return b.borrowDate.startsWith(selectedMonth || currentMonthStr);
     }).length;
   }, [borrows, selectedMonth, currentMonthStr]);
 
   const uniqueBorrowersCount = useMemo(() => {
-    const mssvs = new Set(borrows.map(b => b.mssv).filter(Boolean));
+    const validBorrows = borrows.filter(b => b.status !== 'Đã hủy' && b.status !== 'cancelled' && b.status !== 'Hủy');
+    const mssvs = new Set(validBorrows.map(b => b.mssv).filter(Boolean));
     return mssvs.size;
   }, [borrows]);
 
   return (
     <div className="page-container fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
         <div>
           <h2 className="page-header">
             <BarChart2 className="text-pink-500" size={20} />
@@ -585,14 +587,16 @@ export default function UsageAnalytics() {
           </h2>
           <p className="page-subtitle">Đo lường hiệu suất và tần suất sử dụng thiết bị trong Lab</p>
         </div>
-        <Button
-          variant="secondary"
-          icon={Download}
-          iconPosition="left"
-          onClick={() => setIsExportModalOpen(true)}
-        >
-          Xuất báo cáo sử dụng
-        </Button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginRight: '4.5rem' }}>
+          <Button
+            variant="secondary"
+            icon={Download}
+            iconPosition="left"
+            onClick={() => setIsExportModalOpen(true)}
+          >
+            Xuất báo cáo sử dụng
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -802,56 +806,119 @@ export default function UsageAnalytics() {
               </div>
             </div>
 
-            {/* 2. Usage Ranking Grid (Top Devices & Top Consumables) */}
-            <div className="ranking-grid" style={topConsumables.length === 0 ? { gridTemplateColumns: windowWidth < 1024 ? '1fr' : '2.2fr 1fr' } : {}}>
-              {/* Top Thiết Bị */}
-              <div className="glass-card chart-card">
-                <h3 className="chart-header">
-                  <Cpu size={18} style={{ color: 'var(--accent-blue)' }} />
-                  Thiết bị mượn nhiều nhất
+            {/* 2. Unified Usage Ranking Card (Tabs: Thiết bị / Linh kiện tiêu hao) */}
+            <div className="glass-card chart-card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '1rem' }}>
+                <h3 className="chart-header" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {rankingTab === 'equipment' ? (
+                    <>
+                      <Cpu size={18} style={{ color: 'var(--accent-blue)' }} />
+                      <span>Thiết bị mượn nhiều nhất</span>
+                    </>
+                  ) : (
+                    <>
+                      <Package size={18} style={{ color: 'var(--accent-purple)' }} />
+                      <span>Tiêu hao xuất nhiều nhất</span>
+                    </>
+                  )}
+                  <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: 'var(--text-muted)', marginLeft: '4px' }}>
+                    ({viewMode === 'month' ? `Tháng ${selectedMonth.split('-')[1]}/${selectedMonth.split('-')[0]}` : `${startMonth} → ${endMonth}`})
+                  </span>
                 </h3>
-                <div style={{ width: '100%', height: Math.max(280, topEquipments.length * 40 + 40) }}>
-                  <ResponsiveContainer debounce={50}>
-                    <BarChart
-                      data={topEquipments}
-                      layout="vertical"
-                      margin={{ top: 10, right: 40, left: 10, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" width={yAxisWidth} tick={<CustomYAxisTick />} axisLine={false} tickLine={false} />
-                      <RechartsTooltip 
-                        cursor={false}
-                        contentStyle={{ 
-                          backgroundColor: 'var(--bg-card)', 
-                          border: '1px solid var(--border-color)', 
-                          borderRadius: '8px',
-                          fontSize: '0.8rem',
-                          color: '#fff',
-                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
-                        }} 
-                      />
-                      <Bar 
-                        dataKey="Số lần mượn" 
-                        fill="var(--accent-blue)" 
-                        radius={[0, 4, 4, 0]} 
-                        barSize={16} 
-                        label={{ position: 'right', fill: 'var(--text-secondary)', fontSize: 11, offset: 8 }}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+
+                {/* Tab switcher */}
+                <div style={{ display: 'flex', gap: '4px', background: 'rgba(255, 255, 255, 0.04)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <button
+                    type="button"
+                    onClick={() => setRankingTab('equipment')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      background: rankingTab === 'equipment' ? 'var(--accent-blue)' : 'transparent',
+                      color: rankingTab === 'equipment' ? '#fff' : 'var(--text-secondary)'
+                    }}
+                  >
+                    <Cpu size={14} />
+                    Thiết bị
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRankingTab('consumable')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      background: rankingTab === 'consumable' ? 'var(--accent-purple)' : 'transparent',
+                      color: rankingTab === 'consumable' ? '#fff' : 'var(--text-secondary)'
+                    }}
+                  >
+                    <Package size={14} />
+                    Linh kiện tiêu hao
+                  </button>
                 </div>
               </div>
 
-              {/* Top Tiêu Hoa */}
-              <div className="glass-card chart-card">
-                <h3 className="chart-header">
-                  <Package size={18} style={{ color: 'var(--accent-purple)' }} />
-                  Tiêu hao xuất nhiều nhất
-                </h3>
-                {topConsumables.length > 0 ? (
-                  <div style={{ width: '100%', height: Math.max(280, topConsumables.length * 40 + 40) }}>
-                    <ResponsiveContainer debounce={50}>
+              {rankingTab === 'equipment' ? (
+                topEquipments.length > 0 ? (
+                  <div style={{ width: '100%', height: Math.max(200, topEquipments.length * 44 + 30), minHeight: '200px' }}>
+                    <ResponsiveContainer debounce={0}>
+                      <BarChart
+                        data={topEquipments}
+                        layout="vertical"
+                        margin={{ top: 10, right: 40, left: 10, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" width={yAxisWidth} tick={<CustomYAxisTick />} axisLine={false} tickLine={false} />
+                        <RechartsTooltip 
+                          cursor={false}
+                          contentStyle={{ 
+                            backgroundColor: 'var(--bg-card)', 
+                            border: '1px solid var(--border-color)', 
+                            borderRadius: '8px',
+                            fontSize: '0.8rem',
+                            color: '#fff',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+                          }} 
+                        />
+                        <Bar 
+                          dataKey="Số lần mượn" 
+                          fill="var(--accent-blue)" 
+                          radius={[0, 4, 4, 0]} 
+                          barSize={16} 
+                          label={{ position: 'right', fill: 'var(--text-secondary)', fontSize: 11, offset: 8 }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', minHeight: '200px' }}>
+                    <EmptyState 
+                      icon={Cpu}
+                      title="Không có dữ liệu mượn thiết bị"
+                      description="Chưa có phiếu mượn thiết bị nào trong khoảng thời gian đã chọn."
+                    />
+                  </div>
+                )
+              ) : (
+                topConsumables.length > 0 ? (
+                  <div style={{ width: '100%', height: Math.max(200, topConsumables.length * 44 + 30), minHeight: '200px' }}>
+                    <ResponsiveContainer debounce={0}>
                       <BarChart
                         data={topConsumables}
                         layout="vertical"
@@ -882,84 +949,15 @@ export default function UsageAnalytics() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <EmptyState 
-                    icon={Package}
-                    title="Không có dữ liệu xuất"
-                    description="Chưa có phiếu cấp phát linh kiện tiêu hao nào được xuất trong khoảng thời gian đã chọn."
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* 3. Top Members Table */}
-            <div className="glass-card table-card" style={{ maxWidth: '800px', width: '100%', margin: '0 auto' }}>
-              <h2 className="table-header">
-                <Users size={18} style={{ color: 'var(--accent-blue)' }} />
-                Top Thành viên mượn đồ nhiều nhất
-              </h2>
-              <div style={{ marginTop: '0.5rem', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.825rem' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)' }}>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: '600', width: '60px' }}>Hạng</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: '600' }}>Mã sinh viên</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: '600' }}>Họ và Tên</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: '600', width: '140px' }}>Số lượt mượn</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topBorrowers.map((borrower, idx) => (
-                      <tr 
-                        key={borrower.mssv} 
-                        style={{ 
-                          borderBottom: idx === topBorrowers.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.03)',
-                          transition: 'background-color 0.15s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.01)'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                          <span style={{
-                            display: 'inline-block',
-                            width: '22px',
-                            height: '22px',
-                            lineHeight: '22px',
-                            borderRadius: '50%',
-                            background: idx === 0 ? 'rgba(251, 191, 36, 0.15)' : idx === 1 ? 'rgba(156, 163, 175, 0.15)' : idx === 2 ? 'rgba(180, 83, 9, 0.15)' : 'rgba(255,255,255,0.05)',
-                            color: idx === 0 ? '#fbbf24' : idx === 1 ? '#e5e7eb' : idx === 2 ? '#f59e0b' : 'var(--text-secondary)',
-                            fontWeight: '700',
-                            fontSize: '0.75rem',
-                            border: idx === 0 ? '1px solid rgba(251, 191, 36, 0.3)' : idx === 1 ? '1px solid rgba(156, 163, 175, 0.3)' : idx === 2 ? '1px solid rgba(180, 83, 9, 0.3)' : '1px solid rgba(255,255,255,0.1)'
-                          }}>
-                            {idx + 1}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'left', fontFamily: 'monospace', color: 'var(--text-primary)', letterSpacing: '0.02em' }}>
-                          {borrower.mssv}
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: '500', color: 'var(--text-primary)' }}>
-                          {borrower.name}
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                          <span style={{ 
-                            fontWeight: '700', 
-                            color: 'var(--accent-blue)', 
-                            backgroundColor: 'rgba(59, 130, 246, 0.08)',
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '4px',
-                            fontSize: '0.8rem',
-                            border: '1px solid rgba(59, 130, 246, 0.15)',
-                            display: 'inline-block',
-                            minWidth: '36px'
-                          }}>
-                            {borrower.count}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', minHeight: '200px' }}>
+                    <EmptyState 
+                      icon={Package}
+                      title="Không có phát sinh xuất tiêu hao"
+                      description="Trong khoảng thời gian đã chọn chưa có dữ liệu xuất linh kiện tiêu hao."
+                    />
+                  </div>
+                )
+              )}
             </div>
           </div>
         </>
@@ -970,7 +968,7 @@ export default function UsageAnalytics() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={viewMode === 'range' ? `Chi tiết sử dụng tháng ${selectedDate}` : `Chi tiết sử dụng ngày ${selectedDate}`}
-        size="lg"
+        size="xl"
       >
         {detailsForDate.length > 0 ? (
           <DataTable
@@ -988,10 +986,10 @@ export default function UsageAnalytics() {
         )}
       </Modal>
 
-      {/* KPI Details Modal (Toàn màn hình) */}
+      {/* KPI Details Modal (Tự động co giãn, tối đa rộng 96vw/94vh) */}
       {kpiModal.isOpen && (
-        <div className="modal-overlay fade-in" style={{ zIndex: 1000, padding: '2vh 2vw' }} onClick={() => setKpiModal({ ...kpiModal, isOpen: false })}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+        <div className="modal-overlay fade-in" style={{ zIndex: 1000, padding: '2vh 2vw', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setKpiModal({ ...kpiModal, isOpen: false })}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: '100%', height: 'auto', maxWidth: '100%', maxHeight: '94vh', display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
             <div className="modal-header" style={{ padding: '1.5rem 2rem', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                 <div style={{ background: 'var(--bg-primary)', padding: '0.5rem', borderRadius: '50%', color: 'var(--accent-blue)', display: 'flex' }}>
@@ -1006,8 +1004,8 @@ export default function UsageAnalytics() {
                 style={{ width: '40px', height: '40px', borderRadius: '50%', padding: 0 }}
               />
             </div>
-            <div className="modal-body" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, padding: 0, background: 'var(--bg-primary)' }}>
-              <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
+            <div className="modal-body" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, padding: 0, background: 'var(--bg-primary)' }}>
+              <div style={{ padding: '2rem', overflowY: 'auto' }}>
                 <DataTable
                   data={filteredModalData}
                   columns={kpiModal.type === 'users' ? usersColumns : detailsColumns}

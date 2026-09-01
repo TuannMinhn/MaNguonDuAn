@@ -2,18 +2,20 @@ import React, { useMemo, useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '../utils/fetcher';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-import { 
-  PieChart as PieChartIcon, 
-  Box, 
-  Cpu, 
-  Activity, 
+import {
+  PieChart as PieChartIcon,
+  Box,
+  Cpu,
+  Activity,
   AlertCircle,
   TrendingUp,
   AlertTriangle,
   FileText,
   X,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  ArrowRight,
+  Wrench
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -23,11 +25,12 @@ import Button from '../components/Button';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-export default function AssetOverview() {
+export default function AssetOverview({ onNavigate }) {
   const { data: equipmentList = [], isLoading: isLoadingEquip } = useSWR(`${API_BASE_URL}/equipment`, fetcher);
   const { data: maintenanceList = [], isLoading: isLoadingMaint } = useSWR(`${API_BASE_URL}/maintenance`, fetcher);
   const { data: borrowTickets = [], isLoading: isLoadingBorrows } = useSWR(`${API_BASE_URL}/equipment-borrows`, fetcher);
-  const isLoading = isLoadingEquip || isLoadingMaint || isLoadingBorrows;
+  const { data: analyticsEquipment = [], isLoading: isLoadingAnalytics } = useSWR(`${API_BASE_URL}/analytics/equipment`, fetcher);
+  const isLoading = isLoadingEquip || isLoadingMaint || isLoadingBorrows || isLoadingAnalytics;
 
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, title: '', data: [], columns: [] });
   const [modalCategoryFilter, setModalCategoryFilter] = useState('all');
@@ -54,7 +57,7 @@ export default function AssetOverview() {
     let totalDevices = 0;
     let totalComponents = 0;
     let totalBorrowed = 0;
-    
+
     equipmentList.forEach(eq => {
       const isComponent = eq.assetType && (
         eq.assetType.toLowerCase().includes('linh kiện') ||
@@ -69,7 +72,7 @@ export default function AssetOverview() {
     });
 
     const brokenDevices = maintenanceList.filter(m => m.status === 'Đang sửa' || m.status === 'Bảo hành hãng').length;
-    const availabilityRate = totalDevices > 0 
+    const availabilityRate = totalDevices > 0
       ? Math.round(((totalDevices - totalBorrowed - brokenDevices) / totalDevices) * 100)
       : 100;
 
@@ -80,7 +83,7 @@ export default function AssetOverview() {
   const statusData = useMemo(() => {
     let ready = 0;
     let borrowed = 0;
-    
+
     equipmentList.forEach(eq => {
       const isComponent = eq.assetType && (
         eq.assetType.toLowerCase().includes('linh kiện') ||
@@ -110,7 +113,7 @@ export default function AssetOverview() {
         cats[cat] = (cats[cat] || 0) + (eq.totalQty || 0);
       }
     });
-    
+
     return Object.keys(cats).map(key => ({
       name: key,
       'Số lượng': cats[key]
@@ -126,41 +129,100 @@ export default function AssetOverview() {
     const topCats = categoryData.slice(0, 5);
     const otherCats = categoryData.slice(5);
     const othersSum = otherCats.reduce((sum, item) => sum + item['Số lượng'], 0);
-    
+
     return [
       ...topCats,
       { name: 'Các danh mục khác', 'Số lượng': othersSum }
     ];
   }, [categoryData, showAllCategories]);
 
-  // Danh sách cảnh báo hao mòn / hết khấu hao
-  const highUsageEquipment = useMemo(() => {
-    return equipmentList
-      .filter(eq => eq.assetType !== 'Linh kiện tiêu hao' && eq.lifespanHours && eq.usedHours)
-      .map(eq => {
-        const percent = Math.min(100, Math.round((eq.usedHours / eq.lifespanHours) * 100));
-        return { ...eq, usagePercent: percent };
+  // 1. Thống kê Hoạt động mượn & Tần suất sử dụng Thiết bị
+  const usageInsights = useMemo(() => {
+    const totalBorrowsCount = borrowTickets.length;
+    const activeBorrowsCount = borrowTickets.filter(t => t.status === 'Đang mượn' || t.status === 'Đã đặt trước').length;
+    const returnedBorrowsCount = borrowTickets.filter(t => t.status === 'Đã trả' || t.status === 'Hoàn thành').length;
+
+    // Thống kê tần suất mượn theo từng thiết bị
+    const equipBorrowMap = {};
+    borrowTickets.forEach(b => {
+      const name = b.equipmentName || 'Thiết bị';
+      const qty = Number(b.qty) || 1;
+      equipBorrowMap[name] = (equipBorrowMap[name] || 0) + qty;
+    });
+
+    const topBorrowed = Object.entries(equipBorrowMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    const maxCount = topBorrowed.length > 0 ? topBorrowed[0].count : 1;
+    const topWithPercent = topBorrowed.map(item => ({
+      ...item,
+      percent: Math.min(100, Math.round((item.count / maxCount) * 100))
+    }));
+
+    const utilizationRate = stats.totalDevices > 0
+      ? Math.round((stats.totalBorrowed / stats.totalDevices) * 100)
+      : 0;
+
+    return {
+      totalBorrowsCount,
+      activeBorrowsCount,
+      returnedBorrowsCount,
+      utilizationRate,
+      topBorrowed: topWithPercent,
+      hasBorrowHistory: totalBorrowsCount > 0
+    };
+  }, [borrowTickets, stats.totalDevices, stats.totalBorrowed]);
+
+  // 2. Thống kê & Phân tích Tồn kho Linh kiện
+  const componentsInsights = useMemo(() => {
+    const components = equipmentList.filter(eq =>
+      eq.assetType && (
+        eq.assetType.toLowerCase().includes('linh kiện') ||
+        eq.assetType.toLowerCase().includes('vật tư')
+      )
+    );
+
+    const totalTypes = components.length;
+    const totalStock = components.reduce((sum, c) => sum + (Number(c.totalQty) || 0), 0);
+
+    // Linh kiện dưới hoặc chạm ngưỡng tối thiểu
+    const criticalList = components
+      .filter(c => (Number(c.totalQty) || 0) <= (Number(c.minThreshold) || 5))
+      .sort((a, b) => (a.totalQty || 0) - (b.totalQty || 0));
+
+    // Top 3 linh kiện cần theo dõi (ưu tiên linh kiện có tồn kho thấp nhất)
+    const trackedList = [...components]
+      .sort((a, b) => {
+        const thresholdA = Math.max(1, Number(a.minThreshold) || 5);
+        const thresholdB = Math.max(1, Number(b.minThreshold) || 5);
+        const ratioA = (Number(a.totalQty) || 0) / thresholdA;
+        const ratioB = (Number(b.totalQty) || 0) / thresholdB;
+        return ratioA - ratioB;
       })
-      .sort((a, b) => b.usagePercent - a.usagePercent)
-      .slice(0, 5);
-  }, [equipmentList]);
+      .slice(0, 3)
+      .map(c => {
+        const threshold = Number(c.minThreshold) || 5;
+        const current = Number(c.totalQty) || 0;
+        const ratioPercent = Math.min(100, Math.round((current / (threshold * 2)) * 100));
+        const isCritical = current <= threshold;
+        return {
+          ...c,
+          threshold,
+          current,
+          ratioPercent,
+          isCritical
+        };
+      });
 
-  // Kiểm tra hệ thống đã thiết lập cấu hình khấu hao cho thiết bị nào chưa
-  const hasDepreciationData = useMemo(() => {
-    return equipmentList.some(eq => eq.assetType !== 'Linh kiện tiêu hao' && eq.lifespanHours > 0);
-  }, [equipmentList]);
-
-  // Kiểm tra có dữ liệu sử dụng thiết bị (usedHours > 0) hay không
-  const hasActiveUsage = useMemo(() => {
-    return equipmentList.some(eq => eq.assetType !== 'Linh kiện tiêu hao' && eq.lifespanHours > 0 && eq.usedHours > 0);
-  }, [equipmentList]);
-
-  // Danh sách linh kiện dưới ngưỡng tối thiểu
-  const lowStockComponents = useMemo(() => {
-    return equipmentList
-      .filter(eq => eq.assetType === 'Linh kiện tiêu hao' && eq.totalQty <= (eq.minThreshold || 5))
-      .sort((a, b) => a.totalQty - b.totalQty)
-      .slice(0, 5);
+    return {
+      totalTypes,
+      totalStock,
+      criticalCount: criticalList.length,
+      trackedList,
+      hasComponents: totalTypes > 0
+    };
   }, [equipmentList]);
 
   const handleCardClick = (type) => {
@@ -190,12 +252,76 @@ export default function AssetOverview() {
       columns.push({ accessorKey: 'borrowedQty', header: 'Số lượng đang mượn', sortable: true, align: 'center', width: '15%' });
     } else if (type === 'maintenance') {
       title = 'Thiết bị cần bảo trì';
-      data = maintenanceList.filter(m => m.status === 'Đang sửa' || m.status === 'Bảo hành hãng');
+      // Lấy danh sách thiết bị đang có phiếu báo hỏng / bảo trì chưa hoàn thành
+      data = maintenanceList.filter(m => m.status === 'Đang sửa' || m.status === 'Bảo hành hãng' || m.status === 'Chờ linh kiện' || m.status === 'Đã hỏng (Chờ thanh lý)');
       columns = [
-        { accessorKey: 'equipmentId', header: 'Mã thiết bị', sortable: true, width: '20%' },
-        { accessorKey: 'type', header: 'Loại bảo trì', sortable: true, width: '30%' },
-        { accessorKey: 'status', header: 'Trạng thái', sortable: true, width: '25%' },
-        { accessorKey: 'cost', header: 'Chi phí dự kiến', sortable: true, width: '25%' }
+        {
+          accessorKey: 'equipmentCode',
+          header: 'Mã thiết bị',
+          sortable: true,
+          width: '18%',
+          cell: (row) => {
+            const code = row.equipmentCode || (row.equipmentId ? row.equipmentId.substring(0, 8) : 'N/A');
+            return (
+              <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#a78bfa' }}>
+                {code}
+              </span>
+            );
+          }
+        },
+        {
+          accessorKey: 'equipmentName',
+          header: 'Tên thiết bị',
+          sortable: true,
+          width: '28%',
+          cell: (row) => (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontWeight: 600, color: 'var(--accent-blue)' }}>
+                {row.equipmentName || 'Thiết bị không xác định'}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {row.category || 'Thiết bị Lab'} • {row.location || 'Kho Lab'}
+              </span>
+            </div>
+          )
+        },
+        {
+          accessorKey: 'issueDescription',
+          header: 'Mô tả sự cố',
+          sortable: true,
+          width: '26%',
+          cell: (row) => (
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }} title={row.issueDescription}>
+              {row.issueDescription || '-'}
+            </span>
+          )
+        },
+        {
+          accessorKey: 'status',
+          header: 'Trạng thái',
+          sortable: true,
+          width: '14%',
+          cell: (row) => {
+            const isResolved = row.status === 'Đã sửa';
+            return (
+              <span className={`badge ${isResolved ? 'badge-success' : 'badge-warning'}`} style={{ whiteSpace: 'nowrap' }}>
+                {row.status}
+              </span>
+            );
+          }
+        },
+        {
+          accessorKey: 'cost',
+          header: 'Chi phí dự kiến',
+          sortable: true,
+          align: 'right',
+          width: '14%',
+          cell: (row) => (
+            <span style={{ fontWeight: row.cost ? 600 : 400, color: row.cost ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+              {row.cost ? `${Number(row.cost).toLocaleString('vi-VN')} đ` : '0 đ'}
+            </span>
+          )
+        }
       ];
     }
 
@@ -229,10 +355,10 @@ export default function AssetOverview() {
 
   const renderExpandedRow = (row) => {
     if (modalConfig.type !== 'borrowed') return null;
-    
+
     // Tìm các phiếu mượn tương ứng với thiết bị này (đang mượn hoặc đã bàn giao)
     const activeBorrows = borrowTickets.filter(t => t.equipmentId === row.id && (t.status === 'Đang mượn' || t.status === 'Đã bàn giao' || t.status === 'Đã đặt trước'));
-    
+
     if (activeBorrows.length === 0) {
       return (
         <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--bg-overlay)' }}>
@@ -272,7 +398,7 @@ export default function AssetOverview() {
 
   return (
     <div className="page-container fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      
+
       {/* Header */}
       <div>
         <h2 className="page-header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
@@ -302,7 +428,7 @@ export default function AssetOverview() {
                   </div>
                 </div>
               </div>
-              
+
               {/* KPI 2: Tổng Linh kiện */}
               <div className="kpi-item-neutral" onClick={() => handleCardClick('components')}>
                 <span className="kpi-status-dot dot-neutral"></span>
@@ -318,24 +444,37 @@ export default function AssetOverview() {
             {/* Right section: Active Operational Status (Accented Alerts) */}
             <div className="kpi-group-active">
               {/* KPI 3: Đang được mượn */}
-              <div className="kpi-item-active active-borrowed" onClick={() => handleCardClick('borrowed')}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div
+                className="kpi-item-active active-borrowed"
+                onClick={() => onNavigate ? onNavigate('equipment-borrows') : handleCardClick('borrowed')}
+                style={{ cursor: 'pointer' }}
+                title="Xem danh sách phiếu mượn thiết bị"
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                   <div className="kpi-label" style={{ color: 'var(--accent-purple)' }}>Đang được mượn</div>
                   <div className="kpi-value" style={{ color: 'var(--accent-purple)' }}>
                     {stats.totalBorrowed} <span className="kpi-unit" style={{ color: 'rgba(139, 92, 246, 0.7)' }}>chiếc</span>
+                  </div>
+                  <div style={{ marginTop: '0.35rem', fontSize: '0.75rem', color: 'var(--accent-purple)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: '600' }}>
+                    Xem phiếu mượn <ArrowRight size={12} />
                   </div>
                 </div>
               </div>
 
               {/* KPI 4: Cần bảo trì */}
-              <div 
+              <div
                 className={`kpi-item-active ${stats.brokenDevices > 0 ? 'active-alert-danger' : 'active-alert-warning'}`}
-                onClick={() => handleCardClick('maintenance')}
+                onClick={() => onNavigate ? onNavigate('equipment-maintenance') : handleCardClick('maintenance')}
+                style={{ cursor: 'pointer' }}
+                title="Xem chi tiết các thiết bị cần bảo trì"
               >
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                   <div className="kpi-label" style={{ color: stats.brokenDevices > 0 ? 'var(--accent-red)' : 'var(--accent-amber)' }}>Cần bảo trì</div>
                   <div className="kpi-value" style={{ color: stats.brokenDevices > 0 ? 'var(--accent-red)' : 'var(--accent-amber)' }}>
                     {stats.brokenDevices} <span className="kpi-unit" style={{ color: stats.brokenDevices > 0 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(245, 158, 11, 0.7)' }}>thiết bị</span>
+                  </div>
+                  <div style={{ marginTop: '0.35rem', fontSize: '0.75rem', color: stats.brokenDevices > 0 ? 'var(--accent-red)' : 'var(--accent-amber)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: '600' }}>
+                    Xem chi tiết <ArrowRight size={12} />
                   </div>
                 </div>
               </div>
@@ -344,10 +483,10 @@ export default function AssetOverview() {
 
           {/* Main Grid: Left Column (65% - Analytics), Right Column (35% - Operations) */}
           <div className="dashboard-grid">
-            
+
             {/* LEFT COLUMN: Analytics Hub */}
             <div className="analytics-column">
-              
+
               {/* Biểu đồ Tròn: Tình trạng thiết bị */}
               <div className="glass-card chart-card">
                 <h3 className="chart-header">
@@ -417,7 +556,7 @@ export default function AssetOverview() {
                         );
                       })}
                     </div>
-                    
+
                     <div style={{
                       borderTop: '1px solid var(--border-color)',
                       paddingTop: '0.85rem',
@@ -452,12 +591,12 @@ export default function AssetOverview() {
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} vertical={true} />
                         <XAxis type="number" stroke="var(--text-secondary)" tick={{ fontSize: 11 }} />
-                        <YAxis 
-                          dataKey="name" 
-                          type="category" 
-                          stroke="var(--text-secondary)" 
-                          tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} 
-                          width={yAxisWidth} 
+                        <YAxis
+                          dataKey="name"
+                          type="category"
+                          stroke="var(--text-secondary)"
+                          tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
+                          width={yAxisWidth}
                           interval={0}
                           tickFormatter={formatYAxisTick}
                         />
@@ -468,10 +607,11 @@ export default function AssetOverview() {
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                  
+
                   {categoryData.length > 6 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
                       <button
+                        type="button"
                         onClick={() => setShowAllCategories(!showAllCategories)}
                         style={{
                           background: 'transparent',
@@ -495,229 +635,227 @@ export default function AssetOverview() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Operational Insights & Alerts */}
+            {/* RIGHT COLUMN: Operational Insights & Supply Control */}
             <div className="operations-column">
-              
-              {/* Cảnh báo khấu hao thiết bị */}
+
+              {/* KHỐI 1: Tần suất Sử dụng & Hoạt động Thiết bị */}
               <div className="glass-card alert-card">
-                <h3 className="alert-header" style={{ color: 'var(--accent-amber)' }}>
-                  <AlertTriangle size={18} />
-                  Mức độ sử dụng & Khấu hao thiết bị
+                <h3 className="alert-header" style={{ color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <TrendingUp size={18} />
+                  Hoạt động & Tần suất Sử dụng Thiết bị
                 </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {!hasDepreciationData ? (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      textAlign: 'center',
-                      padding: '1.5rem 1rem',
-                      background: 'rgba(255, 255, 255, 0.01)',
-                      border: '1px dashed var(--border-color)',
-                      borderRadius: '12px',
-                      gap: '0.75rem'
-                    }}>
-                      <Clock size={28} style={{ color: 'var(--text-muted)', opacity: 0.6 }} />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>
-                          Chưa có dữ liệu khấu hao
-                        </h4>
-                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                          Vui lòng bổ sung <strong>thời gian sử dụng định mức (lifespan)</strong> và <strong>giờ hoạt động (used hours)</strong> của thiết bị.
-                        </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {/* 2 Chỉ số KPI chính */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)', padding: '0.85rem', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--accent-blue)', lineHeight: 1 }}>
+                        {usageInsights.totalBorrowsCount} <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>lượt</span>
                       </div>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--accent-blue)', fontWeight: '500', background: 'rgba(59, 130, 246, 0.08)', padding: '0.25rem 0.6rem', borderRadius: '20px' }}>
-                        Cập nhật tại: Quản lý kho → Thiết bị
-                      </span>
-                    </div>
-                  ) : !hasActiveUsage ? (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      textAlign: 'center',
-                      padding: '1.5rem 1rem',
-                      background: 'rgba(16, 185, 129, 0.02)',
-                      border: '1px solid rgba(16, 185, 129, 0.12)',
-                      borderRadius: '12px',
-                      gap: '0.75rem'
-                    }}>
-                      <div style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '50%',
-                        background: 'rgba(16, 185, 129, 0.12)',
-                        color: 'var(--accent-green)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <ShieldCheck size={18} />
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: '600', color: 'var(--accent-green)' }}>
-                          Thiết bị mới 100% (Khấu hao 0%)
-                        </h4>
-                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                          Tất cả thiết bị có số giờ hoạt động thực tế bằng 0h. Khấu hao ở mức tối thiểu.
-                        </p>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Tổng lượt mượn phát sinh
                       </div>
                     </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                      {highUsageEquipment.map(eq => (
-                        <div key={eq.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{eq.name}</span>
-                            <span style={{ color: eq.usagePercent > 80 ? 'var(--accent-red)' : 'var(--text-secondary)', fontWeight: 'bold' }}>
-                              {eq.usagePercent}%
+                    <div style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.15)', padding: '0.85rem', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--accent-purple)', lineHeight: 1 }}>
+                        {stats.totalBorrowed} <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>chiếc</span>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Đang mượn / Vận hành ({usageInsights.utilizationRate}%)
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Danh sách thiết bị được mượn nhiều nhất */}
+                  {usageInsights.hasBorrowHistory ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginTop: '0.25rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Thiết bị mượn nhiều nhất:
+                      </div>
+                      {usageInsights.topBorrowed.map((item, idx) => (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '75%' }} title={item.name}>
+                              {item.name}
+                            </span>
+                            <span style={{ fontWeight: '700', color: 'var(--accent-blue)', fontVariantNumeric: 'tabular-nums' }}>
+                              {item.count} lượt
                             </span>
                           </div>
-                          <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                          <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
                             <div style={{
-                              width: `${eq.usagePercent}%`,
+                              width: `${item.percent}%`,
                               height: '100%',
-                              background: eq.usagePercent > 90 ? 'var(--accent-red)' : eq.usagePercent > 70 ? 'var(--accent-amber)' : 'var(--accent-blue)',
-                              borderRadius: '2px',
+                              background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-purple))',
+                              borderRadius: '3px',
                               transition: 'width 0.5s ease-in-out'
                             }}></div>
                           </div>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Đã chạy: {eq.usedHours}h / {eq.lifespanHours}h</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      background: 'rgba(16, 185, 129, 0.03)',
+                      border: '1px solid rgba(16, 185, 129, 0.12)',
+                      borderRadius: '8px'
+                    }}>
+                      <ShieldCheck size={18} style={{ color: 'var(--accent-green)', flexShrink: 0 }} />
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        Tất cả thiết bị sẵn sàng trong kho, chưa phát sinh phiên mượn mới.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nút bấm liên kết điều hướng */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate ? onNavigate('analytics-usage') : null}
+                      style={{
+                        background: 'rgba(59, 130, 246, 0.08)',
+                        border: '1px solid rgba(59, 130, 246, 0.25)',
+                        color: 'var(--accent-blue)',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        padding: '0.45rem 0.85rem',
+                        borderRadius: '6px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.4rem',
+                        transition: 'all 0.2s',
+                        flex: 1
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)'}
+                    >
+                      Phân tích sử dụng <ArrowRight size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate ? onNavigate('equipment-borrows') : handleCardClick('borrowed')}
+                      style={{
+                        background: 'rgba(139, 92, 246, 0.08)',
+                        border: '1px solid rgba(139, 92, 246, 0.25)',
+                        color: 'var(--accent-purple)',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        padding: '0.45rem 0.85rem',
+                        borderRadius: '6px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.4rem',
+                        transition: 'all 0.2s',
+                        flex: 1
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)'}
+                    >
+                      Phiếu mượn <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* KHỐI 2: Tồn kho & Giám sát Linh kiện Tiêu hao */}
+              <div className="glass-card alert-card">
+                <h3 className="alert-header" style={{ color: componentsInsights.criticalCount > 0 ? 'var(--accent-red)' : 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Cpu size={18} />
+                  Tồn kho & Giám sát Linh kiện Tiêu hao
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {/* 2 Chỉ số KPI chính */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.15)', padding: '0.85rem', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--accent-green)', lineHeight: 1 }}>
+                        {componentsInsights.totalStock} <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>cái</span>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        {componentsInsights.totalTypes} loại linh kiện trong kho
+                      </div>
+                    </div>
+                    <div style={{
+                      background: componentsInsights.criticalCount > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)',
+                      border: `1px solid ${componentsInsights.criticalCount > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
+                      padding: '0.85rem',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.25rem'
+                    }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: componentsInsights.criticalCount > 0 ? 'var(--accent-red)' : 'var(--accent-green)', lineHeight: 1 }}>
+                        {componentsInsights.criticalCount > 0 ? `${componentsInsights.criticalCount} loại` : '100%'}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        {componentsInsights.criticalCount > 0 ? 'Chạm ngưỡng tối thiểu' : 'Mức tồn kho an toàn'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Danh sách linh kiện cần giám sát tồn kho */}
+                  {componentsInsights.trackedList.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginTop: '0.25rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Mức tồn kho linh kiện tiêu biểu:
+                      </div>
+                      {componentsInsights.trackedList.map(comp => (
+                        <div key={comp.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }} title={comp.name}>
+                              {comp.name}
+                            </span>
+                            <span style={{ fontSize: '0.78rem', color: comp.isCritical ? 'var(--accent-red)' : 'var(--text-secondary)', fontWeight: comp.isCritical ? 'bold' : '500', fontVariantNumeric: 'tabular-nums' }}>
+                              Tồn: <strong style={{ color: comp.isCritical ? 'var(--accent-red)' : 'var(--text-primary)' }}>{comp.current}</strong> / {comp.threshold} {comp.unit || 'cái'}
+                            </span>
+                          </div>
+                          <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+                            <div style={{
+                              width: `${comp.ratioPercent}%`,
+                              height: '100%',
+                              background: comp.isCritical ? 'var(--accent-red)' : comp.ratioPercent < 60 ? 'var(--accent-amber)' : 'var(--accent-green)',
+                              borderRadius: '3px',
+                              transition: 'width 0.5s ease-in-out'
+                            }}></div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   )}
-                </div>
-              </div>
 
-              {/* Cảnh báo tồn kho linh kiện */}
-              <div className="glass-card alert-card">
-                <h3 className="alert-header" style={{ color: 'var(--accent-red)' }}>
-                  <AlertCircle size={18} />
-                  Linh kiện sắp hết
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                  {lowStockComponents.length > 0 ? (
-                    <>
-                      <table className="compact-alert-table">
-                        <thead>
-                          <tr>
-                            <th>Mã</th>
-                            <th>Tên linh kiện</th>
-                            <th style={{ textAlign: 'center' }}>Tồn kho / Ngưỡng</th>
-                            <th style={{ textAlign: 'right' }}>Cảnh báo</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {lowStockComponents.map(comp => {
-                            const isOut = comp.totalQty === 0;
-                            return (
-                              <tr key={comp.id}>
-                                <td style={{ fontWeight: '600', color: 'var(--text-muted)', fontSize: '0.75rem', fontVariantNumeric: 'tabular-nums' }}>
-                                  {comp.code}
-                                </td>
-                                <td style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
-                                  {comp.name}
-                                </td>
-                                <td style={{ textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
-                                  <span style={{ color: isOut ? 'var(--accent-red)' : 'var(--text-primary)', fontWeight: isOut ? 'bold' : 'normal' }}>
-                                    {comp.totalQty}
-                                  </span>
-                                  <span style={{ color: 'var(--text-muted)' }}> / {comp.minThreshold || 5}</span>
-                                </td>
-                                <td style={{ textAlign: 'right' }}>
-                                  <span style={{
-                                    fontSize: '0.75rem',
-                                    fontWeight: '600',
-                                    padding: '0.2rem 0.5rem',
-                                    borderRadius: '4px',
-                                    background: isOut ? 'rgba(239, 68, 68, 0.08)' : 'rgba(245, 158, 11, 0.08)',
-                                    color: isOut ? 'var(--accent-red)' : 'var(--accent-amber)',
-                                    display: 'inline-block'
-                                  }}>
-                                    {isOut ? 'Nguy cấp' : 'Cảnh báo'}
-                                  </span>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
-                        <button
-                          onClick={() => handleCardClick('components')}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--accent-blue)',
-                            fontSize: '0.85rem',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            padding: '0.25rem 0.75rem',
-                            borderRadius: '4px',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseEnter={e => e.target.style.background = 'rgba(59, 130, 246, 0.08)'}
-                          onMouseLeave={e => e.target.style.background = 'transparent'}
-                        >
-                          Quản lý tồn kho linh kiện
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      textAlign: 'center',
-                      padding: '1.5rem 1rem',
-                      background: 'rgba(16, 185, 129, 0.02)',
-                      border: '1px solid rgba(16, 185, 129, 0.12)',
-                      borderRadius: '12px',
-                      gap: '0.75rem'
-                    }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        background: 'rgba(16, 185, 129, 0.12)',
+                  {/* Nút bấm liên kết điều hướng */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate ? onNavigate('equipment-components') : handleCardClick('components')}
+                      style={{
+                        background: 'rgba(16, 185, 129, 0.08)',
+                        border: '1px solid rgba(16, 185, 129, 0.25)',
                         color: 'var(--accent-green)',
-                        display: 'flex',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        padding: '0.45rem 0.85rem',
+                        borderRadius: '6px',
+                        display: 'inline-flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <ShieldCheck size={20} />
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '600', color: 'var(--accent-green)' }}>
-                          Tồn kho an toàn
-                        </h4>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                          Tất cả linh kiện tiêu hao đều ở mức tồn kho an toàn, vượt trên ngưỡng tối thiểu.
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleCardClick('components')}
-                        style={{
-                          marginTop: '0.25rem',
-                          background: 'rgba(16, 185, 129, 0.08)',
-                          border: 'none',
-                          color: 'var(--accent-green)',
-                          fontSize: '0.8rem',
-                          fontWeight: '500',
-                          cursor: 'pointer',
-                          padding: '0.3rem 0.75rem',
-                          borderRadius: '20px',
-                          transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={e => e.target.style.background = 'rgba(16, 185, 129, 0.15)'}
-                        onMouseLeave={e => e.target.style.background = 'rgba(16, 185, 129, 0.08)'}
-                      >
-                        Xem chi tiết linh kiện
-                      </button>
-                    </div>
-                  )}
+                        justifyContent: 'center',
+                        gap: '0.4rem',
+                        transition: 'all 0.2s',
+                        width: '100%'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.15)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.08)'}
+                    >
+                      Quản lý kho linh kiện & Nhập xuất <ArrowRight size={13} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -727,21 +865,21 @@ export default function AssetOverview() {
 
       {/* Modal hiển thị chi tiết (Floating Card Modal) */}
       {modalConfig.isOpen && (
-        <div className="modal-overlay fade-in" style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalConfig({ ...modalConfig, isOpen: false })}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ 
-            width: '90vw', 
-            maxWidth: '1000px', 
-            height: '80vh', 
-            maxHeight: '700px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            borderRadius: '16px', 
-            overflow: 'hidden', 
+        <div className="modal-overlay fade-in" style={{ zIndex: 1000, padding: '2vh 2vw', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalConfig({ ...modalConfig, isOpen: false })}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{
+            width: '100%',
+            height: 'auto',
+            maxWidth: '100%',
+            maxHeight: '94vh',
+            display: 'flex',
+            flexDirection: 'column',
+            borderRadius: '16px',
+            overflow: 'hidden',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
             border: '1px solid var(--border-color)',
             background: 'var(--bg-card)'
           }}>
-            <div className="modal-header" style={{ padding: '1.25rem 2rem', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="modal-header" style={{ padding: '1.25rem 2rem', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                 <div style={{ background: 'var(--bg-primary)', padding: '0.5rem', borderRadius: '50%', color: 'var(--accent-blue)', display: 'flex' }}>
                   {modalConfig.type === 'devices' && <Box size={24} className="text-blue-500" />}
@@ -751,19 +889,37 @@ export default function AssetOverview() {
                 </div>
                 <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: 0, color: 'var(--text-primary)' }}>{modalConfig.title}</h2>
               </div>
-              <Button 
-                variant="ghost" 
-                icon={X} 
-                onClick={() => setModalConfig({ ...modalConfig, isOpen: false })} 
-                style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }} 
-              />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                {modalConfig.type === 'maintenance' && onNavigate && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={Wrench}
+                    iconPosition="left"
+                    onClick={() => {
+                      setModalConfig({ ...modalConfig, isOpen: false });
+                      onNavigate('equipment-maintenance');
+                    }}
+                    style={{ height: '36px' }}
+                  >
+                    Đến trang Bảo trì & Sửa chữa
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  icon={X}
+                  onClick={() => setModalConfig({ ...modalConfig, isOpen: false })}
+                  style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
+                />
+              </div>
             </div>
-            <div className="modal-body" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, padding: 0, background: 'var(--bg-primary)' }}>
-              <div style={{ padding: '1.5rem 2rem', flex: 1, overflowY: 'auto' }}>
+            <div className="modal-body" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, padding: 0, background: 'var(--bg-primary)' }}>
+              <div style={{ padding: '1.25rem 2rem', overflowY: 'auto' }}>
                 <DataTable
                   data={filteredModalData}
                   columns={modalConfig.columns}
-                  searchKeys={modalConfig.type === 'maintenance' ? ['equipmentId', 'type'] : ['name', 'code', 'category']}
+                  searchKeys={modalConfig.type === 'maintenance' ? ['equipmentCode', 'equipmentName', 'issueDescription', 'status'] : ['name', 'code', 'category']}
                   toolbarActions={modalToolbarActions}
                   expandedRowId={expandedRowId}
                   onExpandedRowChange={setExpandedRowId}

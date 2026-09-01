@@ -32,6 +32,7 @@ import {
   Download,
   Briefcase,
   Zap,
+  Bell,
   FileSpreadsheet
 } from 'lucide-react';
 import { useSortableTable } from '../hooks/useSortableTable.jsx';
@@ -43,6 +44,8 @@ import ReturnEquipmentModal from '../components/equipment/ReturnEquipmentModal';
 import ConfirmHandoverModal from '../components/equipment/ConfirmHandoverModal';
 import WaitlistModal from '../components/equipment/WaitlistModal';
 import EquipmentDetailsModal from '../components/equipment/EquipmentDetailsModal';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
+import CancelReservationModal from '../components/equipment/CancelReservationModal';
 import ImportExcelModal from '../components/ImportExcelModal';
 import { CATEGORIES, ASSET_TYPES, BORROW_STATUS_TABS } from '../utils/constants';
 import { API_BASE_URL } from '../config';
@@ -53,15 +56,16 @@ import TextInput from '../components/TextInput';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export default function Equipment({ activeTab = 'list' }) {
+export default function Equipment({ activeTab = 'list', pageParams = {} }) {
   const { data: equipmentList = [], mutate: mutateEquip, isLoading: isLoadingEquip } = useSWR(`${API_BASE_URL}/equipment`, fetcher);
   const { data: borrowTickets = [], mutate: mutateBorrows, isLoading: isLoadingBorrows } = useSWR(`${API_BASE_URL}/equipment-borrows`, fetcher);
+  const { data: allWaitlists = [], mutate: mutateWaitlists, isLoading: isLoadingWaitlists } = useSWR(`${API_BASE_URL}/waitlist`, fetcher);
   const { data: members = [], isLoading: isLoadingMembers } = useSWR(`${API_BASE_URL}/members`, fetcher);
   const { data: systemSettings } = useSWR(`${API_BASE_URL}/settings`, fetcher);
   const isLoading = isLoadingEquip || isLoadingBorrows || isLoadingMembers;
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(pageParams.searchTerm || '');
   const [selectedCategoryTab, setSelectedCategoryTab] = useState('Tất cả');
-  const [selectedBorrowTab, setSelectedBorrowTab] = useState('Tất cả');
+  const [selectedBorrowTab, setSelectedBorrowTab] = useState(pageParams.borrowTab || 'Tất cả');
 
   // Generate dynamic categories from actual equipment data
   const availableCategories = useMemo(() => {
@@ -141,23 +145,45 @@ export default function Equipment({ activeTab = 'list' }) {
 
   const { data: report } = useSWR(reportUrl, fetcher);
 
+  const [analyticsCategory, setAnalyticsCategory] = useState('Tất cả');
+
+  const analyticsCategories = useMemo(() => {
+    if (!report?.equipmentStats) return [{ value: 'Tất cả', label: 'Tất cả danh mục' }];
+    const cats = Array.from(new Set(report.equipmentStats.map(e => e.category).filter(Boolean)));
+    return [
+      { value: 'Tất cả', label: 'Tất cả danh mục' },
+      ...cats.map(c => ({ value: c, label: c }))
+    ];
+  }, [report?.equipmentStats]);
+
   const filteredEquipmentStats = useMemo(() => {
     if (!report?.equipmentStats) return [];
     return report.equipmentStats.filter(e => {
-      const matchText = e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.category.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchText;
-    }).map(e => ({
-      ...e,
-      depreciationPercent: Number(e.depreciationPercent),
-      periodUsedHours: Number(e.periodUsedHours)
-    }));
-  }, [report?.equipmentStats, searchTerm]);
+      const matchText = (e.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (e.code || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (e.category || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchCategory = analyticsCategory === 'Tất cả' || e.category === analyticsCategory;
+      return matchText && matchCategory;
+    }).map(e => {
+      const instances = e.instances || [];
+      const batchCount = instances.length > 0 ? instances.length : Math.max(e.totalQty || 1, 1);
+      const singleLifespan = Number(e.lifespanHours) || 10000;
+      const totalBatchLifespan = Number(e.totalBatchLifespan) || (batchCount * singleLifespan);
+      return {
+        ...e,
+        depreciationPercent: Number(e.depreciationPercent) || 0,
+        periodUsedHours: Number(e.periodUsedHours) || 0,
+        totalUsedHours: Number(e.totalUsedHours) || 0,
+        lifespanHours: singleLifespan,
+        totalBatchLifespan: totalBatchLifespan,
+        batchCount: batchCount
+      };
+    });
+  }, [report?.equipmentStats, searchTerm, analyticsCategory]);
 
   const { items: sortedEquipmentStats, requestSort: requestEqStatsSort, getSortIcon: getEqStatsSortIcon } = useSortableTable(
     filteredEquipmentStats,
-    'depreciationPercent',
+    'periodUsedHours',
     'desc'
   );
 
@@ -183,13 +209,27 @@ export default function Equipment({ activeTab = 'list' }) {
     { accessorKey: 'name', header: 'Thiết bị (Mã ID)', sortable: true, cell: (row) => (
       <div style={{ fontWeight: '500' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {row.name} <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>({row.code})</span>
+          <span>{row.name}</span> <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>({row.code})</span>
         </div>
       </div>
     )},
     { accessorKey: 'category', header: 'Phân loại', sortable: true, cell: (row) => <span style={{ color: 'var(--text-secondary)' }}>{row.category}</span> },
     { accessorKey: 'periodBorrowCount', header: 'Lượt mượn (Kỳ này)', sortable: true, align: 'right', cell: (row) => <span style={{ fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>{row.periodBorrowCount}</span> },
     { accessorKey: 'periodUsedHours', header: 'Giờ dùng thêm (Kỳ này)', sortable: true, align: 'right', cell: (row) => <span style={{ color: 'var(--accent-blue)', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>+{typeof row.periodUsedHours === 'number' ? Number(row.periodUsedHours).toFixed(1) : row.periodUsedHours}h</span> },
+    { accessorKey: 'totalUsedHours', header: 'Tổng thời gian đã dùng', sortable: true, align: 'right', cell: (row) => {
+      const used = typeof row.totalUsedHours === 'number' ? Number(row.totalUsedHours).toFixed(1) : row.totalUsedHours;
+      const totalBatch = row.totalBatchLifespan || ((row.batchCount || 1) * (row.lifespanHours || 10000));
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+          <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+            {used}h
+          </span>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+            / {totalBatch.toLocaleString()}h tổng định mức
+          </span>
+        </div>
+      );
+    }},
     { accessorKey: 'depreciationPercent', header: '% Khấu hao (Đã dùng)', sortable: true, align: 'right', cell: (row) => {
       let statusColor = 'var(--accent-green)';
       let statusText = 'Tốt';
@@ -214,15 +254,43 @@ export default function Equipment({ activeTab = 'list' }) {
   ], []);
 
   const renderEqStatsExpandedRow = React.useCallback((row) => {
-    if (!row.instances || row.instances.length === 0) return <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)' }}>Không có dữ liệu máy con</div>;
+    let instances = row.instances || [];
+    const count = Math.max(
+      row.totalQty || 0,
+      row.periodBorrowCount || 0,
+      instances.length,
+      1
+    );
+    const lifespan = row.lifespanHours || 10000;
+    const avgUsed = row.totalUsedHours ? (row.totalUsedHours / count) : 0;
+
+    if (instances.length === 0) {
+      instances = Array.from({ length: count }, (_, idx) => ({
+        id: `auto-${row.id}-${idx + 1}`,
+        serialNumber: `${row.code}-${String(idx + 1).padStart(2, '0')}`,
+        status: row.status || 'Sẵn sàng',
+        usedHours: Number(avgUsed.toFixed(1)),
+        lifespanHours: lifespan
+      }));
+    }
+
     return (
       <div style={{ backgroundColor: 'var(--bg-card)', padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>
         <table className="table" style={{ margin: 0, background: 'rgba(0,0,0,0.15)', borderRadius: '8px' }}>
+          <thead>
+            <tr style={{ fontSize: '0.78rem', color: 'var(--text-muted)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <th style={{ padding: '8px 12px', textAlign: 'left' }}>Tên thiết bị con & Số hiệu máy</th>
+              <th style={{ padding: '8px 12px', textAlign: 'left' }}>Trạng thái</th>
+              <th style={{ padding: '8px 12px', textAlign: 'center' }}>Tình trạng mượn</th>
+              <th style={{ padding: '8px 12px', textAlign: 'right' }}>Thời gian đã dùng (Máy này)</th>
+              <th style={{ padding: '8px 12px', textAlign: 'right' }}>% Khấu hao (Máy này)</th>
+            </tr>
+          </thead>
           <tbody>
-            {row.instances.map(inst => {
-              const lifespan = inst.lifespanHours || row.lifespanHours || 10000;
-              const used = inst.usedHours || 0;
-              const instDepreciation = Math.min(100, Math.round((used / lifespan) * 100));
+            {instances.map((inst, idx) => {
+              const instLifespan = inst.lifespanHours || lifespan;
+              const used = Number(inst.usedHours) || (Number(avgUsed.toFixed(1)) || 0);
+              const instDepreciation = Math.min(100, Math.round((used / instLifespan) * 100));
 
               let instColor = 'var(--accent-green)';
               let instStatus = 'Tốt';
@@ -234,27 +302,39 @@ export default function Equipment({ activeTab = 'list' }) {
                 instStatus = 'Cần bảo trì';
               }
 
+              const instanceNumber = String(idx + 1).padStart(2, '0');
+              const instanceCode = inst.serialNumber || `${row.code}-${instanceNumber}`;
+
               return (
-                <tr key={inst.id}>
-                  <td style={{ fontWeight: '400', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Mã máy: <strong style={{ color: 'var(--text-primary)' }}>{inst.serialNumber}</strong>
+                <tr key={inst.id || `${row.id}-${idx}`}>
+                  <td style={{ padding: '8px 12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.85rem' }}>
+                        {row.name} <span style={{ color: 'var(--accent-blue)', fontWeight: 'bold' }}>#{instanceNumber}</span>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                        Mã định danh: {instanceCode}
+                      </div>
+                    </div>
                   </td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{inst.status !== 'Đang mượn' ? inst.status : ''}</td>
-                  <td style={{ textAlign: 'center' }}>
+                  <td style={{ color: 'var(--text-muted)', fontSize: '0.825rem', padding: '8px 12px' }}>
+                    <span className="badge badge-secondary" style={{ fontSize: '0.72rem' }}>{inst.status || 'Sẵn sàng'}</span>
+                  </td>
+                  <td style={{ textAlign: 'center', padding: '8px 12px' }}>
                     {inst.status === 'Đang mượn' ? (
                       <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: 'var(--accent-red)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <Clock size={12} /> Đang mượn {inst.borrowedBy ? `(${inst.borrowedBy})` : ''}
                       </span>
                     ) : (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>-</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Sẵn sàng trong kho</span>
                     )}
                   </td>
-                  <td style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Tổng đã dùng: {typeof used === 'number' ? Number(used).toFixed(1) : used}h
+                  <td style={{ textAlign: 'right', color: 'var(--text-secondary)', fontSize: '0.85rem', padding: '8px 12px' }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>{used.toFixed(1)}h</strong> / {instLifespan.toLocaleString()}h
                   </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
-                      <span style={{ color: instColor, fontWeight: 'bold', fontSize: '0.9rem' }}>
+                  <td style={{ textAlign: 'right', padding: '8px 12px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ color: instColor, fontWeight: 'bold', fontSize: '0.875rem' }}>
                         {instDepreciation}%
                       </span>
                       <span style={{ fontSize: '0.7rem', color: instColor, backgroundColor: `${instColor}15`, padding: '1px 5px', borderRadius: '4px' }}>
@@ -481,6 +561,15 @@ export default function Equipment({ activeTab = 'list' }) {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showConfirmHandoverModal, setShowConfirmHandoverModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancellingTicket, setCancellingTicket] = useState(null);
+  const [isCancellingReservation, setIsCancellingReservation] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingItem, setDeletingItem] = useState(null);
+  const [isDeletingEquip, setIsDeletingEquip] = useState(false);
+  const [showDeleteWaitlistModal, setShowDeleteWaitlistModal] = useState(false);
+  const [deletingWaitlist, setDeletingWaitlist] = useState(null);
+  const [isDeletingWaitlist, setIsDeletingWaitlist] = useState(false);
   const [showRfidModal, setShowRfidModal] = useState(false);
   const [rfidAction, setRfidAction] = useState(''); // 'borrow' hoặc 'return'
   const [rfidCards, setRfidCards] = useState([]);
@@ -507,9 +596,18 @@ export default function Equipment({ activeTab = 'list' }) {
   });
   const [editingEquip, setEditingEquip] = useState(null);
 
-  // Trợ giúp ngày hẹn trả mặc định (hôm nay)
+  // Trợ giúp ngày mượn và ngày hẹn trả mặc định
   const getTodayDateString = () => {
     const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getTomorrowDateString = (baseDateStr) => {
+    const d = baseDateStr ? new Date(baseDateStr + 'T00:00:00') : new Date();
+    d.setDate(d.getDate() + 1);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -520,10 +618,20 @@ export default function Equipment({ activeTab = 'list' }) {
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
   const [suggestedMembers, setSuggestedMembers] = useState([]);
 
+  const getDefaultBorrowTime = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 29);
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
+  };
+
   const [borrowForm, setBorrowForm] = useState({
     mssv: '',
     qty: 1,
-    expectedReturnDate: getTodayDateString(),
+    borrowDate: getTodayDateString(),
+    borrowTime: getDefaultBorrowTime(),
+    expectedReturnDate: getTomorrowDateString(),
     expectedReturnTime: '17:00',
     initialCondition: 'Tốt / Hoạt động bình thường',
     borrowNotes: ''
@@ -556,6 +664,23 @@ export default function Equipment({ activeTab = 'list' }) {
     };
     fetchWaitlists();
   }, [equipmentList]);
+
+  // Xử lý điều hướng từ Dashboard sang: tự động chọn tab và mở modal chi tiết phiếu
+  useEffect(() => {
+    if (pageParams.borrowTab) {
+      setSelectedBorrowTab(pageParams.borrowTab);
+    }
+    if (pageParams.searchTerm !== undefined) {
+      setSearchTerm(pageParams.searchTerm);
+    }
+    if (pageParams.ticketId && borrowTickets.length > 0) {
+      const found = borrowTickets.find(t => t.id === pageParams.ticketId);
+      if (found) {
+        setSelectedBorrowDetail(found);
+        setShowDetailsModal(true);
+      }
+    }
+  }, [pageParams, borrowTickets]);
 
   // Xử lý tìm kiếm thành viên gợi ý
   const handleMemberSearch = (query) => {
@@ -704,9 +829,13 @@ export default function Equipment({ activeTab = 'list' }) {
 
   const processConfirmHandover = async (cardId) => {
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE_URL}/equipment/borrows/${selectedBorrow.id}/confirm-handover`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           cardId,
           initialCondition: borrowForm.initialCondition,
@@ -716,7 +845,7 @@ export default function Equipment({ activeTab = 'list' }) {
       const data = await res.json();
 
       if (res.ok) {
-        setSuccessMsg('Đã xác nhận bàn giao thiết bị!');
+        setSuccessMsg(`Đã xác nhận bàn giao thiết bị "${selectedBorrow.equipmentName}" cho ${scannedUserInfo?.name || 'sinh viên'}!`);
         setSelectedBorrow(null);
         mutateEquip();
         mutateBorrows();
@@ -730,7 +859,8 @@ export default function Equipment({ activeTab = 'list' }) {
 
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
-    if (!waitlistForm.mssv.trim() || Number(waitlistForm.qty) <= 0) {
+    const cleanMssv = waitlistForm.mssv?.includes('–') ? waitlistForm.mssv.split('–')[0].trim() : waitlistForm.mssv?.trim();
+    if (!cleanMssv || Number(waitlistForm.qty) <= 0) {
       setErrorMsg('Vui lòng điền đầy đủ MSSV và số lượng');
       return;
     }
@@ -739,21 +869,25 @@ export default function Equipment({ activeTab = 'list' }) {
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEquip.id}/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(waitlistForm)
+        body: JSON.stringify({
+          ...waitlistForm,
+          mssv: cleanMssv
+        })
       });
       const data = await res.json();
 
+      setShowWaitlistModal(false);
       if (!res.ok) {
         setErrorMsg(data.error || 'Lỗi đăng ký chờ');
       } else {
-        setSuccessMsg(`✅ ${data.message}`);
-        setWaitlistForm({ mssv: '', qty: 1, notes: '' });
+        setSuccessMsg(`🔔 Đã tiếp nhận đăng ký chờ mượn ${selectedEquip.name}! Hệ thống sẽ gửi thông báo ngay khi có thiết bị.`);
+        setWaitlistForm({ mssv: '', qty: 1, purpose: 'Đồ án môn học / Khóa luận tốt nghiệp', neededDate: '', notes: '' });
         setMemberSearchQuery('');
         setSuggestedMembers([]);
-        setShowWaitlistModal(false);
         mutateEquip();
       }
     } catch (error) {
+      setShowWaitlistModal(false);
       setErrorMsg('Lỗi kết nối tới server');
     }
   };
@@ -766,13 +900,22 @@ export default function Equipment({ activeTab = 'list' }) {
         ? availableInstances.slice(0, Number(borrowForm.qty)).map(i => i.id) 
         : [];
 
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEquip.id}/borrow`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           ...borrowForm,
           selectedInstanceIds,
           cardId: cardId,
+          borrowDate: (borrowForm.borrowDate && borrowForm.borrowTime)
+            ? new Date(borrowForm.borrowDate + 'T' + borrowForm.borrowTime + ':00').toISOString()
+            : (borrowForm.borrowDate ? new Date(borrowForm.borrowDate).toISOString() : new Date().toISOString()),
           expectedReturnDate: isConsumable ? null : new Date(borrowForm.expectedReturnDate + 'T' + borrowForm.expectedReturnTime + ':00').toISOString()
         })
       });
@@ -788,6 +931,8 @@ export default function Equipment({ activeTab = 'list' }) {
         setBorrowForm({
           mssv: '',
           qty: 1,
+          borrowDate: getTodayDateString(),
+          borrowTime: '08:30',
           expectedReturnDate: getTodayDateString(),
           expectedReturnTime: '17:00',
           initialCondition: 'Tốt / Hoạt động bình thường',
@@ -806,9 +951,13 @@ export default function Equipment({ activeTab = 'list' }) {
 
   const processReturn = async (cardId) => {
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE_URL}/equipment/borrows/${selectedBorrow.id}/return`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           ...returnForm,
           cardId: cardId
@@ -819,6 +968,7 @@ export default function Equipment({ activeTab = 'list' }) {
       if (res.ok) {
         setSuccessMsg('Đã ghi nhận trả thiết bị thành công');
         setShowReturnModal(false);
+        setShowRfidModal(false);
         setSelectedBorrow(null);
         setReturnForm({
           returnMssv: '',
@@ -845,9 +995,15 @@ export default function Equipment({ activeTab = 'list' }) {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/rfid-cards`);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const response = await fetch(`${API_BASE_URL}/rfid-cards`, { headers });
       const cards = await response.json();
-      setRfidCards(cards);
+      if (Array.isArray(cards)) {
+        setRfidCards(cards);
+      }
 
       setShowReturnModal(false);
       setRfidScanStatus('idle');
@@ -859,24 +1015,33 @@ export default function Equipment({ activeTab = 'list' }) {
     }
   };
 
-  const handleDeleteEquip = async (id, name) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa thiết bị ${name} khỏi danh sách?`)) {
-      return;
-    }
+  const handleDeleteEquip = (row) => {
+    // Nhận cả object thiết bị hoặc (id, name)
+    const item = typeof row === 'object' ? row : { id: row, name: arguments[1] || 'Thiết bị' };
+    setDeletingItem(item);
+    setShowDeleteModal(true);
+  };
 
+  const handleConfirmDeleteEquip = async () => {
+    if (!deletingItem) return;
+    setIsDeletingEquip(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/equipment/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/equipment/${deletingItem.id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
-        setSuccessMsg(`Đã xóa thiết bị ${name}`);
+        setSuccessMsg(`Đã xóa thiết bị ${deletingItem.name}`);
         mutateEquip();
+        setShowDeleteModal(false);
+        setDeletingItem(null);
       } else {
         const data = await res.json();
         setErrorMsg(data.error || 'Không thể xóa thiết bị');
       }
     } catch (error) {
       setErrorMsg('Lỗi kết nối tới server');
+    } finally {
+      setIsDeletingEquip(false);
     }
   };
 
@@ -932,11 +1097,9 @@ export default function Equipment({ activeTab = 'list' }) {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    let hours = date.getHours();
+    const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
   };
 
   const formatDateOnly = (isoString) => {
@@ -954,19 +1117,55 @@ export default function Equipment({ activeTab = 'list' }) {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    let hours = date.getHours();
+    const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${day} Thg ${month}, ${year} lúc ${hours}:${minutes} ${ampm}`;
+    return `${day} Thg ${month}, ${year} lúc ${hours}:${minutes}`;
   };
 
   const getBorrowStatusInfo = (ticket) => {
-    if (ticket.status === 'Đã đặt trước') {
+    if (ticket.status === 'Đã hủy') {
       return {
-        label: 'Đã đặt trước',
+        label: 'Đã hủy giữ chỗ',
+        colorClass: 'badge-danger',
+        overdue: false,
+        style: { backgroundColor: 'rgba(239, 68, 68, 0.12)', color: 'var(--text-muted)', border: '1px solid rgba(239, 68, 68, 0.25)', textDecoration: 'line-through' }
+      };
+    }
+
+    if (ticket.status === 'Đã đặt trước') {
+      if (ticket.borrowDate) {
+        const scheduledTime = new Date(ticket.borrowDate);
+        const now = new Date();
+        if (now > scheduledTime) {
+          const diffMs = now - scheduledTime;
+          const diffMinutesTotal = Math.floor(diffMs / (1000 * 60));
+          const diffHours = Math.floor(diffMinutesTotal / 60);
+          const remainingMinutes = diffMinutesTotal % 60;
+
+          let overdueText = '';
+          if (diffHours >= 1) {
+            overdueText = remainingMinutes > 0 
+              ? `Quá giờ nhận (${diffHours}h${remainingMinutes}p)`
+              : `Quá giờ nhận (${diffHours}h)`;
+          } else {
+            overdueText = `Quá giờ nhận (${diffMinutesTotal}p)`;
+          }
+
+          return {
+            label: `⚠️ ${overdueText}`,
+            colorClass: 'badge-danger',
+            overdue: true,
+            isPickupOverdue: true,
+            style: { backgroundColor: 'rgba(239, 68, 68, 0.18)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.4)', fontWeight: '600' }
+          };
+        }
+      }
+
+      return {
+        label: 'Đang chờ nhận',
         colorClass: 'badge-warning',
         overdue: false,
+        isPickupOverdue: false,
         style: { backgroundColor: 'rgba(234, 179, 8, 0.15)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }
       };
     }
@@ -1023,8 +1222,16 @@ export default function Equipment({ activeTab = 'list' }) {
     if (!showRfidModal) return;
 
     const handleKeyPress = async (e) => {
-      if (['1', '2', '3', '4'].includes(e.key)) {
-        const cardId = `CARD-00${e.key}`;
+      const key = e.key;
+      let cardNum = null;
+      if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(key)) {
+        cardNum = key;
+      } else if (key.startsWith('Numpad') && ['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(key.replace('Numpad', ''))) {
+        cardNum = key.replace('Numpad', '');
+      }
+
+      if (cardNum) {
+        const cardId = `CARD-00${cardNum}`;
 
         try {
           const scanRes = await fetch(`${API_BASE_URL}/rfid-scan`, {
@@ -1048,7 +1255,7 @@ export default function Equipment({ activeTab = 'list' }) {
 
           if (scanData.mssv !== expectedMssv) {
             setRfidScanStatus('error');
-            setRfidScanMessage(`Thẻ không khớp! Vui lòng quét đúng thẻ.`);
+            setRfidScanMessage(`Thẻ không khớp! Vui lòng quét đúng thẻ của sinh viên (${expectedMssv}).`);
             setTimeout(() => { setRfidScanStatus('idle'); setRfidScanMessage(''); }, 3000);
             return;
           }
@@ -1119,12 +1326,19 @@ export default function Equipment({ activeTab = 'list' }) {
         return (
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.35 }}>{row.name}</div>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{row.category || 'Khác'}</span>
+            <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', marginTop: '0.25rem', fontSize: '0.76rem', flexWrap: 'wrap' }}>
+              <span style={{ color: 'var(--text-muted)' }}>{row.category || 'Khác'}</span>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+              <span style={{ color: 'var(--text-secondary)' }}>
+                Vị trí: <strong style={{ color: 'var(--accent-blue)', fontWeight: '600' }}>{row.location || 'Kho Lab'}</strong>
+              </span>
               {isConsumable && (
-                <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '1px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '500' }}>
-                  Tiêu hao
-                </span>
+                <>
+                  <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '1px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '500' }}>
+                    Tiêu hao
+                  </span>
+                </>
               )}
             </div>
           </div>
@@ -1203,7 +1417,9 @@ export default function Equipment({ activeTab = 'list' }) {
                       mssv: '', 
                       qty: 1, 
                       selectedInstanceIds: firstReadyInst ? [firstReadyInst.id] : [],
-                      expectedReturnDate: getTodayDateString(), 
+                      borrowDate: getTodayDateString(),
+                      borrowTime: getDefaultBorrowTime(),
+                      expectedReturnDate: getTomorrowDateString(), 
                       expectedReturnTime: systemSettings?.defaultReturnTime || '17:00', 
                       initialCondition: 'Tốt / Hoạt động bình thường', 
                       borrowNotes: '' 
@@ -1228,7 +1444,7 @@ export default function Equipment({ activeTab = 'list' }) {
                 icon={Trash2} 
                 title="Xóa thiết bị" 
                 aria-label="Xóa thiết bị"
-                onClick={() => handleDeleteEquip(row.id, row.name)} 
+                onClick={() => handleDeleteEquip(row)} 
               />
             </div>
           </div>
@@ -1264,6 +1480,23 @@ export default function Equipment({ activeTab = 'list' }) {
       width: '25%',
       sortable: true,
       cell: (ticket) => {
+        if (ticket.isWaitlist || ticket.status === 'waiting') {
+          return (
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                <Clock size={12} style={{ color: 'var(--accent-amber)' }} />
+                Đăng ký: {formatDateWithTime ? formatDateWithTime(ticket.registeredDate || ticket.borrowDate) : formatTime(ticket.registeredDate || ticket.borrowDate)}
+              </span>
+              {ticket.neededDate && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent-amber)', whiteSpace: 'nowrap' }}>
+                  <Calendar size={12} />
+                  Ngày cần: {ticket.neededDate}
+                </span>
+              )}
+            </div>
+          );
+        }
+
         const statusInfo = getBorrowStatusInfo(ticket);
         return ticket.expectedReturnDate ? (
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -1293,6 +1526,26 @@ export default function Equipment({ activeTab = 'list' }) {
       width: '15%',
       sortable: true,
       cell: (ticket) => {
+        if (ticket.isWaitlist || ticket.status === 'waiting') {
+          return (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 8px',
+              borderRadius: '12px',
+              fontSize: '0.78rem',
+              fontWeight: '600',
+              backgroundColor: 'rgba(245, 158, 11, 0.15)',
+              color: 'var(--accent-amber)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              whiteSpace: 'nowrap'
+            }}>
+              ⏳ Đang chờ lượt
+            </span>
+          );
+        }
+
         const statusInfo = getBorrowStatusInfo(ticket);
         return (
           <span className={`badge ${statusInfo.colorClass}`} style={{ ...statusInfo.style, whiteSpace: 'nowrap' }}>
@@ -1307,44 +1560,199 @@ export default function Equipment({ activeTab = 'list' }) {
       width: '25%',
       sortable: false,
       align: 'right',
-      cell: (ticket) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end' }}>
-          {ticket.status === 'Đã đặt trước' ? (
-            <Button
-              size="sm"
-              variant="primary"
-              style={{ backgroundColor: 'var(--accent-amber)', borderColor: 'var(--accent-amber)' }}
-              onClick={() => {
-                setSelectedBorrow(ticket);
-                setBorrowForm({ ...borrowForm, initialCondition: 'Tốt / Hoạt động bình thường', borrowNotes: ticket.borrowNotes || '' });
-                setShowConfirmHandoverModal(true);
-              }}
-            >
-              Xác nhận bàn giao
-            </Button>
-          ) : ticket.status === 'Đang mượn' ? (
-            <Button
-              size="sm"
-              variant="primary"
-              style={{ backgroundColor: 'var(--accent-green)', borderColor: 'var(--accent-green)' }}
-              onClick={() => {
-                setSelectedBorrow(ticket);
-                setReturnForm({ returnMssv: ticket.mssv, finalCondition: 'Tốt / Nguyên vẹn như cũ', returnNotes: '' });
-                setShowReturnModal(true);
-              }}
-            >
-              Trả thiết bị
-            </Button>
-          ) : (
-            <span style={{ fontSize: '0.75rem', color: 'var(--accent-green)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
-              <CheckCircle size={14} /> {ticket.status === 'Đã tiêu hao' ? 'Đã dùng' : 'Đã trả'}
-            </span>
+      cell: (ticket) => {
+        if (ticket.isWaitlist || ticket.status === 'waiting') {
+          return (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Hàng chờ</span>
+              <Button
+                size="sm"
+                variant="danger-ghost"
+                icon={Trash2}
+                title="Xóa khỏi danh sách chờ"
+                onClick={() => handleDeleteWaitlist(ticket.id, ticket.mssv, ticket.borrowerName || ticket.userName, ticket.equipmentName)}
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end' }}>
+            {ticket.status === 'Đã đặt trước' ? (
+              <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  style={{ backgroundColor: 'var(--accent-amber)', borderColor: 'var(--accent-amber)', height: '32px' }}
+                  onClick={() => {
+                    setSelectedBorrow(ticket);
+                    setBorrowForm({ ...borrowForm, initialCondition: 'Tốt / Hoạt động bình thường', borrowNotes: ticket.borrowNotes || '' });
+                    setShowConfirmHandoverModal(true);
+                  }}
+                >
+                  Bàn giao
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  style={{ height: '32px' }}
+                  title="Hủy phiếu đặt trước & Hoàn trả thiết bị lại kho"
+                  onClick={() => {
+                    setCancellingTicket(ticket);
+                    setShowCancelModal(true);
+                  }}
+                >
+                  Hủy giữ chỗ
+                </Button>
+              </div>
+            ) : ticket.status === 'Đang mượn' ? (
+              <Button
+                size="sm"
+                variant="primary"
+                style={{ backgroundColor: 'var(--accent-green)', borderColor: 'var(--accent-green)' }}
+                onClick={() => {
+                  setSelectedBorrow(ticket);
+                  setReturnForm({ returnMssv: ticket.mssv, finalCondition: 'Tốt / Nguyên vẹn như cũ', returnNotes: '' });
+                  setShowReturnModal(true);
+                }}
+              >
+                Trả thiết bị
+              </Button>
+            ) : ticket.status === 'Đã hủy' ? (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                <X size={14} style={{ color: 'var(--accent-red)' }} /> Đã hủy
+              </span>
+            ) : (
+              <span style={{ fontSize: '0.75rem', color: 'var(--accent-green)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                <CheckCircle size={14} /> {ticket.status === 'Đã tiêu hao' ? 'Đã dùng' : 'Đã trả'}
+              </span>
+            )}
+            <Button type="button" size="sm" variant="ghost" icon={Info} iconPosition="left" onClick={() => { setSelectedBorrowDetail(ticket); setShowDetailsModal(true); }}>Chi tiết</Button>
+          </div>
+        );
+      }
+    }
+  ], [borrowForm, borrowTickets, mutateBorrows, mutateEquip, formatDateWithTime, formatTime]);
+
+  const handleDeleteWaitlist = (waitlistId, mssv, userName, equipmentName) => {
+    setDeletingWaitlist({ id: waitlistId, mssv, userName, equipmentName });
+    setShowDeleteWaitlistModal(true);
+  };
+
+  const handleConfirmDeleteWaitlist = async () => {
+    if (!deletingWaitlist) return;
+    setIsDeletingWaitlist(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/waitlist/${deletingWaitlist.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mssv: deletingWaitlist.mssv })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccessMsg(`Đã xóa ${deletingWaitlist.userName} khỏi danh sách chờ`);
+        mutateWaitlists();
+        mutateEquip();
+        setShowDeleteWaitlistModal(false);
+        setDeletingWaitlist(null);
+      } else {
+        setErrorMsg(data.error || 'Lỗi khi xóa đăng ký chờ');
+      }
+    } catch {
+      setErrorMsg('Lỗi kết nối máy chủ');
+    } finally {
+      setIsDeletingWaitlist(false);
+    }
+  };
+
+  const waitlistColumns = useMemo(() => [
+    {
+      accessorKey: 'equipmentName',
+      header: 'Thiết bị / Người chờ',
+      width: '35%',
+      sortable: true,
+      cell: (row) => (
+        <div>
+          <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.9rem' }}>{row.equipmentName}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', marginTop: '0.15rem' }}>
+            <span>Mã: <strong style={{ color: '#a78bfa' }}>{row.equipmentCode}</strong></span>
+            <span>·</span>
+            <span>Số lượng cần: <strong style={{ color: 'var(--accent-amber)' }}>{row.qty} chiếc</strong></span>
+          </div>
+          <div style={{ marginTop: '0.45rem', borderTop: '1px dashed rgba(255,255,255,0.06)', paddingTop: '0.35rem' }}>
+            <span style={{ fontWeight: '500', color: 'var(--accent-blue)', fontSize: '0.85rem' }}>{row.userName}</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '0.4rem' }}>(MSSV: {row.mssv})</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      accessorKey: 'registeredDate',
+      header: 'Thời gian đăng ký & Dự kiến',
+      width: '35%',
+      sortable: true,
+      cell: (row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.85rem' }}>
+          <div>
+            <span style={{ color: 'var(--text-muted)' }}>Đăng ký: </span>
+            <strong>{formatDateWithTime ? formatDateWithTime(row.registeredDate) : formatTime(row.registeredDate)}</strong>
+          </div>
+          {row.neededDate && (
+            <div>
+              <span style={{ color: 'var(--text-muted)' }}>Ngày cần: </span>
+              <strong style={{ color: 'var(--accent-amber)' }}>{row.neededDate}</strong>
+            </div>
           )}
-          <Button type="button" size="sm" variant="ghost" icon={Info} iconPosition="left" onClick={() => { setSelectedBorrowDetail(ticket); setShowDetailsModal(true); }}>Chi tiết</Button>
+          {row.purpose && (
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+              Mục đích: <em>{row.purpose}</em>
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      accessorKey: 'status',
+      header: 'Trạng thái',
+      width: '15%',
+      sortable: true,
+      align: 'center',
+      cell: (row) => (
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '3px 8px',
+          borderRadius: '12px',
+          fontSize: '0.78rem',
+          fontWeight: '600',
+          backgroundColor: row.status === 'waiting' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+          color: row.status === 'waiting' ? 'var(--accent-amber)' : 'var(--text-muted)',
+          border: row.status === 'waiting' ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)'
+        }}>
+          {row.status === 'waiting' ? '⏳ Đang chờ lượt' : row.status}
+        </span>
+      )
+    },
+    {
+      accessorKey: 'actions',
+      header: 'Thao tác',
+      width: '15%',
+      sortable: false,
+      align: 'right',
+      cell: (row) => (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem' }}>
+          <Button
+            size="sm"
+            variant="danger-ghost"
+            icon={Trash2}
+            title="Xóa khỏi danh sách chờ"
+            onClick={() => handleDeleteWaitlist(row.id, row.mssv, row.userName, row.equipmentName)}
+          />
         </div>
       )
     }
-  ], [borrowForm, borrowTickets]);
+  ], [formatDateWithTime, formatTime]);
 
   const equipmentFieldMap = [
     { excelHeader: 'Tên thiết bị', fieldKey: 'name', required: true, type: 'string' },
@@ -1502,7 +1910,7 @@ export default function Equipment({ activeTab = 'list' }) {
       {activeTab === 'analytics' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <Card
-            title="Khấu hao & Tiêu hao Thiết Bị (Trong kỳ)"
+            title={`Khấu hao & Tiêu hao Thiết Bị (Trong kỳ) (${sortedEquipmentStats.length})`}
             icon={Activity}
             style={{ color: 'var(--accent-blue)' }}
           >
@@ -1510,6 +1918,16 @@ export default function Equipment({ activeTab = 'list' }) {
               data={sortedEquipmentStats}
               columns={eqStatsColumns}
               searchKeys={['name', 'code', 'category']}
+              searchPlaceholder="Tìm theo tên thiết bị, mã hoặc phân loại..."
+              toolbarActions={
+                <div style={{ width: '240px' }}>
+                  <Select
+                    value={analyticsCategory}
+                    onChange={setAnalyticsCategory}
+                    options={analyticsCategories}
+                  />
+                </div>
+              }
               renderExpandedRow={renderEqStatsExpandedRow}
               expandedRowId={expandedEqStatId}
               onExpandedRowChange={setExpandedEqStatId}
@@ -1518,27 +1936,17 @@ export default function Equipment({ activeTab = 'list' }) {
         </div>
       ) : activeTab === 'borrows' ? (
         <Card
-          title={`Danh sách phiếu mượn & hoạt động trả (${borrowTickets.length})`}
-          icon={Inbox}
-          style={{ color: 'var(--accent-blue)' }}
+          title={selectedBorrowTab === 'waitlist' ? `Danh sách đăng ký chờ mượn (Waitlist - ${allWaitlists.filter(w => w.status === 'waiting').length} người)` : `Danh sách phiếu mượn & hoạt động trả (${borrowTickets.length})`}
+          icon={selectedBorrowTab === 'waitlist' ? Bell : Inbox}
+          style={{ color: selectedBorrowTab === 'waitlist' ? 'var(--accent-amber)' : 'var(--accent-blue)' }}
         >
-          <DataTable 
-            data={borrowTickets.filter(ticket => {
-              const matchCat = selectedBorrowTab === 'Tất cả' || ticket.status === selectedBorrowTab;
-              return matchCat;
-            })}
-            columns={borrowColumns}
-            searchKeys={['equipmentName', 'equipmentCode', 'borrowerName', 'mssv']}
-            searchPlaceholder="Tìm theo tên thiết bị, người mượn hoặc MSSV..."
-            rowSelection={selectedBorrowIds.reduce((acc, id) => ({ ...acc, [id]: true }), {})}
-            onRowSelectionChange={(sel) => {
-              const selectedIds = Object.keys(sel).filter(key => sel[key]);
-              // In this quick integration, since DataTable works with indices, we need to map indices to IDs.
-              // Wait! DataTable uses indices for rowSelection (0, 1, 2). This won't work perfectly with external IDs unless DataTable uses row.id.
-              // I will leave this as internal selection for now, or adapt it.
-            }}
-            toolbarActions={
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {selectedBorrowTab === 'waitlist' ? (
+            <DataTable 
+              data={allWaitlists.filter(w => w.status === 'waiting')}
+              columns={waitlistColumns}
+              searchKeys={['equipmentName', 'equipmentCode', 'userName', 'mssv', 'purpose']}
+              searchPlaceholder="Tìm theo tên thiết bị, sinh viên hoặc MSSV..."
+              toolbarActions={
                 <div style={{ width: '280px' }}>
                   <Select
                     value={selectedBorrowTab}
@@ -1549,12 +1957,50 @@ export default function Equipment({ activeTab = 'list' }) {
                     }))}
                   />
                 </div>
-                {selectedBorrowIds.length > 0 && (
-                  <Button variant="secondary" icon={Download} iconPosition="left" onClick={() => setIsExportModalOpen(true)}>Export Selected</Button>
-                )}
-              </div>
-            }
-          />
+              }
+            />
+          ) : (
+            <DataTable 
+              data={(() => {
+                if (selectedBorrowTab === 'Tất cả') {
+                  const waitingItems = allWaitlists
+                    .filter(w => w.status === 'waiting')
+                    .map(w => ({
+                      ...w,
+                      isWaitlist: true,
+                      borrowerName: w.userName,
+                      borrowDate: w.registeredDate
+                    }));
+                  return [...waitingItems, ...borrowTickets];
+                }
+                return borrowTickets.filter(ticket => ticket.status === selectedBorrowTab);
+              })()}
+              columns={borrowColumns}
+              searchKeys={['equipmentName', 'equipmentCode', 'borrowerName', 'userName', 'mssv']}
+              searchPlaceholder="Tìm theo tên thiết bị, người mượn hoặc MSSV..."
+              rowSelection={selectedBorrowIds.reduce((acc, id) => ({ ...acc, [id]: true }), {})}
+              onRowSelectionChange={(sel) => {
+                const selectedIds = Object.keys(sel).filter(key => sel[key]);
+              }}
+              toolbarActions={
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ width: '280px' }}>
+                    <Select
+                      value={selectedBorrowTab}
+                      onChange={setSelectedBorrowTab}
+                      options={BORROW_STATUS_TABS.map(tab => ({
+                        value: tab.value,
+                        label: tab.label === 'Tất cả' ? 'Tất cả trạng thái' : tab.label
+                      }))}
+                    />
+                  </div>
+                  {selectedBorrowIds.length > 0 && (
+                    <Button variant="secondary" icon={Download} iconPosition="left" onClick={() => setIsExportModalOpen(true)}>Export Selected</Button>
+                  )}
+                </div>
+              }
+            />
+          )}
         </Card>
       ) : (
         <Card
@@ -1652,12 +2098,55 @@ export default function Equipment({ activeTab = 'list' }) {
         selectedBorrow={selectedBorrow}
         borrowForm={borrowForm}
         setBorrowForm={setBorrowForm}
+        formatDateWithTime={formatDateWithTime}
+        formatTime={formatTime}
         onConfirm={() => {
           setShowConfirmHandoverModal(false);
           setRfidAction('confirm-handover');
           setRfidScanStatus('idle');
           setScannedUserInfo(null);
           setShowRfidModal(true);
+        }}
+      />
+
+      <CancelReservationModal
+        isOpen={showCancelModal}
+        onClose={() => {
+          setShowCancelModal(false);
+          setCancellingTicket(null);
+        }}
+        ticket={cancellingTicket}
+        isCancelling={isCancellingReservation}
+        formatDateWithTime={formatDateWithTime}
+        formatTime={formatTime}
+        onConfirm={async (cancelReason) => {
+          if (!cancellingTicket) return;
+          setIsCancellingReservation(true);
+          try {
+            const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+            const res = await fetch(`${API_BASE_URL}/equipment/borrows/${cancellingTicket.id}/cancel-reservation`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+              },
+              body: JSON.stringify({ cancelReason: cancelReason || 'Quản lý hủy giữ chỗ' })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              setErrorMsg(data.error || 'Lỗi khi hủy giữ chỗ');
+            } else {
+              setSuccessMsg(`✓ Đã hủy phiếu đặt trước của ${cancellingTicket.borrowerName}. Tồn kho đã được hoàn trả.`);
+              setShowCancelModal(false);
+              setCancellingTicket(null);
+              mutateBorrows();
+              mutateEquip();
+            }
+          } catch (err) {
+            setErrorMsg('Lỗi kết nối máy chủ');
+          } finally {
+            setIsCancellingReservation(false);
+          }
         }}
       />
 
@@ -1728,6 +2217,34 @@ export default function Equipment({ activeTab = 'list' }) {
         title="Import Thiết bị từ Excel"
         fieldMap={equipmentFieldMap}
         sampleRow={equipmentSampleRow}
+      />
+
+      {/* Confirm Delete Equipment Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setDeletingItem(null); }}
+        onConfirm={handleConfirmDeleteEquip}
+        title="Xác nhận xóa thiết bị"
+        itemName={deletingItem?.name}
+        itemCode={deletingItem?.code}
+        itemCategory={deletingItem?.category}
+        warningMessage="Hành động này sẽ xóa vĩnh viễn thiết bị khỏi danh mục và hệ thống quản lý. Không thể hoàn tác sau khi thực hiện!"
+        confirmText="Xác nhận xóa thiết bị"
+        isDeleting={isDeletingEquip}
+      />
+
+      {/* Confirm Delete Waitlist Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteWaitlistModal}
+        onClose={() => { setShowDeleteWaitlistModal(false); setDeletingWaitlist(null); }}
+        onConfirm={handleConfirmDeleteWaitlist}
+        title="Xóa khỏi danh sách chờ"
+        itemName={deletingWaitlist?.equipmentName ? `Đăng ký chờ: ${deletingWaitlist.equipmentName}` : 'Đăng ký chờ mượn'}
+        itemCode={deletingWaitlist?.mssv ? `MSSV: ${deletingWaitlist.mssv}` : ''}
+        itemCategory={deletingWaitlist?.userName ? `Sinh viên: ${deletingWaitlist.userName}` : ''}
+        warningMessage="Hành động này sẽ hủy yêu cầu trong hàng chờ của sinh viên. Nếu muốn mượn lại sinh viên sẽ phải đăng ký lại từ đầu."
+        confirmText="Xác nhận xóa khỏi hàng chờ"
+        isDeleting={isDeletingWaitlist}
       />
     </div>
   );

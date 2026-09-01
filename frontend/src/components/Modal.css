@@ -1,18 +1,28 @@
 /* Custom sizes for the reusable Modal */
 .modal-size-sm {
-  max-width: 440px !important;
+  max-width: 480px !important;
 }
 
 .modal-size-md {
-  max-width: 600px !important;
+  max-width: 640px !important;
 }
 
 .modal-size-lg {
-  max-width: 800px !important;
+  max-width: 1050px !important;
+  width: 92vw !important;
+  max-height: 92vh !important;
 }
 
 .modal-size-xl {
-  max-width: 1000px !important;
+  max-width: 1250px !important;
+  width: 94vw !important;
+  max-height: 94vh !important;
+}
+
+.modal-size-2xl {
+  max-width: 1400px !important;
+  width: 96vw !important;
+  max-height: 95vh !important;
 }
 
 /* Modal Title */

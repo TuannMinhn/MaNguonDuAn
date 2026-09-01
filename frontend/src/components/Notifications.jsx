@@ -145,31 +145,65 @@ export default function Notifications({ userRole }) {
 
   return (
     <>
-      {/* Nút Chuông nổi (Floating Bell) */}
-      <div style={{ position: 'absolute', top: '2.5rem', right: '2.5rem', zIndex: 1000 }} ref={notifRef}>
+      {/* Nút Chuông (Đính ở đầu trang, cuộn tự nhiên theo trang) */}
+      <div 
+        style={{ 
+          position: 'absolute', 
+          top: '2rem', 
+          right: 'var(--site-gutter-inline, 2.5rem)', 
+          zIndex: 100 
+        }} 
+        ref={notifRef}
+      >
         <div style={{ position: 'relative' }}>
           <button 
             onClick={() => setIsOpen(!isOpen)}
+            aria-label="Thông báo hệ thống"
+            title="Thông báo"
             style={{ 
-              background: 'var(--bg-overlay)', border: '1px solid var(--border-color)', 
-              borderRadius: '50%', width: '48px', height: '48px', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-primary)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)', transition: 'all 0.2s'
+              background: 'var(--bg-overlay)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: '50%', 
+              width: '44px', 
+              height: '44px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              cursor: 'pointer', 
+              color: 'var(--text-primary)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.18)', 
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = 'var(--accent-blue)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'var(--border-color)';
+              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            <Bell size={22} style={{ color: unreadCount > 0 ? 'var(--accent-blue)' : 'var(--text-secondary)' }} />
+            <Bell size={20} style={{ color: unreadCount > 0 ? 'var(--accent-blue)' : 'var(--text-secondary)' }} />
           </button>
 
           {/* Badge số lượng */}
           {unreadCount > 0 && (
             <span style={{
-              position: 'absolute', top: '-4px', right: '-4px',
-              background: 'var(--accent-red)', color: '#fff',
-              fontSize: '0.75rem', fontWeight: 'bold',
-              minWidth: '22px', height: '22px', borderRadius: '11px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '2px solid var(--bg-primary)'
+              position: 'absolute', 
+              top: '-3px', 
+              right: '-3px',
+              background: 'var(--accent-red)', 
+              color: '#fff',
+              fontSize: '0.7rem', 
+              fontWeight: 'bold',
+              minWidth: '20px', 
+              height: '20px', 
+              borderRadius: '10px',
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              border: '2px solid var(--bg-primary)',
+              boxShadow: '0 2px 6px rgba(239, 68, 68, 0.4)'
             }}>
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>

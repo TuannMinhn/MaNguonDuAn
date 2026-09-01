@@ -11,12 +11,17 @@ import Card from '../components/Card';
 import Modal from '../components/Modal';
 import TextInput from '../components/TextInput';
 import EmptyState from '../components/EmptyState';
+import TimePicker24 from '../components/TimePicker24';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 
 export default function Settings() {
   const { data: catalog, mutate } = useSWR(`${API_BASE_URL}/settings/catalog`, fetcher);
   const { data: systemSettings, mutate: mutateSettings } = useSWR(`${API_BASE_URL}/settings`, fetcher);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingCatalog, setDeletingCatalog] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // System Settings state phân theo 3 nhóm
   const [sysConfig, setSysConfig] = useState({
@@ -26,6 +31,8 @@ export default function Settings() {
     defaultLowStockThreshold: 0,
     defaultLifespanHours: 10000,
     maintenanceWarningPercent: 20,
+    reserveAutoExpireHours: 2,
+    reserveAdvanceNoticeMinutes: 29,
     // Nhóm 2: Trực Lab & Điểm thưởng
     attendanceMinHours: 1.0,
     attendanceStandardPoints: 5,
@@ -56,6 +63,8 @@ export default function Settings() {
         defaultLowStockThreshold: systemSettings.defaultLowStockThreshold ?? 0,
         defaultLifespanHours: systemSettings.defaultLifespanHours ?? 10000,
         maintenanceWarningPercent: systemSettings.maintenanceWarningPercent ?? 20,
+        reserveAutoExpireHours: Number(systemSettings.reserveAutoExpireHours) ?? 2,
+        reserveAdvanceNoticeMinutes: Number(systemSettings.reserveAdvanceNoticeMinutes) ?? 29,
         attendanceMinHours: systemSettings.attendanceMinHours ?? 1.0,
         attendanceStandardPoints: systemSettings.attendanceStandardPoints ?? 5,
         attendanceShortPoints: systemSettings.attendanceShortPoints ?? 2,
@@ -85,6 +94,21 @@ export default function Settings() {
 
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  const closeModal = () => {
+    setShowAddModal(false);
+    setEditingItem(null);
+    setForm({
+      name: '',
+      codePrefix: '',
+      category: CATEGORIES[0],
+      assetType: ASSET_TYPES[0],
+      unit: 'Cái',
+      minThreshold: 0,
+      lifespanHours: 10000,
+      description: ''
+    });
+  };
 
   const handleSaveSysConfig = async (e) => {
     e.preventDefault();
@@ -144,15 +168,25 @@ export default function Settings() {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa "${name}" khỏi Danh mục gốc?`)) return;
+  const handleDelete = (item) => {
+    setDeletingCatalog(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDeleteCatalog = async () => {
+    if (!deletingCatalog) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/settings/catalog/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE_URL}/settings/catalog/${deletingCatalog.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Không thể xóa');
-      setSuccessMsg('Đã xóa thành công');
+      setSuccessMsg(`Đã xóa "${deletingCatalog.name}" khỏi danh mục gốc`);
       mutate();
+      setShowDeleteModal(false);
+      setDeletingCatalog(null);
     } catch (err) {
       setErrorMsg(err.message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -314,7 +348,7 @@ export default function Settings() {
     { accessorKey: 'actions', header: 'Thao tác', sortable: false, align: 'right', cell: (row) => (
       <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
         <Button variant="secondary" size="sm" onClick={() => setEditingItem(row)}><Edit3 size={15} /></Button>
-        <Button variant="danger-tertiary" size="sm" onClick={() => handleDelete(row.id, row.name)}><Trash2 size={15} /></Button>
+        <Button variant="danger-tertiary" size="sm" onClick={() => handleDelete(row)}><Trash2 size={15} /></Button>
       </div>
     )}
   ];
@@ -463,9 +497,11 @@ export default function Settings() {
           </h2>
           <p className="page-subtitle">Quản lý danh mục thiết bị gốc để hỗ trợ việc thêm thiết bị vào kho nhanh chóng hơn.</p>
         </div>
-        <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => setShowAddModal(true)}>
-          Thêm danh mục gốc
-        </Button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginRight: '4.5rem' }}>
+          <Button variant="primary" icon={Plus} iconPosition="left" onClick={() => setShowAddModal(true)}>
+            Thêm danh mục gốc
+          </Button>
+        </div>
       </div>
 
       {successMsg && <div className="alert-message alert-success">{successMsg}</div>}
@@ -501,11 +537,9 @@ export default function Settings() {
               <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
                 Giờ hẹn trả mặc định
               </label>
-              <TextInput
-                type="time"
-                required
-                value={sysConfig.defaultReturnTime}
-                onChange={(e) => setSysConfig({ ...sysConfig, defaultReturnTime: e.target.value })}
+              <TimePicker24
+                value={sysConfig.defaultReturnTime || '17:00'}
+                onChange={(newTime) => setSysConfig({ ...sysConfig, defaultReturnTime: newTime })}
               />
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
                 Giờ hết hạn mượn trong ngày (Mặc định: 17:00)
@@ -563,6 +597,42 @@ export default function Settings() {
               />
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
                 Báo "Cần bảo trì" khi tuổi thọ dưới % này (Mặc định: 20%)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                Tự động hủy phiếu đặt trước (Giờ)
+              </label>
+              <TextInput
+                type="number"
+                min="0"
+                max="72"
+                required
+                value={sysConfig.reserveAutoExpireHours}
+                onChange={(e) => setSysConfig({ ...sysConfig, reserveAutoExpireHours: Number(e.target.value) })}
+                placeholder="2"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Tự động hủy & hoàn kho nếu quá giờ hẹn (0: Tắt, Mặc định: 2h)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                Thời gian đặt trước tối thiểu (Phút)
+              </label>
+              <TextInput
+                type="number"
+                min="0"
+                max="1440"
+                required
+                value={sysConfig.reserveAdvanceNoticeMinutes}
+                onChange={(e) => setSysConfig({ ...sysConfig, reserveAdvanceNoticeMinutes: Number(e.target.value) })}
+                placeholder="29"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Khóa giờ mượn trong vòng X phút tới để CLB chuẩn bị (Mặc định: 29p)
               </span>
             </div>
           </div>
@@ -1323,7 +1393,7 @@ export default function Settings() {
           setSelectedAuditDetail(null);
         }}
         title="Chi tiết Nhật ký kiểm toán"
-        size="lg"
+        size="xl"
         footer={
           <Button
             type="button"
@@ -1404,6 +1474,20 @@ export default function Settings() {
           </div>
         )}
       </Modal>
+
+      {/* Confirm Delete Catalog Item Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setDeletingCatalog(null); }}
+        onConfirm={handleConfirmDeleteCatalog}
+        title="Xác nhận xóa danh mục gốc"
+        itemName={deletingCatalog?.name}
+        itemCode={deletingCatalog?.codePrefix ? `Prefix: ${deletingCatalog.codePrefix}` : ''}
+        itemCategory={deletingCatalog?.category ? `Phân loại: ${deletingCatalog.category}` : ''}
+        warningMessage="Mục danh mục gốc này sẽ bị xóa. Các thiết bị hiện tại vẫn giữ nguyên nhưng sẽ không còn gợi ý tự động khi tạo mới!"
+        confirmText="Xác nhận xóa danh mục"
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

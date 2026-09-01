@@ -26,5 +26,6 @@ export const BORROW_STATUS_TABS = [
   { value: 'Đã đặt trước', label: 'Đã đặt trước' },
   { value: 'Trễ hạn', label: 'Trễ hạn' },
   { value: 'Đã trả', label: 'Đã trả' },
-  { value: 'Đã tiêu hao', label: 'Xuất tiêu hao' }
+  { value: 'Đã tiêu hao', label: 'Xuất tiêu hao' },
+  { value: 'waitlist', label: '🔔 Hàng chờ (Waitlist)' }
 ];

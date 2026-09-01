@@ -163,7 +163,7 @@ const AddEquipmentModal = ({ isOpen, onClose, onSuccess, setErrorMsg, equipmentL
       isOpen={isOpen}
       onClose={onClose}
       title="Thêm thiết bị vào kho"
-      size="lg"
+      size="xl"
       footer={modalFooter}
     >
       <style>{`

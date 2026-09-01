@@ -27,29 +27,35 @@ const ReplacementForecast = lazy(() => import('./pages/ReplacementForecast'));
 
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [pageParams, setPageParams] = useState({});
   const [userRole, setUserRole] = useState(null); // 'admin' | 'student' | null
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+
+  const navigateTo = (page, params = {}) => {
+    setPageParams(params);
+    setCurrentPage(page);
+  };
 
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard onNavigate={navigateTo} />;
       case 'members':
         return <Members />;
       case 'attendance':
         return <Attendance />;
       case 'equipment':
       case 'equipment-list':
-        return <Equipment activeTab="list" />;
+        return <Equipment activeTab="list" pageParams={pageParams} />;
       case 'equipment-components':
         return <ComponentsInventory />;
       case 'equipment-borrows':
-        return <Equipment activeTab="borrows" />;
+        return <Equipment activeTab="borrows" pageParams={pageParams} />;
       case 'equipment-maintenance':
-        return <Maintenance />;
+        return <Maintenance pageParams={pageParams} onNavigate={navigateTo} />;
         
       case 'analytics-overview':
-        return <AssetOverview />;
+        return <AssetOverview onNavigate={navigateTo} />;
       case 'analytics-usage':
         return <UsageAnalytics />;
       case 'equipment-analytics':

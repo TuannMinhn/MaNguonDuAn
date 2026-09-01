@@ -21,6 +21,7 @@ import { useSortableTable } from '../hooks/useSortableTable.jsx';
 import AddEquipmentModal from '../components/equipment/AddEquipmentModal';
 import EditEquipmentModal from '../components/equipment/EditEquipmentModal';
 import BorrowEquipmentModal from '../components/equipment/BorrowEquipmentModal';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import ImportExcelModal from '../components/ImportExcelModal';
 import DataTable from '../components/DataTable';
 import { API_BASE_URL } from '../config';
@@ -38,6 +39,9 @@ export default function ComponentsInventory() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBorrowModal, setShowBorrowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingItem, setDeletingItem] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const [selectedEquip, setSelectedEquip] = useState(null);
   
@@ -45,11 +49,32 @@ export default function ComponentsInventory() {
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Trợ giúp ngày mượn và ngày hẹn trả mặc định
+  const getTodayDateString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getTomorrowDateString = (baseDateStr) => {
+    const d = baseDateStr ? new Date(baseDateStr + 'T00:00:00') : new Date();
+    d.setDate(d.getDate() + 1);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Form states
   const [borrowForm, setBorrowForm] = useState({
     mssv: '',
     qty: 1,
-    expectedReturnDate: '', // Not used for consumables, but required by modal state
+    borrowDate: getTodayDateString(),
+    borrowTime: '08:30',
+    expectedReturnDate: getTomorrowDateString(),
+    expectedReturnTime: '17:00',
     initialCondition: 'Mới',
     borrowNotes: ''
   });
@@ -95,20 +120,38 @@ export default function ComponentsInventory() {
     setShowEditModal(true);
   };
 
-  const handleDeleteEquip = async (id, name) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa linh kiện "${name}"?`)) return;
+  const handleDeleteEquip = (item) => {
+    setDeletingItem(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/equipment/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE_URL}/equipment/${deletingItem.id}`, { method: 'DELETE' });
       if (res.ok) {
-        setSuccessMsg(`Đã xóa linh kiện "${name}"`);
+        setSuccessMsg(`Đã xóa linh kiện "${deletingItem.name}"`);
         mutateEquip();
+        setShowDeleteModal(false);
+        setDeletingItem(null);
       } else {
         const data = await res.json();
         setErrorMsg(data.error || 'Lỗi khi xóa linh kiện');
       }
     } catch (err) {
       setErrorMsg('Lỗi kết nối máy chủ');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const getDefaultBorrowTime = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 29);
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
   };
 
   const handleBorrowClick = (equip) => {
@@ -116,7 +159,10 @@ export default function ComponentsInventory() {
     setBorrowForm({
       mssv: '',
       qty: 1,
-      expectedReturnDate: '', 
+      borrowDate: getTodayDateString(),
+      borrowTime: getDefaultBorrowTime(),
+      expectedReturnDate: getTomorrowDateString(), 
+      expectedReturnTime: '17:00',
       initialCondition: 'Tốt',
       borrowNotes: 'Xuất dùng dự án'
     });
@@ -147,12 +193,22 @@ export default function ComponentsInventory() {
       return;
     }
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEquip.id}/borrow`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           ...borrowForm,
-          mssv: cleanMssv
+          mssv: cleanMssv,
+          borrowDate: (borrowForm.borrowDate && borrowForm.borrowTime)
+            ? new Date(borrowForm.borrowDate + 'T' + borrowForm.borrowTime + ':00').toISOString()
+            : (borrowForm.borrowDate ? new Date(borrowForm.borrowDate).toISOString() : new Date().toISOString()),
+          expectedReturnDate: new Date(borrowForm.expectedReturnDate + 'T' + borrowForm.expectedReturnTime + ':00').toISOString()
         })
       });
       const data = await res.json();
@@ -169,18 +225,12 @@ export default function ComponentsInventory() {
     }
   };
 
-  // Helper functions
-  const getTodayDateString = () => {
-    const today = new Date();
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  };
-
   const getStatusBadge = (equip) => {
     const max = equip.maxQty || equip.totalQty || 1;
     const pct = Math.round((equip.totalQty / max) * 100);
 
     if (equip.totalQty === 0) {
-      return <span className="badge badge-danger">Hết hàng</span>;
+      return <span className="badge badge-danger">Hết linh kiện</span>;
     }
     if (pct <= 20) {
       return <span className="badge badge-danger" title={`Tồn kho dưới 20% (${pct}%) - Có ${equip.totalQty}/${max} chiếc`}>Cần nhập thêm</span>;
@@ -204,8 +254,8 @@ export default function ComponentsInventory() {
         const isLowStock = row.totalQty <= minThreshold && row.totalQty > 0;
         return (
           <div style={{ fontWeight: '700', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            {isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-red)' }} title="Hết hàng" />}
-            {isLowStock && !isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-amber)' }} title="Sắp hết hàng" />}
+            {isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-red)' }} title="Hết linh kiện" />}
+            {isLowStock && !isOutOfStock && <AlertTriangle size={14} style={{ color: 'var(--accent-amber)' }} title="Sắp hết linh kiện" />}
             <span>{row.code || 'N/A'}</span>
           </div>
         );
@@ -254,7 +304,7 @@ export default function ComponentsInventory() {
               </span>
             </div>
             {isOutOfStock ? (
-              <span style={{ fontSize: '0.7rem', color: 'var(--accent-red)', background: 'rgba(239,68,68,0.12)', padding: '2px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '600' }}>Hết hàng</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--accent-red)', background: 'rgba(239,68,68,0.12)', padding: '2px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '600' }}>Hết linh kiện</span>
             ) : isLowStock ? (
               <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', background: 'rgba(245,158,11,0.12)', padding: '2px 5px', borderRadius: 'var(--radius-sm)', fontWeight: '600' }}>Sắp hết</span>
             ) : null}
@@ -293,7 +343,7 @@ export default function ComponentsInventory() {
             icon={Trash2} 
             title="Xóa linh kiện"
             aria-label="Xóa linh kiện"
-            onClick={() => handleDeleteEquip(row.id, row.name)} 
+            onClick={() => handleDeleteEquip(row)} 
           />
         </div>
       )
@@ -437,6 +487,20 @@ export default function ComponentsInventory() {
         title="Import Linh kiện từ Excel"
         fieldMap={componentFieldMap}
         sampleRow={componentSampleRow}
+      />
+
+      {/* Confirm Delete Component Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setDeletingItem(null); }}
+        onConfirm={handleConfirmDelete}
+        title="Xác nhận xóa linh kiện"
+        itemName={deletingItem?.name}
+        itemCode={deletingItem?.code}
+        itemCategory={deletingItem?.category}
+        warningMessage="Linh kiện này sẽ bị xóa khỏi kho hệ thống. Hành động này không thể hoàn tác!"
+        confirmText="Xác nhận xóa linh kiện"
+        isDeleting={isDeleting}
       />
     </div>
   );

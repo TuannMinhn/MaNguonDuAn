@@ -1,5 +1,117 @@
 [
   {
+    "id": "c211fc6b-5f71-4923-a9b0-b1436537a40a",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)\" của Nguyễn Văn A (20210001) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "3e4c99fa-c72a-461f-9f18-c30da72d139a",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.564Z",
+    "read": false
+  },
+  {
+    "id": "97af7706-e900-4c56-b250-5f92ead9a5c1",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)\" của Trần Thị B (20210002) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "c9e873d1-a27c-4fcb-a09b-ce9e8d9ec8c2",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.561Z",
+    "read": false
+  },
+  {
+    "id": "c6d38a09-e960-4c36-8d54-478c93c335e2",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Dây cắm testboard (Đực-Đực, Cái-Cái, Đực-Cái)\" của Nguyễn Văn A (20210001) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "f6e25e3b-14c7-4608-bb04-20cf277c17fa",
+      "equipmentId": "eq-mrbve89uw8lqr4m83vm",
+      "equipmentName": "Dây cắm testboard (Đực-Đực, Cái-Cái, Đực-Cái)",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.557Z",
+    "read": false
+  },
+  {
+    "id": "f77bf81a-7fb7-4a4c-8296-364522f23f04",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)\" của Nguyễn Văn A (20210001) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "adc7fee3-a549-4d0d-91d0-6a0616002049",
+      "equipmentId": "eq-mrbve89u4g4g13pp7is",
+      "equipmentName": "Bo mạch cắm thử nghiệm (Breadboard loại lớn BB-102)",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.554Z",
+    "read": false
+  },
+  {
+    "id": "9d709aef-c6e1-4f0c-bd2f-55276af54044",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Raspberry Pi 4 Model B (4GB) / Raspberry Pi 5 (8GB)\" của Nguyễn Văn A (20210001) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "599ad1ef-6bb4-4df9-9e55-4588d9fd2c5d",
+      "equipmentId": "eq-mrbve89uzgwnucprete",
+      "equipmentName": "Raspberry Pi 4 Model B (4GB) / Raspberry Pi 5 (8GB)",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.550Z",
+    "read": false
+  },
+  {
+    "id": "75ffc786-8923-4f96-8993-c22b9be380bb",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C\" của Nguyễn Văn A (20210001) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "303bf5b1-0bcf-4855-ac38-c6e37a632cb1",
+      "equipmentId": "eq-mrbve89uydhsba7w068",
+      "equipmentName": "Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.544Z",
+    "read": false
+  },
+  {
+    "id": "996cd311-e5dd-4d9a-b882-251674d04bc3",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C\" của Nguyễn Văn A (20210001) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "8e591233-8fa4-4bc1-bd50-f60cecc29f79",
+      "equipmentId": "eq-mrbve89uydhsba7w068",
+      "equipmentName": "Máy phân tích logic 16 kênh (Saleae Logic Analyzer) để giải mã UART, SPI, I2C",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.541Z",
+    "read": false
+  },
+  {
+    "id": "0c33e08f-ea85-42c3-809c-3e49659e167d",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Đồng hồ vạn năng kỹ thuật số UNI-T UT61E\" của Nguyễn Văn A (20210001) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "452514f3-1444-4196-8c9d-6a12bf2cf4f2",
+      "equipmentId": "eq-mrbve89u8j3urg5p6j3",
+      "equipmentName": "Đồng hồ vạn năng kỹ thuật số UNI-T UT61E",
+      "qty": 1
+    },
+    "timestamp": "2026-09-01T19:40:49.534Z",
+    "read": false
+  },
+  {
     "id": "1ae7afb2-bca8-4f9f-8b33-c8e3ba4a6394",
     "type": "room_booking_bulk",
     "title": "Đăng ký phòng (Nhiều buổi)",

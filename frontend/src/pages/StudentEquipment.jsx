@@ -5,8 +5,8 @@ import { API_BASE_URL } from '../config';
 import Select from '../components/Select';
 import DataTable from '../components/DataTable';
 import Card from '../components/Card';
-import Modal from '../components/Modal';
-import TextInput from '../components/TextInput';
+import BorrowEquipmentModal from '../components/equipment/BorrowEquipmentModal';
+import WaitlistModal from '../components/equipment/WaitlistModal';
 
 const CATEGORIES = [
   'Thiết bị đo lường',
@@ -24,6 +24,23 @@ const CATEGORIES = [
   'Khác'
 ];
 
+const getTodayDateStr = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getTomorrowDateStr = (baseDateStr) => {
+  const d = baseDateStr ? new Date(baseDateStr + 'T00:00:00') : new Date();
+  d.setDate(d.getDate() + 1);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function StudentEquipment() {
   const [equipment, setEquipment] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,15 +49,41 @@ export default function StudentEquipment() {
   const [activeTab, setActiveTab] = useState('equipment'); // 'equipment' | 'components'
   
   const [showModal, setShowModal] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [selectedEq, setSelectedEq] = useState(null);
+  
+  const getDefaultBorrowTime = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 29);
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
+  };
   
   const [mssv, setMssv] = useState('');
   const [qty, setQty] = useState(1);
-  const [expectedReturnDate, setExpectedReturnDate] = useState('');
+  const [borrowDate, setBorrowDate] = useState(() => getTodayDateStr());
+  const [borrowTime, setBorrowTime] = useState(() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  });
+  const [expectedReturnDate, setExpectedReturnDate] = useState(() => getTomorrowDateStr());
+  const [expectedReturnTime, setExpectedReturnTime] = useState('17:00');
+
+  const [waitlistForm, setWaitlistForm] = useState({
+    mssv: '',
+    qty: 1,
+    purpose: 'Đồ án môn học / Khóa luận tốt nghiệp',
+    neededDate: '',
+    notes: ''
+  });
   
   const [alert, setAlert] = useState(null);
   const [toast, setToast] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const [equipmentWaitlists, setEquipmentWaitlists] = useState({});
 
   useEffect(() => {
     fetchEquipment();
@@ -51,6 +94,20 @@ export default function StudentEquipment() {
       const res = await fetch(`${API_BASE_URL}/equipment`);
       const data = await res.json();
       setEquipment(data);
+
+      if (Array.isArray(data) && data.length > 0) {
+        const counts = {};
+        await Promise.all(data.map(async (eq) => {
+          try {
+            const wRes = await fetch(`${API_BASE_URL}/equipment/${eq.id}/waitlist`);
+            const wData = await wRes.json();
+            counts[eq.id] = Array.isArray(wData) ? wData.length : 0;
+          } catch {
+            counts[eq.id] = 0;
+          }
+        }));
+        setEquipmentWaitlists(counts);
+      }
     } catch (err) {
       console.error('Error fetching equipment:', err);
     } finally {
@@ -61,42 +118,94 @@ export default function StudentEquipment() {
   const handleReserve = async (e) => {
     e.preventDefault();
     if (!mssv.trim()) {
-      setAlert({ type: 'error', message: 'Vui lòng nhập MSSV' });
+      setToast({ type: 'error', message: 'Vui lòng nhập MSSV' });
       return;
     }
-    if (qty < 1 || qty > (selectedEq.totalQty - (selectedEq.borrowedQty || 0))) {
-      setAlert({ type: 'error', message: 'Số lượng đặt trước không hợp lệ' });
+    const parsedQty = Number(qty);
+    const maxAvailable = selectedEq.assetType && (selectedEq.assetType.toLowerCase().includes('linh kiện') || selectedEq.assetType.toLowerCase().includes('vật tư'))
+      ? selectedEq.totalQty 
+      : selectedEq.totalQty - (selectedEq.borrowedQty || 0);
+
+    if (!parsedQty || parsedQty < 1 || parsedQty > maxAvailable) {
+      setToast({ type: 'error', message: 'Số lượng đặt trước không hợp lệ hoặc vượt quá số lượng khả dụng' });
       return;
     }
 
     setSubmitting(true);
-    setAlert(null);
     try {
+      const formattedBorrowDate = new Date(borrowDate + 'T' + (borrowTime || '08:30') + ':00').toISOString();
+      const formattedReturnDate = expectedReturnDate ? new Date(expectedReturnDate + 'T' + (expectedReturnTime || '17:00') + ':00').toISOString() : null;
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEq.id}/reserve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mssv: mssv.trim(), qty, expectedReturnDate })
+        headers,
+        body: JSON.stringify({ 
+          mssv: mssv.trim(), 
+          qty: parsedQty, 
+          borrowDate: formattedBorrowDate,
+          expectedReturnDate: formattedReturnDate 
+        })
       });
       const data = await res.json();
       
       if (res.ok) {
         setShowModal(false);
-        setToast({ type: 'success', message: 'Đã đặt trước thành công! Vui lòng đến Lab để nhận thiết bị.' });
+        setToast({ type: 'success', message: 'Đã đặt trước thành công! Vui lòng đến Lab theo lịch hẹn để nhận thiết bị.' });
         fetchEquipment();
         setMssv('');
         setQty(1);
+        setBorrowDate(new Date().toISOString().split('T')[0]);
+        setBorrowTime('08:30');
         setExpectedReturnDate('');
-        setAlert(null);
-        setTimeout(() => {
-          setToast(null);
-        }, 3000);
+        setExpectedReturnTime('17:00');
+        setTimeout(() => setToast(null), 3000);
       } else {
-        setAlert({ type: 'error', message: data.error || 'Đặt trước thất bại' });
+        setToast({ type: 'error', message: data.error || 'Đặt trước thất bại' });
       }
     } catch (err) {
-      setAlert({ type: 'error', message: 'Lỗi kết nối máy chủ' });
+      setToast({ type: 'error', message: 'Lỗi kết nối máy chủ' });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleWaitlistSubmit = async (e) => {
+    e.preventDefault();
+    const cleanMssv = waitlistForm.mssv?.includes('–') ? waitlistForm.mssv.split('–')[0].trim() : waitlistForm.mssv?.trim();
+    if (!cleanMssv || Number(waitlistForm.qty) <= 0) {
+      setToast({ type: 'error', message: 'Vui lòng điền đầy đủ MSSV và số lượng' });
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/equipment/${selectedEq.id}/waitlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...waitlistForm,
+          mssv: cleanMssv
+        })
+      });
+      const data = await res.json();
+
+      setShowWaitlistModal(false);
+      if (!res.ok) {
+        setToast({ type: 'error', message: data.error || 'Lỗi đăng ký chờ' });
+      } else {
+        setToast({ type: 'success', message: `🔔 Đã tiếp nhận đăng ký chờ mượn ${selectedEq.name}! Hệ thống sẽ gửi thông báo ngay khi có thiết bị.` });
+        setWaitlistForm({ mssv: '', qty: 1, purpose: 'Đồ án môn học / Khóa luận tốt nghiệp', neededDate: '', notes: '' });
+        fetchEquipment();
+        setTimeout(() => setToast(null), 4000);
+      }
+    } catch (error) {
+      setShowWaitlistModal(false);
+      setToast({ type: 'error', message: 'Lỗi kết nối tới server' });
     }
   };
 
@@ -112,54 +221,49 @@ export default function StudentEquipment() {
   }, [equipment, activeTab]);
 
   const filteredEq = useMemo(() => equipment.filter(eq => {
-    // Tách riêng thiết bị và linh kiện
     const isComponent = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
-    
-    if (activeTab === 'equipment' && isComponent) return false;
     if (activeTab === 'components' && !isComponent) return false;
+    if (activeTab === 'equipment' && isComponent) return false;
 
-    const matchText = eq.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                      eq.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      eq.code?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchSearch = eq.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                        eq.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        eq.location?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCat = selectedCategory === 'Tất cả' || eq.category === selectedCategory;
-    return matchText && matchCat;
-  }), [equipment, activeTab, searchTerm, selectedCategory]);
+    return matchSearch && matchCat;
+  }), [equipment, searchTerm, selectedCategory, activeTab]);
 
-
-  const equipmentColumns = React.useMemo(() => [
+  const equipmentColumns = useMemo(() => [
     { 
       accessorKey: 'code', 
-      header: 'Mã thiết bị', 
-      width: '18%',
-      sortable: true, 
+      header: 'Mã TB', 
+      width: '12%',
+      sortable: true,
+      cell: (row) => <span style={{ fontWeight: '600', color: 'var(--accent-blue)' }}>{row.code}</span>
+    },
+    { 
+      accessorKey: 'name', 
+      header: activeTab === 'equipment' ? 'Tên thiết bị' : 'Tên linh kiện', 
+      width: '38%',
+      sortable: true,
       cell: (row) => (
         <div>
-          <span style={{ color: 'var(--accent-purple)', fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem' }}>
-            {row.code}
-          </span>
-          <div className="text-muted" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.2rem', fontSize: '0.75rem' }}>
-            <Package size={12} /> {row.category || 'Khác'}
+          <div style={{ fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.35 }}>{row.name}</div>
+          <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', marginTop: '0.25rem', fontSize: '0.78rem', flexWrap: 'wrap' }}>
+            <span style={{ color: 'var(--text-muted)' }}>{row.category || 'Khác'}</span>
+            <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              Vị trí: <strong style={{ color: 'var(--accent-blue)', fontWeight: '600' }}>{row.location || 'Kho Lab'}</strong>
+            </span>
           </div>
         </div>
       )
     },
     { 
-      accessorKey: 'name', 
-      header: activeTab === 'equipment' ? 'Tên thiết bị' : 'Tên linh kiện', 
-      width: '32%',
-      sortable: true, 
-      cell: (row) => (
-        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{row.name}</span>
-      )
-    },
-    { 
-      accessorKey: 'location', 
-      header: 'Vị trí lưu kho', 
-      width: '18%',
-      sortable: true, 
-      cell: (row) => (
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{row.location || 'Kho Lab'}</span>
-      )
+      accessorKey: 'category', 
+      header: 'Phân loại', 
+      width: '20%',
+      sortable: true,
+      cell: (row) => <span className="text-secondary">{row.category || 'Khác'}</span>
     },
     { 
       accessorKey: 'availability', 
@@ -182,21 +286,42 @@ export default function StudentEquipment() {
     { 
       accessorKey: 'actions', 
       header: 'Thao tác', 
-      width: '14%',
+      width: '18%',
       sortable: false, 
       align: 'right', 
       cell: (row) => {
         const isComponent = row.assetType && (row.assetType.toLowerCase().includes('linh kiện') || row.assetType.toLowerCase().includes('vật tư'));
         const available = isComponent ? row.totalQty : row.totalQty - (row.borrowedQty || 0);
         const isAvailable = available > 0;
-        return (
+        return isAvailable ? (
           <Button
             size="sm"
             variant="primary"
-            onClick={() => { setSelectedEq(row); setShowModal(true); setAlert(null); setQty(1); }}
-            disabled={!isAvailable}
+            onClick={() => { 
+              setSelectedEq(row); 
+              setQty(1);
+              setBorrowDate(getTodayDateStr());
+              setBorrowTime(getDefaultBorrowTime());
+              setExpectedReturnDate(getTomorrowDateStr());
+              setExpectedReturnTime('17:00');
+              setAlert(null); 
+              setShowModal(true); 
+            }}
           >
             {activeTab === 'equipment' ? 'Mượn' : 'Xin cấp phát'}
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setSelectedEq(row);
+              setWaitlistForm({ mssv: '', qty: 1, purpose: 'Đồ án môn học / Khóa luận tốt nghiệp', neededDate: '', notes: '' });
+              setShowWaitlistModal(true);
+            }}
+            style={{ color: 'var(--accent-amber)', borderColor: 'rgba(245, 158, 11, 0.3)' }}
+          >
+            🔔 Đăng ký chờ
           </Button>
         );
       }
@@ -274,90 +399,59 @@ export default function StudentEquipment() {
         />
       </Card>
 
-      {/* Modal đặt mượn thiết bị */}
-      <Modal
-        isOpen={showModal && !!selectedEq}
-        onClose={() => setShowModal(false)}
-        title="Đặt mượn thiết bị"
-        size="sm"
-        footer={
-          <>
-            <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Hủy</Button>
-            <Button type="submit" form="reserve-equipment-form" variant="primary" loading={submitting}>
-              {submitting ? 'Đang xử lý...' : 'Xác nhận Đặt trước'}
-            </Button>
-          </>
-        }
-      >
-        {selectedEq && (
-          <div>
-            <div style={{ background: 'var(--bg-overlay)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-              <div className="section-heading" style={{ marginBottom: '0.25rem' }}>{selectedEq.name}</div>
-              <div className="text-muted">
-                {selectedEq.code} | Số lượng khả dụng: {
-                  selectedEq.assetType && (selectedEq.assetType.toLowerCase().includes('linh kiện') || selectedEq.assetType.toLowerCase().includes('vật tư'))
-                    ? selectedEq.totalQty 
-                    : selectedEq.totalQty - (selectedEq.borrowedQty || 0)
-                }
-              </div>
-            </div>
+      {/* Borrow & Reserve Equipment / Components Modal */}
+      {selectedEq && (
+        <BorrowEquipmentModal
+          isOpen={showModal}
+          onClose={() => { setShowModal(false); setAlert(null); }}
+          selectedEquip={selectedEq}
+          borrowForm={{
+            mssv,
+            qty,
+            borrowDate,
+            borrowTime,
+            expectedReturnDate,
+            expectedReturnTime,
+            initialCondition: 'Tốt / Hoạt động bình thường',
+            borrowNotes: ''
+          }}
+          setBorrowForm={(updated) => {
+            if (updated.mssv !== undefined) setMssv(updated.mssv);
+            if (updated.qty !== undefined) setQty(updated.qty);
+            if (updated.borrowDate !== undefined) setBorrowDate(updated.borrowDate);
+            if (updated.borrowTime !== undefined) setBorrowTime(updated.borrowTime);
+            if (updated.expectedReturnDate !== undefined) setExpectedReturnDate(updated.expectedReturnDate);
+            if (updated.expectedReturnTime !== undefined) setExpectedReturnTime(updated.expectedReturnTime);
+          }}
+          memberSearchQuery={mssv}
+          setMemberSearchQuery={setMssv}
+          suggestedMembers={[]}
+          setSuggestedMembers={() => {}}
+          handleBorrowSubmit={handleReserve}
+          getTodayDateString={() => new Date().toISOString().split('T')[0]}
+          isStudentMode={true}
+          submitBtnText={activeTab === 'equipment' ? 'Xác nhận Đặt mượn' : 'Xác nhận Cấp phát'}
+        />
+      )}
 
-            {alert && (
-              <div style={{ 
-                padding: '0.75rem', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                background: alert.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                color: alert.type === 'success' ? 'var(--accent-green)' : 'var(--accent-red)',
-                border: `1px solid ${alert.type === 'success' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`
-              }}>
-                {alert.type === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
-                {alert.message}
-              </div>
-            )}
-
-            <form id="reserve-equipment-form" onSubmit={handleReserve} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', paddingBottom: 'var(--space-md)' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                <label className="form-label" style={{ margin: 0 }}>Mã số sinh viên (MSSV) <span style={{ color: 'var(--accent-red)' }}>*</span></label>
-                <TextInput
-                  type="text"
-                  required
-                  placeholder="Nhập MSSV..."
-                  value={mssv}
-                  onChange={(e) => setMssv(e.target.value)}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                <label className="form-label" style={{ margin: 0 }}>Số lượng <span style={{ color: 'var(--accent-red)' }}>*</span></label>
-                <TextInput
-                  type="number"
-                  min="1"
-                  max={
-                    selectedEq.assetType && (selectedEq.assetType.toLowerCase().includes('linh kiện') || selectedEq.assetType.toLowerCase().includes('vật tư'))
-                      ? selectedEq.totalQty 
-                      : selectedEq.totalQty - (selectedEq.borrowedQty || 0)
-                  }
-                  required
-                  value={qty}
-                  onChange={(e) => setQty(Number(e.target.value))}
-                />
-              </div>
-
-              {selectedEq.assetType !== 'Linh kiện tiêu hao' && activeTab === 'equipment' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                  <label className="form-label" style={{ margin: 0 }}>Ngày hẹn trả (Không bắt buộc)</label>
-                  <input
-                    type="date"
-                    className="search-input"
-                    value={expectedReturnDate}
-                    onChange={(e) => setExpectedReturnDate(e.target.value)}
-                    style={{ width: '100%', height: '40px' }}
-                  />
-                </div>
-              )}
-            </form>
-          </div>
-        )}
-      </Modal>
+      {/* Waitlist Modal */}
+      {selectedEq && (
+        <WaitlistModal
+          isOpen={showWaitlistModal}
+          onClose={() => setShowWaitlistModal(false)}
+          selectedEquip={selectedEq}
+          equipmentWaitlists={equipmentWaitlists}
+          waitlistForm={waitlistForm}
+          setWaitlistForm={setWaitlistForm}
+          memberSearchQuery={waitlistForm.mssv}
+          setMemberSearchQuery={(val) => setWaitlistForm({ ...waitlistForm, mssv: val })}
+          suggestedMembers={[]}
+          setSuggestedMembers={() => {}}
+          handleMemberSearch={() => {}}
+          handleWaitlistSubmit={handleWaitlistSubmit}
+          getTodayDateString={() => new Date().toISOString().split('T')[0]}
+        />
+      )}
 
       {/* Toast Notification */}
       {toast && (

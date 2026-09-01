@@ -93,7 +93,10 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước"
+    "status": "Đã hủy",
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "8e591233-8fa4-4bc1-bd50-f60cecc29f79",
@@ -112,7 +115,10 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước"
+    "status": "Đã hủy",
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "303bf5b1-0bcf-4855-ac38-c6e37a632cb1",
@@ -131,7 +137,10 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước"
+    "status": "Đã hủy",
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "599ad1ef-6bb4-4df9-9e55-4588d9fd2c5d",
@@ -150,7 +159,10 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước"
+    "status": "Đã hủy",
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "6760ba57-2561-4561-96f0-14e679e5f146",
@@ -350,9 +362,12 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước",
+    "status": "Đã hủy",
     "instanceIds": null,
-    "instanceSerials": null
+    "instanceSerials": null,
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "f6e25e3b-14c7-4608-bb04-20cf277c17fa",
@@ -371,9 +386,12 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước",
+    "status": "Đã hủy",
     "instanceIds": null,
-    "instanceSerials": null
+    "instanceSerials": null,
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "c9e873d1-a27c-4fcb-a09b-ce9e8d9ec8c2",
@@ -392,9 +410,12 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước",
+    "status": "Đã hủy",
     "instanceIds": null,
-    "instanceSerials": null
+    "instanceSerials": null,
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "3e4c99fa-c72a-461f-9f18-c30da72d139a",
@@ -413,9 +434,12 @@
     "returnerName": null,
     "finalCondition": null,
     "returnNotes": null,
-    "status": "Đã đặt trước",
+    "status": "Đã hủy",
     "instanceIds": null,
-    "instanceSerials": null
+    "instanceSerials": null,
+    "cancelReason": "Hệ thống tự động hủy do quá hạn nhận 2 giờ mà không tới lấy thiết bị.",
+    "cancelledAt": "2026-09-01T19:40:49.529Z",
+    "cancelledBy": "Hệ thống tự động"
   },
   {
     "id": "fcffdd6c-6831-4ea1-b294-167be718ddc4",

@@ -22,16 +22,17 @@ import * as XLSX from 'xlsx';
 import ExportModal from '../components/ExportModal';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 
-export default function Maintenance() {
+export default function Maintenance({ pageParams = {} }) {
   const { data: maintenanceList = [], mutate: mutateMaintenance } = useSWR(`${API_BASE_URL}/maintenance`, fetcher);
   const { data: equipmentList = [] } = useSWR(`${API_BASE_URL}/equipment`, fetcher);
   
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(pageParams.searchTerm || '');
   const [equipSearchTerm, setEquipSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('Tất cả vị trí');
   const [selectedStatus, setSelectedStatus] = useState('Tất cả trạng thái');
-  const [activeTab, setActiveTab] = useState('active'); // active, resolved
+  const [activeTab, setActiveTab] = useState(pageParams.activeTab || 'active'); // active, resolved
   
   const [selectedIds, setSelectedIds] = useState([]);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -42,11 +43,25 @@ export default function Maintenance() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingTicket, setDeletingTicket] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
   
   // States cho Modal Xem chi tiết
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetailTicket, setSelectedDetailTicket] = useState(null);
+
+  // Tự động mở modal chi tiết khi điều hướng từ trang Tổng quan tài sản
+  React.useEffect(() => {
+    if (pageParams.ticketId && maintenanceList.length > 0) {
+      const found = maintenanceList.find(m => m.id === pageParams.ticketId);
+      if (found) {
+        setSelectedDetailTicket(found);
+        setShowDetailModal(true);
+      }
+    }
+  }, [pageParams, maintenanceList]);
   
   // States cho Modal Báo hỏng 2 bước
   const [modalStep, setModalStep] = useState(1); // 1: Chọn thiết bị, 2: Nhập chi tiết hỏng
@@ -80,11 +95,17 @@ export default function Maintenance() {
       });
   }, [equipmentList, equipSearchTerm, selectedLocation, selectedStatus]);
 
-  // Filtering
+  // Filtering & Sorting: Mặc định phiếu mới nhất lên trên đầu
   const filteredList = useMemo(() => {
-    return maintenanceList.filter(item => {
+    const list = maintenanceList.filter(item => {
       const isResolved = item.status === 'Đã sửa';
       return activeTab === 'resolved' ? isResolved : !isResolved;
+    });
+
+    return [...list].sort((a, b) => {
+      const dateA = new Date(a.reportedDate || 0).getTime();
+      const dateB = new Date(b.reportedDate || 0).getTime();
+      return dateB - dateA;
     });
   }, [maintenanceList, activeTab]);
 
@@ -95,9 +116,13 @@ export default function Maintenance() {
     if (!eq) return setErrorMsg('Vui lòng chọn thiết bị');
 
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE_URL}/maintenance`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           equipmentId: eq.id,
           equipmentName: eq.name,
@@ -105,13 +130,13 @@ export default function Maintenance() {
         })
       });
       if (res.ok) {
-        setSuccessMsg('Đã tạo phiếu bảo trì / báo hỏng');
+        setSuccessMsg(`Đã tạo phiếu bảo trì / báo hỏng cho "${eq.name}"`);
         setShowAddModal(false);
         setAddForm({ equipmentId: '', issueDescription: '' });
         mutateMaintenance();
       } else {
         const data = await res.json();
-        setErrorMsg(data.error);
+        setErrorMsg(data.error || 'Không thể tạo phiếu bảo trì');
       }
     } catch (err) {
       setErrorMsg('Lỗi kết nối máy chủ');
@@ -122,9 +147,13 @@ export default function Maintenance() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE_URL}/maintenance/${selectedTicket.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(editForm)
       });
       if (res.ok) {
@@ -133,7 +162,7 @@ export default function Maintenance() {
         mutateMaintenance();
       } else {
         const data = await res.json();
-        setErrorMsg(data.error);
+        setErrorMsg(data.error || 'Không thể cập nhật phiếu bảo trì');
       }
     } catch (err) {
       setErrorMsg('Lỗi kết nối');
@@ -141,16 +170,36 @@ export default function Maintenance() {
   };
 
   // Delete
-  const handleDelete = async (id) => {
-    if(!window.confirm('Xóa phiếu bảo trì này?')) return;
+  const handleDelete = (item) => {
+    setDeletingTicket(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDeleteMaintenance = async () => {
+    if (!deletingTicket) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/maintenance/${id}`, { method: 'DELETE' });
+      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE_URL}/maintenance/${deletingTicket.id}`, { 
+        method: 'DELETE',
+        headers
+      });
       if (res.ok) {
         setSuccessMsg('Đã xóa phiếu bảo trì');
         mutateMaintenance();
+        setShowDeleteModal(false);
+        setDeletingTicket(null);
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.error || 'Không thể xóa phiếu bảo trì');
       }
     } catch (err) {
       setErrorMsg('Lỗi kết nối');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -383,7 +432,7 @@ export default function Maintenance() {
             }}
           />
         ),
-        width: '5%',
+        width: '4%',
         sortable: false,
         cell: (row) => (
           <input 
@@ -406,7 +455,7 @@ export default function Maintenance() {
       { 
         accessorKey: 'equipmentName', 
         header: 'Thiết bị', 
-        width: '28%', 
+        width: activeTab === 'resolved' ? '24%' : '26%', 
         sortable: true, 
         cell: (row) => (
           <span 
@@ -415,7 +464,7 @@ export default function Maintenance() {
               color: 'var(--accent-blue)', 
               cursor: 'pointer',
               display: 'inline-block',
-              maxWidth: '240px',
+              maxWidth: '100%',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -430,7 +479,7 @@ export default function Maintenance() {
       { 
         accessorKey: 'issueDescription', 
         header: 'Mô tả lỗi', 
-        width: '26%', 
+        width: activeTab === 'resolved' ? '24%' : '26%', 
         sortable: true, 
         cell: (row) => (
           <span 
@@ -438,7 +487,7 @@ export default function Maintenance() {
               color: 'var(--text-secondary)',
               cursor: 'pointer',
               display: 'inline-block',
-              maxWidth: '240px',
+              maxWidth: '100%',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -453,10 +502,10 @@ export default function Maintenance() {
       { 
         accessorKey: 'reportedDate', 
         header: 'Ngày báo hỏng', 
-        width: '14%', 
+        width: '13%', 
         sortable: true, 
         cell: (row) => (
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
             {new Date(row.reportedDate).toLocaleDateString('vi-VN')}
           </span>
         )
@@ -464,12 +513,12 @@ export default function Maintenance() {
       { 
         accessorKey: 'status', 
         header: 'Trạng thái', 
-        width: '14%', 
+        width: '13%', 
         sortable: true, 
         cell: (row) => {
           const isResolved = row.status === 'Đã sửa';
           return (
-            <span className={`badge ${isResolved ? 'badge-success' : 'badge-warning'}`}>
+            <span className={`badge ${isResolved ? 'badge-success' : 'badge-warning'}`} style={{ whiteSpace: 'nowrap' }}>
               {row.status}
             </span>
           );
@@ -482,7 +531,7 @@ export default function Maintenance() {
         sortable: true, 
         align: 'right', 
         cell: (row) => (
-          <span style={{ fontWeight: row.cost ? '600' : 'normal', color: row.cost ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+          <span style={{ fontWeight: row.cost ? '600' : 'normal', color: row.cost ? 'var(--text-primary)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
             {row.cost ? `${row.cost.toLocaleString('vi-VN')} đ` : '-'}
           </span>
         )
@@ -490,11 +539,11 @@ export default function Maintenance() {
       { 
         accessorKey: 'actions', 
         header: 'Thao tác', 
-        width: '8%', 
+        width: activeTab === 'resolved' ? '12%' : '12%', 
         sortable: false, 
         align: 'right', 
         cell: (row) => (
-          <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <div style={{ display: 'inline-flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '0.5rem' }}>
             <Button 
               size="sm" 
               variant="ghost" 
@@ -509,7 +558,7 @@ export default function Maintenance() {
               icon={Trash2} 
               title="Xóa phiếu" 
               aria-label="Xóa phiếu"
-              onClick={() => handleDeleteClick(row.id)} 
+              onClick={() => handleDelete(row)} 
             />
           </div>
         ) 
@@ -624,369 +673,278 @@ export default function Maintenance() {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         title={
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
-            <h3 style={{ 
-              margin: 0, 
-              fontSize: '18px', 
-              fontWeight: '700', 
-              lineHeight: '24px', 
-              color: 'var(--text-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <Wrench size={18} style={{ color: 'var(--accent-amber)' }} />
-              {modalStep === 1 ? 'Báo hỏng thiết bị' : 'Chi tiết báo hỏng'}
-            </h3>
-            <span style={{ fontSize: '12px', lineHeight: '18px', color: 'var(--text-muted)', fontWeight: 'normal' }}>
-              {modalStep === 1 ? 'Bước 1/2: Chọn thiết bị gặp sự cố' : 'Bước 2/2: Nhập lý do và mô tả lỗi'}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <Wrench size={20} style={{ color: 'var(--accent-amber)' }} />
+            <div>
+              <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '1.05rem' }}>
+                {modalStep === 1 ? 'Báo hỏng & Yêu cầu Bảo trì thiết bị' : 'Chi tiết sự cố & Mức độ khẩn cấp'}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 'normal', marginTop: '1px' }}>
+                {modalStep === 1 ? 'Bước 1/2: Chọn thiết bị / máy móc đang gặp sự cố' : 'Bước 2/2: Nhập triệu chứng hỏng hóc và chọn mức độ ưu tiên'}
+              </div>
+            </div>
           </div>
         }
-        size="lg"
+        size="xl"
         footer={addModalFooter}
       >
-        <form id="add-ticket-form" onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <form id="add-ticket-form" onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
           {/* BƯỚC 1: CHỌN THIẾT BỊ */}
           {modalStep === 1 && (
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              flex: 1,
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-              gap: '0.8rem'
-            }}>
-                    {/* Section Title: 20px, mb: 8px */}
-                    <div style={{ height: '20px', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
-                      <label style={{ fontSize: '13px', fontWeight: '600', lineHeight: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        Chọn thiết bị
-                      </label>
-                    </div>
-                    
-                    {/* Search Input: 46px, mb: 10px */}
-                    <div style={{ position: 'relative', height: '46px', marginBottom: '10px' }}>
-                      <input
-                        type="text"
-                        placeholder="Tìm theo tên, mã thiết bị hoặc serial..."
-                        value={equipSearchTerm}
-                        onChange={e => setEquipSearchTerm(e.target.value)}
-                        style={{
-                          paddingLeft: '40px',
-                          paddingRight: '14px',
-                          width: '100%',
-                          height: '46px',
-                          borderRadius: '10px',
-                          border: '1px solid var(--border-color)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          color: 'var(--text-primary)',
-                          fontSize: '14px',
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                      <Search 
-                        size={18} 
-                        style={{ 
-                          position: 'absolute', 
-                          left: '14px', 
-                          top: '50%', 
-                          transform: 'translateY(-50%)', 
-                          color: 'var(--text-muted)' 
-                        }} 
-                      />
-                    </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {/* Search & Filter Bar */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.65rem', alignItems: 'center' }}>
+                <div style={{ position: 'relative' }}>
+                  <Search 
+                    size={16} 
+                    style={{ 
+                      position: 'absolute', 
+                      left: '0.85rem', 
+                      top: '50%', 
+                      transform: 'translateY(-50%)', 
+                      color: 'var(--text-muted)',
+                      pointerEvents: 'none'
+                    }} 
+                  />
+                  <input
+                    type="text"
+                    placeholder="Tìm theo tên, mã thiết bị (VD: RIGOL, MEA-01...)"
+                    value={equipSearchTerm}
+                    onChange={e => setEquipSearchTerm(e.target.value)}
+                    style={{
+                      paddingLeft: '2.4rem',
+                      paddingRight: '1rem',
+                      width: '100%',
+                      height: '40px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-secondary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.88rem'
+                    }}
+                  />
+                </div>
 
-                    {/* Filter Bar: 32px, mb: 12px */}
-                    <div style={{ 
-                      height: '32px', 
-                      marginBottom: '12px', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '8px',
-                      boxSizing: 'border-box'
-                    }}>
-                      <select
-                        value={selectedLocation}
-                        onChange={e => setSelectedLocation(e.target.value)}
+                <div style={{ width: '150px' }}>
+                  <Select
+                    value={selectedLocation}
+                    onChange={setSelectedLocation}
+                    options={locations.map(loc => ({ value: loc, label: loc }))}
+                  />
+                </div>
+
+                <div style={{ width: '155px' }}>
+                  <Select
+                    value={selectedStatus}
+                    onChange={setSelectedStatus}
+                    options={statuses.map(st => ({ value: st, label: st }))}
+                  />
+                </div>
+              </div>
+
+              {/* Danh sách thiết bị dạng Grid Card */}
+              <div style={{ 
+                height: '360px', 
+                overflowY: 'auto', 
+                border: '1px solid var(--border-color)', 
+                borderRadius: 'var(--radius-lg)', 
+                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '0.4rem'
+              }}>
+                {filteredEquipment.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    🔍 Không tìm thấy thiết bị nào khớp với từ khóa tìm kiếm
+                  </div>
+                ) : (
+                  filteredEquipment.map(eq => {
+                    const isSelected = addForm.equipmentId === eq.id;
+                    return (
+                      <div
+                        key={eq.id}
+                        onClick={() => setAddForm({ ...addForm, equipmentId: eq.id })}
                         style={{
-                          width: '140px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-color)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          color: 'var(--text-primary)',
-                          fontSize: '12px',
-                          padding: '0 8px',
-                          cursor: 'pointer'
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '0.75rem 0.9rem',
+                          borderRadius: 'var(--radius-md)',
+                          marginBottom: '0.3rem',
+                          backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                          border: isSelected ? '1px solid var(--accent-blue)' : '1px solid transparent',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => {
+                          if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+                        }}
+                        onMouseLeave={e => {
+                          if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
                         }}
                       >
-                        {locations.map(loc => (
-                          <option key={loc} value={loc} style={{ backgroundColor: 'var(--bg-card)' }}>{loc}</option>
-                        ))}
-                      </select>
-
-                      <select
-                        value={selectedStatus}
-                        onChange={e => setSelectedStatus(e.target.value)}
-                        style={{
-                          width: '165px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-color)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          color: 'var(--text-primary)',
-                          fontSize: '12px',
-                          padding: '0 8px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {statuses.map(st => (
-                          <option key={st} value={st} style={{ backgroundColor: 'var(--bg-card)' }}>{st}</option>
-                        ))}
-                      </select>
-
-                      <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                        {filteredEquipment.length} thiết bị
-                      </span>
-                    </div>
-
-                    {/* Device List: 292px, mb: 18px (vùng scroll duy nhất cao ~400px trong form do textarea ẩn) */}
-                    <div style={{ 
-                      height: '392px', 
-                      minHeight: '392px',
-                      maxHeight: '392px',
-                      overflowY: 'auto', 
-                      border: '1px solid var(--border-color)', 
-                      borderRadius: '10px', 
-                      backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      boxSizing: 'border-box'
-                    }} className="modal-device-list">
-                      {filteredEquipment.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', fontSize: '13px' }}>
-                          Không tìm thấy thiết bị nào phù hợp
+                        {/* Radio indicator */}
+                        <div style={{ 
+                          width: '18px', 
+                          height: '18px', 
+                          borderRadius: '50%', 
+                          border: `2px solid ${isSelected ? 'var(--accent-blue)' : 'var(--text-muted)'}`, 
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginRight: '0.75rem',
+                          flexShrink: 0
+                        }}>
+                          {isSelected && (
+                            <div style={{ 
+                              width: '8px', 
+                              height: '8px', 
+                              borderRadius: '50%', 
+                              backgroundColor: 'var(--accent-blue)' 
+                            }} />
+                          )}
                         </div>
-                      ) : (
-                        filteredEquipment.map(eq => {
-                          const isSelected = addForm.equipmentId === eq.id;
-                          return (
-                            <div
-                              key={eq.id}
-                              onClick={() => setAddForm({ ...addForm, equipmentId: eq.id })}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                height: '68px',
-                                minHeight: '68px',
-                                padding: isSelected ? '12px 14px 12px 11px' : '12px 14px',
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                                borderLeft: isSelected ? '3px solid var(--accent-blue)' : '3px solid transparent',
-                                backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                boxSizing: 'border-box'
-                              }}
-                            >
-                              {/* Radio: 20px */}
-                              <div style={{ 
-                                width: '20px', 
-                                height: '20px', 
-                                borderRadius: '50%', 
-                                border: `2px solid ${isSelected ? 'var(--accent-blue)' : 'var(--text-muted)'}`, 
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginRight: '10px',
-                                boxSizing: 'border-box',
-                                flexShrink: 0
-                              }}>
-                                {isSelected && (
-                                  <div style={{ 
-                                    width: '10px', 
-                                    height: '10px', 
-                                    borderRadius: '50%', 
-                                    backgroundColor: 'var(--accent-blue)' 
-                                  }}></div>
-                                )}
-                              </div>
 
-                              {/* Content */}
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left', overflow: 'hidden', flex: 1 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                                  <span style={{ 
-                                    fontFamily: 'monospace', 
-                                    fontSize: '12px', 
-                                    fontWeight: '600', 
-                                    lineHeight: '16px',
-                                    color: isSelected ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                                    padding: '0px 4px',
-                                    borderRadius: '4px',
-                                    flexShrink: 0
-                                  }}>
-                                    {eq.code}
-                                  </span>
-                                  <span style={{ 
-                                    fontSize: '14px', 
-                                    fontWeight: '600', 
-                                    lineHeight: '20px',
-                                    color: 'var(--text-primary)',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
-                                  }}>
-                                    {eq.name}
-                                  </span>
-                                </div>
-                                <div style={{ 
-                                  fontSize: '11px', 
-                                  lineHeight: '16px', 
-                                  color: 'var(--text-muted)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px'
-                                }}>
-                                  <span>📍 {eq.location || 'Kho Lab'}</span>
-                                  <span>·</span>
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ 
-                                      width: '6px', 
-                                      height: '6px', 
-                                      borderRadius: '50%', 
-                                      backgroundColor: eq.status === 'Sẵn sàng' ? 'var(--accent-green)' : 'var(--accent-amber)',
-                                      display: 'inline-block'
-                                    }}></span>
-                                    {eq.status || 'Đang hoạt động'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
+                        {/* Thông tin thiết bị */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <span style={{ 
+                              fontFamily: 'monospace', 
+                              fontSize: '0.75rem', 
+                              fontWeight: '700', 
+                              color: isSelected ? 'var(--accent-blue)' : 'var(--accent-purple)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                              padding: '2px 6px', 
+                              borderRadius: '4px'
+                            }}>
+                              {eq.code}
+                            </span>
+                            <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {eq.name}
+                            </strong>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                            <span>{eq.category || 'Khác'}</span>
+                            <span>•</span>
+                            <span style={{ color: 'var(--text-secondary)' }}>
+                              Vị trí: <strong style={{ color: 'var(--accent-blue)' }}>{eq.location || 'Kho Lab'}</strong>
+                            </span>
+                            <span>•</span>
+                            <span style={{ 
+                              color: eq.status === 'Sẵn sàng' ? 'var(--accent-green)' : 'var(--accent-amber)',
+                              fontWeight: '500'
+                            }}>
+                              ● {eq.status || 'Đang hoạt động'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
           )}
 
           {/* BƯỚC 2: NHẬP LÝ DO & GHI CHÚ */}
           {modalStep === 2 && (
-            <div style={{ 
-              padding: '10px 0',
-              display: 'flex', 
-              flexDirection: 'column', 
-              flex: 1,
-              boxSizing: 'border-box',
-              gap: '0.8rem'
-            }}>
-                    {/* Thẻ hiển thị thiết bị đã chọn */}
-                    {(() => {
-                      const selectedEq = equipmentList.find(e => e.id === addForm.equipmentId);
-                      if (!selectedEq) return null;
-                      const depreciation = selectedEq.lifespanHours ? Math.min(100, Math.round((selectedEq.usedHours / selectedEq.lifespanHours) * 100)) : 0;
-                      return (
-                        <div style={{
-                          padding: '14px 16px',
-                          borderRadius: '12px',
-                          border: '1px dashed var(--accent-blue)',
-                          backgroundColor: 'rgba(59, 130, 246, 0.06)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '8px',
-                          marginBottom: '20px',
-                          textAlign: 'left'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ 
-                              fontFamily: 'monospace', 
-                              fontSize: '11px', 
-                              fontWeight: 'bold', 
-                              backgroundColor: 'rgba(59, 130, 246, 0.2)', 
-                              color: 'var(--accent-blue)',
-                              padding: '2px 6px', 
-                              borderRadius: '4px'
-                            }}>
-                              {selectedEq.code}
-                            </span>
-                            <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{selectedEq.name}</strong>
-                          </div>
-                          
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--text-muted)' }}>
-                            <span>📍 Vị trí: <strong>{selectedEq.location || 'Kho Lab'}</strong></span>
-                            <span>Trạng thái máy: <strong>{selectedEq.status}</strong></span>
-                          </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Thẻ hiển thị thiết bị đã chọn */}
+              {(() => {
+                const selectedEq = equipmentList.find(e => e.id === addForm.equipmentId);
+                if (!selectedEq) return null;
+                const depreciation = selectedEq.lifespanHours ? Math.min(100, Math.round(((selectedEq.usedHours || 0) / selectedEq.lifespanHours) * 100)) : 0;
+                return (
+                  <div style={{
+                    padding: '0.9rem 1.1rem',
+                    borderRadius: 'var(--radius-lg)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.02))',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span style={{ 
+                        fontFamily: 'monospace', 
+                        fontSize: '0.78rem', 
+                        fontWeight: '700', 
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)', 
+                        color: 'var(--accent-blue)',
+                        padding: '2px 6px', 
+                        borderRadius: '4px'
+                      }}>
+                        {selectedEq.code}
+                      </span>
+                      <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{selectedEq.name}</strong>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                      <span>Phân loại: <strong>{selectedEq.category || 'Khác'}</strong></span>
+                      <span>•</span>
+                      <span>Vị trí: <strong style={{ color: 'var(--accent-blue)' }}>{selectedEq.location || 'Kho Lab'}</strong></span>
+                      <span>•</span>
+                      <span>Trạng thái: <strong style={{ color: selectedEq.status === 'Sẵn sàng' ? 'var(--accent-green)' : 'var(--accent-amber)' }}>{selectedEq.status}</strong></span>
+                    </div>
 
-                          {/* Khấu hao thiết bị */}
-                          {selectedEq.lifespanHours > 0 && (
-                            <div style={{ marginTop: '4px' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                                <span>Khấu hao thiết bị:</span>
-                                <strong style={{ color: depreciation > 80 ? 'var(--accent-red)' : 'var(--text-secondary)' }}>{depreciation}% ({selectedEq.usedHours}h / {selectedEq.lifespanHours}h)</strong>
-                              </div>
-                              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
-                                <div style={{ width: `${depreciation}%`, height: '100%', background: depreciation > 80 ? 'var(--accent-red)' : 'var(--accent-blue)', borderRadius: '2px' }}></div>
-                              </div>
-                            </div>
-                          )}
+                    {/* Khấu hao thiết bị */}
+                    {selectedEq.lifespanHours > 0 && (
+                      <div style={{ marginTop: '0.2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '3px' }}>
+                          <span>Mức độ khấu hao sử dụng:</span>
+                          <strong style={{ color: depreciation > 80 ? 'var(--accent-red)' : 'var(--text-secondary)' }}>
+                            {depreciation}% ({selectedEq.usedHours || 0}h / {selectedEq.lifespanHours}h)
+                          </strong>
                         </div>
-                      );
-                    })()}
+                        <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+                          <div style={{ width: `${depreciation}%`, height: '100%', background: depreciation > 80 ? 'var(--accent-red)' : 'var(--accent-blue)', borderRadius: '2px' }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
-                    {/* Mức độ khẩn cấp */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px', textAlign: 'left' }}>
-                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                        Mức độ khẩn cấp
-                      </label>
-                      <select
-                        value={priority}
-                        onChange={e => setPriority(e.target.value)}
-                        style={{
-                          width: '100%',
-                          height: '40px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          color: 'var(--text-primary)',
-                          fontSize: '13px',
-                          padding: '0 12px',
-                          cursor: 'pointer',
-                          boxSizing: 'border-box'
-                        }}
-                      >
-                        <option value="Thấp" style={{ backgroundColor: 'var(--bg-card)' }}>🟢 Thấp (Sự cố nhỏ, vẫn dùng được tạm thời)</option>
-                        <option value="Trung bình" style={{ backgroundColor: 'var(--bg-card)' }}>🟡 Trung bình (Không dùng được, cần sửa sớm)</option>
-                        <option value="Khẩn cấp" style={{ backgroundColor: 'var(--bg-card)' }}>🔴 Khẩn cấp (Lỗi nghiêm trọng, hỏng hoàn toàn / nguy hiểm)</option>
-                      </select>
-                    </div>
+              {/* Mức độ khẩn cấp */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                  Mức độ khẩn cấp & Ưu tiên
+                </label>
+                <Select
+                  value={priority}
+                  onChange={setPriority}
+                  options={[
+                    { value: 'Thấp', label: '🟢 Thấp (Sự cố nhỏ, vẫn dùng được tạm thời)' },
+                    { value: 'Trung bình', label: '🟡 Trung bình (Không dùng được, cần kiểm tra sửa sớm)' },
+                    { value: 'Khẩn cấp', label: '🔴 Khẩn cấp (Hỏng hoàn toàn / Nguy hiểm, cần cách ly ngay)' }
+                  ]}
+                />
+              </div>
 
-                    {/* Nhãn nhập lý do */}
-                    <div style={{ height: '20px', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
-                      <label style={{ fontSize: '13px', fontWeight: '600', lineHeight: '20px', color: 'var(--text-secondary)' }}>
-                        Mô tả tình trạng lỗi *
-                      </label>
-                    </div>
-
-                    {/* Textarea nhập lý do lỗi lớn hơn */}
-                    <textarea 
-                      required 
-                      value={addForm.issueDescription}
-                      onChange={e => setAddForm({...addForm, issueDescription: e.target.value})}
-                      placeholder="Nhập chi tiết triệu chứng hỏng hóc, sự cố linh kiện để kỹ thuật viên nắm rõ..."
-                      style={{
-                        width: '100%',
-                        height: '210px',
-                        minHeight: '180px',
-                        maxHeight: '230px',
-                        padding: '12px 14px',
-                        fontSize: '14px',
-                        lineHeight: '20px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-color)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        color: 'var(--text-primary)',
-                        boxSizing: 'border-box'
-                      }}
-                    ></textarea>
+              {/* Mô tả tình trạng lỗi */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                  Mô tả chi tiết tình trạng hỏng hóc & Sự cố <span style={{ color: 'var(--accent-red)' }}>*</span>
+                </label>
+                <textarea 
+                  required 
+                  rows={4}
+                  value={addForm.issueDescription}
+                  onChange={e => setAddForm({ ...addForm, issueDescription: e.target.value })}
+                  placeholder="Mô tả cụ thể: màn hình không hiển thị, chập nguồn, đứt dây cáp, phát tiếng kêu lạ hoặc linh kiện bị gãy vỡ..."
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    fontSize: '0.88rem',
+                    lineHeight: '1.45',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    resize: 'none'
+                  }}
+                />
+              </div>
             </div>
           )}
         </form>
@@ -1083,7 +1041,7 @@ export default function Maintenance() {
             <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'normal' }}>Mã Ticket: #{selectedDetailTicket?.id.slice(0, 8)}</span>
           </div>
         }
-        size="md"
+        size="lg"
         footer={
           <>
             <Button type="button" variant="ghost" onClick={() => setShowDetailModal(false)} style={{ width: '80px', height: '40px', padding: 0 }}>Đóng</Button>
@@ -1165,6 +1123,19 @@ export default function Maintenance() {
         )}
       </Modal>
 
+      {/* Confirm Delete Maintenance Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setDeletingTicket(null); }}
+        onConfirm={handleConfirmDeleteMaintenance}
+        title="Xác nhận xóa phiếu bảo trì"
+        itemName={deletingTicket?.equipmentName ? `Thiết bị: ${deletingTicket.equipmentName}` : 'Phiếu bảo trì'}
+        itemCode={deletingTicket?.serialNumber ? `Mã máy: ${deletingTicket.serialNumber}` : ''}
+        itemCategory={deletingTicket?.reportedDate ? `Báo hỏng: ${new Date(deletingTicket.reportedDate).toLocaleDateString('vi-VN')}` : ''}
+        warningMessage="Phiếu bảo trì này sẽ bị xóa khỏi hệ thống theo dõi thiết bị. Không thể hoàn tác sau khi thực hiện!"
+        confirmText="Xác nhận xóa phiếu"
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

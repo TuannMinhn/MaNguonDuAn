@@ -69,8 +69,87 @@ syncDatabase()
   .then(() => {
     console.log('SQLite sync initialization complete.');
     scheduleAutoBackup(getSystemSetting);
+    // Bật tiến trình quét tự động hủy phiếu đặt trước quá hạn (chạy 5 phút/lần)
+    setInterval(checkAndExpireReservations, 5 * 60 * 1000);
+    // Chạy kiểm tra ngay một lần khi khởi động
+    setTimeout(checkAndExpireReservations, 3000);
   })
   .catch(err => console.error('SQLite database initialization failed:', err));
+
+// Hàm quét tự động hủy các phiếu đặt trước quá hạn nhận
+function checkAndExpireReservations() {
+  try {
+    const expireHoursSetting = getSystemSetting('reserveAutoExpireHours');
+    const expireHours = expireHoursSetting !== undefined ? Number(expireHoursSetting) : 2;
+    if (expireHours <= 0) return; // Đã tắt tự động hủy
+
+    const borrows = readCollection('borrows');
+    const equipment = readCollection('equipment');
+    const now = new Date();
+    let hasChanges = false;
+    let equipChanged = false;
+
+    for (const b of borrows) {
+      if (b.status === 'Đã đặt trước' && b.borrowDate) {
+        const scheduledTime = new Date(b.borrowDate);
+        const elapsedHours = (now - scheduledTime) / (1000 * 60 * 60);
+
+        if (elapsedHours >= expireHours) {
+          // Phiếu đã quá hạn nhận -> Tự động hủy
+          b.status = 'Đã hủy';
+          b.cancelReason = `Hệ thống tự động hủy do quá hạn nhận ${expireHours} giờ mà không tới lấy thiết bị.`;
+          b.cancelledAt = now.toISOString();
+          b.cancelledBy = 'Hệ thống tự động';
+          hasChanges = true;
+
+          // Hoàn trả tồn kho
+          const eq = equipment.find(e => e.id === b.equipmentId);
+          if (eq) {
+            const isConsumable = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
+            if (isConsumable) {
+              eq.totalQty = (eq.totalQty || 0) + Number(b.qty);
+            } else {
+              eq.borrowedQty = Math.max(0, (eq.borrowedQty || 0) - Number(b.qty));
+              if (b.instanceIds && b.instanceIds.length > 0 && eq.instances) {
+                for (let instId of b.instanceIds) {
+                  let inst = eq.instances.find(i => i.id === instId);
+                  if (inst && inst.status === 'Đang mượn') {
+                    inst.status = 'Sẵn sàng';
+                  }
+                }
+              }
+            }
+            equipChanged = true;
+            notifyWaitlist(eq.id);
+          }
+
+          createNotification(
+            'warning',
+            'Tự động hủy phiếu quá hạn nhận',
+            `Phiếu đặt trước ${b.qty}x "${b.equipmentName}" của ${b.borrowerName} (${b.mssv}) đã tự động bị hủy do quá hạn nhận ${expireHours} giờ. Đã hoàn trả lại kho.`,
+            {
+              borrowId: b.id,
+              equipmentId: b.equipmentId,
+              equipmentName: b.equipmentName,
+              qty: b.qty
+            }
+          );
+
+          console.log(`[AUTO-EXPIRE] Đã tự động hủy phiếu mượn ${b.id} của ${b.borrowerName} do quá ${expireHours}h`);
+        }
+      }
+    }
+
+    if (equipChanged) {
+      writeCollection('equipment', equipment);
+    }
+    if (hasChanges) {
+      writeCollection('borrows', borrows);
+    }
+  } catch (err) {
+    console.error('Lỗi khi chạy checkAndExpireReservations:', err.message);
+  }
+}
 
 // Helper function: Lấy setting hệ thống (có fallback an toàn)
 const DEFAULT_SETTINGS = {
@@ -105,7 +184,9 @@ const DEFAULT_SETTINGS = {
   slot_evening_2_end: '20:00',
   roomBookingCancelDeadlineHours: 2,
   roomBookingAdvanceDays: 14,
-  maxBookingSlotsPerWeek: 4
+  maxBookingSlotsPerWeek: 4,
+  reserveAutoExpireHours: 2,
+  reserveAdvanceNoticeMinutes: 29
 };
 
 function getSystemSetting(key) {
@@ -750,7 +831,28 @@ app.post('/api/attendance/check', (req, res) => {
 // ==========================================
 
 app.get('/api/equipment', (req, res) => {
+  checkAndExpireReservations();
   const equipment = readCollection('equipment');
+  const borrows = readCollection('borrows');
+
+  // Tính toán lại borrowedQty thực tế theo các phiếu đang hoạt động (Đang mượn hoặc Đã đặt trước)
+  let changed = false;
+  equipment.forEach(eq => {
+    const isConsumable = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
+    if (!isConsumable) {
+      const activeBorrows = borrows.filter(b => b.equipmentId === eq.id && (b.status === 'Đang mượn' || b.status === 'Đã đặt trước'));
+      const actualBorrowedQty = activeBorrows.reduce((sum, b) => sum + (Number(b.qty) || 0), 0);
+      if (eq.borrowedQty !== actualBorrowedQty) {
+        eq.borrowedQty = actualBorrowedQty;
+        changed = true;
+      }
+    }
+  });
+
+  if (changed) {
+    writeCollection('equipment', equipment);
+  }
+
   res.json(equipment);
 });
 
@@ -897,17 +999,12 @@ app.delete('/api/equipment/:id', authenticateToken, authorizeRoles('manager', 's
 });
 
 // Mượn thiết bị
-app.post('/api/equipment/:id/borrow', authenticateToken, (req, res) => {
+app.post('/api/equipment/:id/borrow', (req, res) => {
   const { id } = req.params;
   const { qty, expectedReturnDate, initialCondition, borrowNotes, cardId, selectedInstanceIds } = req.body;
 
-  // Lấy MSSV từ token nếu là student, hoặc từ req.body nếu là manager/super_admin
-  let targetMssv = req.user.mssv;
-  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
-    if (req.body.mssv && String(req.body.mssv).trim()) {
-      targetMssv = String(req.body.mssv).trim();
-    }
-  }
+  // Lấy MSSV từ req.body.mssv hoặc từ req.user nếu có
+  let targetMssv = req.body.mssv ? String(req.body.mssv).trim() : (req.user?.mssv || null);
 
   if (!targetMssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Số lượng mượn không hợp lệ' });
@@ -921,6 +1018,26 @@ app.post('/api/equipment/:id/borrow', authenticateToken, (req, res) => {
   const user = findPerson(targetMssv);
   if (!user) {
     return res.status(404).json({ error: 'Thành viên mượn thiết bị không tồn tại trên hệ thống' });
+  }
+
+  // Kiểm tra thời gian hẹn nhận nếu là Đặt trước (không quét thẻ tại quầy)
+  if (!cardId && req.body.borrowDate) {
+    const scheduledTime = new Date(req.body.borrowDate);
+    const now = new Date();
+    const expireHoursSetting = getSystemSetting('reserveAutoExpireHours');
+    const expireHours = expireHoursSetting !== undefined ? Number(expireHoursSetting) : 2;
+
+    if (!isNaN(scheduledTime.getTime())) {
+      // Nếu giờ hẹn nhận đã ở quá khứ
+      if (now > scheduledTime) {
+        const elapsedHours = (now - scheduledTime) / (1000 * 60 * 60);
+        if (expireHours > 0 && elapsedHours >= expireHours) {
+          return res.status(400).json({
+            error: `Thời gian hẹn nhận (${new Date(req.body.borrowDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })}) đã quá hạn quy định ${expireHours} giờ. Vui lòng chọn giờ hẹn nhận ở hiện tại hoặc tương lai.`
+          });
+        }
+      }
+    }
   }
 
   const equipment = readCollection('equipment');
@@ -977,6 +1094,13 @@ app.post('/api/equipment/:id/borrow', authenticateToken, (req, res) => {
   const borrowDays = getSystemSetting('defaultBorrowDays') || 7;
   const fallbackReturnDate = new Date(Date.now() + borrowDays * 24 * 60 * 60 * 1000).toISOString();
 
+  let finalBorrowDate = new Date().toISOString();
+  if (req.body.borrowDate) {
+    try {
+      finalBorrowDate = new Date(req.body.borrowDate).toISOString();
+    } catch (e) {}
+  }
+
   const newBorrow = {
     id: uuidv4(),
     equipmentId: eq.id,
@@ -985,7 +1109,7 @@ app.post('/api/equipment/:id/borrow', authenticateToken, (req, res) => {
     mssv: user.mssv,
     borrowerName: user.name,
     qty: requestedQty,
-    borrowDate: new Date().toISOString(),
+    borrowDate: finalBorrowDate,
     expectedReturnDate: isConsumable ? null : (expectedReturnDate || fallbackReturnDate),
     initialCondition: initialCondition || 'Tốt',
     borrowNotes: borrowNotes || '',
@@ -1047,18 +1171,12 @@ app.post('/api/equipment/:id/borrow', authenticateToken, (req, res) => {
   res.json({ message: isConsumable ? 'Xuất linh kiện thành công' : 'Mượn thiết bị thành công', borrow: newBorrow });
 });
 
-// Đặt trước thiết bị (Online Reservation - Sinh viên chỉ đặt cho chính mình hoặc Manager đặt thay)
-app.post('/api/equipment/:id/reserve', authenticateToken, (req, res) => {
+// Đặt trước thiết bị (Online Reservation - Sinh viên & Khách đặt trực tiếp theo MSSV)
+app.post('/api/equipment/:id/reserve', (req, res) => {
   const { id } = req.params;
   const { qty, expectedReturnDate } = req.body;
 
-  // Lấy MSSV từ token nếu là student, hoặc từ req.body nếu là manager
-  let targetMssv = req.user.mssv;
-  if (req.user.normalizedRole === 'manager' || req.user.normalizedRole === 'super_admin') {
-    if (req.body.mssv && String(req.body.mssv).trim()) {
-      targetMssv = String(req.body.mssv).trim();
-    }
-  }
+  let targetMssv = req.body.mssv ? String(req.body.mssv).trim() : (req.user?.mssv || null);
 
   if (!targetMssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Số lượng mượn không hợp lệ' });
@@ -1096,6 +1214,13 @@ app.post('/api/equipment/:id/reserve', authenticateToken, (req, res) => {
   writeCollection('equipment', equipment);
 
   const borrows = readCollection('borrows');
+  let finalBorrowDate = new Date().toISOString();
+  if (req.body.borrowDate) {
+    try {
+      finalBorrowDate = new Date(req.body.borrowDate).toISOString();
+    } catch (e) {}
+  }
+
   const newBorrow = {
     id: uuidv4(),
     equipmentId: eq.id,
@@ -1104,7 +1229,7 @@ app.post('/api/equipment/:id/reserve', authenticateToken, (req, res) => {
     mssv: user.mssv,
     borrowerName: user.name,
     qty: requestedQty,
-    borrowDate: new Date().toISOString(),
+    borrowDate: finalBorrowDate,
     expectedReturnDate: isConsumable ? null : (expectedReturnDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()),
     initialCondition: 'Tốt',
     borrowNotes: 'Đặt trước qua hệ thống Online',
@@ -1238,6 +1363,101 @@ app.post('/api/equipment/borrows/:borrowId/confirm-handover', authenticateToken,
   });
 
   res.json({ message: 'Bàn giao thiết bị thành công', borrow: borrowTicket });
+});
+
+// Hủy giữ chỗ / Bỏ hẹn đặt trước thiết bị (Hoàn trả tồn kho và thông báo Waitlist)
+app.post('/api/equipment/borrows/:borrowId/cancel-reservation', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
+  const { borrowId } = req.params;
+  const { cancelReason } = req.body;
+
+  const borrows = readCollection('borrows');
+  const borrowIndex = borrows.findIndex(b => b.id === borrowId);
+
+  if (borrowIndex === -1) {
+    return res.status(404).json({ error: 'Không tìm thấy phiếu mượn' });
+  }
+
+  const borrowTicket = borrows[borrowIndex];
+
+  if (borrowTicket.status !== 'Đã đặt trước') {
+    return res.status(400).json({ error: 'Chỉ có thể hủy phiếu đang ở trạng thái Đã đặt trước' });
+  }
+
+  const equipment = readCollection('equipment');
+  const eq = equipment.find(e => e.id === borrowTicket.equipmentId);
+
+  const oldStatus = borrowTicket.status;
+
+  // 1. Hoàn trả lại số lượng vào tồn kho
+  if (eq) {
+    const isConsumable = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
+    if (isConsumable) {
+      eq.totalQty = (eq.totalQty || 0) + Number(borrowTicket.qty);
+    } else {
+      eq.borrowedQty = Math.max(0, (eq.borrowedQty || 0) - Number(borrowTicket.qty));
+      // Giải phóng trạng thái các instance máy con
+      if (borrowTicket.instanceIds && borrowTicket.instanceIds.length > 0 && eq.instances) {
+        for (let instId of borrowTicket.instanceIds) {
+          let inst = eq.instances.find(i => i.id === instId);
+          if (inst && inst.status === 'Đang mượn') {
+            inst.status = 'Sẵn sàng';
+          }
+        }
+      }
+    }
+    writeCollection('equipment', equipment);
+  }
+
+  // 2. Cập nhật trạng thái phiếu sang Đã hủy
+  borrowTicket.status = 'Đã hủy';
+  borrowTicket.cancelReason = cancelReason || 'Quản lý hủy giữ chỗ do người đặt không đến nhận';
+  borrowTicket.cancelledAt = new Date().toISOString();
+  borrowTicket.cancelledBy = req.user.name || req.user.mssv || 'Quản lý';
+  writeCollection('borrows', borrows);
+
+  // 3. Thông báo cho người tiếp theo trong danh sách chờ (Waitlist)
+  let notifiedPerson = null;
+  if (eq) {
+    notifiedPerson = notifyWaitlist(eq.id);
+  }
+
+  // 4. Tạo thông báo hệ thống
+  createNotification(
+    'warning',
+    'Hủy giữ chỗ thiết bị',
+    `Phiếu đặt trước của ${borrowTicket.borrowerName} (${borrowTicket.mssv}) cho thiết bị "${borrowTicket.equipmentName}" đã bị hủy. Số lượng đã được hoàn trả lại kho.`,
+    {
+      borrowId: borrowTicket.id,
+      equipmentId: borrowTicket.equipmentId,
+      equipmentName: borrowTicket.equipmentName,
+      qty: borrowTicket.qty
+    }
+  );
+
+  // 5. Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CANCEL',
+    targetType: 'borrow_ticket',
+    targetId: borrowId,
+    oldValue: { status: oldStatus },
+    newValue: { status: 'Đã hủy', cancelReason: borrowTicket.cancelReason },
+    metadata: {
+      borrowerMssv: borrowTicket.mssv,
+      borrowerName: borrowTicket.borrowerName,
+      equipmentName: borrowTicket.equipmentName,
+      qty: borrowTicket.qty
+    },
+    success: true
+  });
+
+  res.json({
+    message: 'Đã hủy giữ chỗ và hoàn trả số lượng vào kho thành công',
+    borrow: borrowTicket,
+    waitlistNotified: notifiedPerson ? {
+      name: notifiedPerson.userName,
+      mssv: notifiedPerson.mssv
+    } : null
+  });
 });
 
 // Trả thiết bị
@@ -1391,6 +1611,9 @@ app.post('/api/equipment/borrows/:borrowId/return', authenticateToken, authorize
 
 // Danh sách phiếu mượn
 app.get('/api/equipment-borrows', (req, res) => {
+  // Quét và tự động hủy các phiếu đặt trước đã quá hạn ngay lập tức
+  checkAndExpireReservations();
+
   const borrows = readCollection('borrows');
   const equipment = readCollection('equipment');
 
@@ -1412,30 +1635,36 @@ app.get('/api/equipment-borrows', (req, res) => {
 // API WAITLIST (DANH SÁCH CHỜ MƯỢN THIẾT BỊ)
 // ==========================================
 
+// Lấy toàn bộ danh sách chờ (Waitlist) cho Quản trị viên
+app.get('/api/waitlist', (req, res) => {
+  const waitlist = readCollection('waitlist', []);
+  res.json(waitlist);
+});
+
 // Lấy danh sách chờ của một thiết bị
 app.get('/api/equipment/:id/waitlist', (req, res) => {
   const { id } = req.params;
-  const waitlist = readCollection('waitlist');
-  const equipWaitlist = waitlist.filter(w => w.equipmentId === id && w.status === 'waiting');
+  const waitlist = readCollection('waitlist', []);
+  const equipWaitlist = waitlist.filter(w => String(w.equipmentId) === String(id) && w.status === 'waiting');
   res.json(equipWaitlist);
 });
 
 // Đăng ký chờ mượn thiết bị
 app.post('/api/equipment/:id/waitlist', (req, res) => {
   const { id } = req.params;
-  const { mssv, qty, notes } = req.body;
+  const { mssv, qty, notes, purpose, neededDate } = req.body;
 
   if (!mssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc số lượng không hợp lệ' });
   }
 
-  const users = readCollection('users');
-  const members = readCollection('members');
+  const users = readCollection('users', []);
+  const members = readCollection('members', []);
   const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
 
-  const user = findPerson(mssv);
+  let user = findPerson(mssv);
   if (!user) {
-    return res.status(404).json({ error: 'Thành viên không tồn tại trên hệ thống' });
+    user = { mssv: String(mssv).trim(), name: `Sinh viên (${mssv})` };
   }
 
   const equipment = readCollection('equipment');
@@ -1464,6 +1693,8 @@ app.post('/api/equipment/:id/waitlist', (req, res) => {
     mssv: user.mssv,
     userName: user.name,
     qty: Number(qty),
+    purpose: purpose || 'Đồ án môn học / Khóa luận tốt nghiệp',
+    neededDate: neededDate || '',
     notes: notes || '',
     registeredDate: new Date().toISOString(),
     status: 'waiting', // 'waiting', 'notified', 'cancelled', 'fulfilled'
@@ -2477,15 +2708,39 @@ app.post('/api/bookings/cancel-all', (req, res) => {
 
 app.get('/api/analytics/equipment', (req, res) => {
   const equipment = readCollection('equipment');
+  const borrows = readCollection('borrows');
   let analytics = [];
   const defaultLifespan = getSystemSetting('defaultLifespanHours') || 10000;
   const warningPercent = getSystemSetting('maintenanceWarningPercent') || 20;
 
+  // Tính tổng giờ mượn tích lũy all-time từ toàn bộ lịch sử phiếu mượn
+  const allTimeBorrowHoursByEquip = {};
+  const allTimeBorrowHoursByInst = {};
+
+  borrows.forEach(b => {
+    if (b.status === 'Đã hủy' || b.status === 'cancelled' || b.status === 'Hủy') return;
+    if (!b.borrowDate || !b.equipmentId) return;
+    const bDate = new Date(b.borrowDate);
+    const now = new Date();
+    const rDate = b.returnDate ? new Date(b.returnDate) : now;
+    const hours = Math.max(0, (rDate - bDate) / 3600000) * (Number(b.qty) || 1);
+
+    allTimeBorrowHoursByEquip[b.equipmentId] = (allTimeBorrowHoursByEquip[b.equipmentId] || 0) + hours;
+
+    if (b.instanceIds && Array.isArray(b.instanceIds)) {
+      b.instanceIds.forEach(instId => {
+        allTimeBorrowHoursByInst[instId] = (allTimeBorrowHoursByInst[instId] || 0) + (hours / b.instanceIds.length);
+      });
+    }
+  });
+
   equipment.forEach(eq => {
+    const eqAllTimeUsed = allTimeBorrowHoursByEquip[eq.id] || 0;
+
     if (eq.assetType === 'Thiết bị' && eq.instances && eq.instances.length > 0) {
       eq.instances.forEach(inst => {
         const lifespan = inst.lifespanHours || eq.lifespanHours || defaultLifespan;
-        const used = inst.usedHours || 0;
+        const used = Math.max(Number(inst.usedHours) || 0, allTimeBorrowHoursByInst[inst.id] || (eq.totalQty > 0 ? eqAllTimeUsed / eq.totalQty : 0));
         const healthPercent = Math.max(0, 100 - (used / lifespan) * 100);
 
         let status = 'Tốt';
@@ -2501,7 +2756,7 @@ app.get('/api/analytics/equipment', (req, res) => {
           location: eq.location,
           totalQty: 1,
           borrowedQty: inst.status === 'Đang mượn' ? 1 : 0,
-          usedHours: used,
+          usedHours: Number(used.toFixed(1)),
           lifespanHours: lifespan,
           healthPercent: healthPercent.toFixed(1),
           lifespanStatus: status
@@ -2509,7 +2764,8 @@ app.get('/api/analytics/equipment', (req, res) => {
       });
     } else {
       const lifespan = eq.lifespanHours || defaultLifespan;
-      const used = eq.usedHours || 0;
+      const instTotal = (eq.instances || []).reduce((sum, i) => sum + (Number(i.usedHours) || 0), 0);
+      const used = Math.max(Number(eq.usedHours) || 0, instTotal, eqAllTimeUsed);
       const healthPercent = Math.max(0, 100 - (used / lifespan) * 100);
 
       let status = 'Tốt';
@@ -2518,6 +2774,8 @@ app.get('/api/analytics/equipment', (req, res) => {
 
       analytics.push({
         ...eq,
+        usedHours: Number(used.toFixed(1)),
+        lifespanHours: lifespan,
         healthPercent: healthPercent.toFixed(1),
         lifespanStatus: status
       });
@@ -2632,14 +2890,87 @@ app.get('/api/reports/comprehensive', (req, res) => {
     }
   }
 
+  // Tính tổng giờ mượn tích lũy all-time từ toàn bộ lịch sử phiếu mượn
+  const allTimeBorrowHoursByEquip = {};
+  const allTimeBorrowHoursByInst = {};
+  borrows.forEach(b => {
+    if (b.status === 'Đã hủy' || b.status === 'cancelled' || b.status === 'Hủy') return;
+    if (!b.borrowDate || !b.equipmentId) return;
+    const bDate = new Date(b.borrowDate);
+    const now = new Date();
+    const rDate = b.returnDate ? new Date(b.returnDate) : now;
+    const hours = Math.max(0, (rDate - bDate) / 3600000) * (Number(b.qty) || 1);
+    allTimeBorrowHoursByEquip[b.equipmentId] = (allTimeBorrowHoursByEquip[b.equipmentId] || 0) + hours;
+
+    if (b.instanceIds && Array.isArray(b.instanceIds)) {
+      b.instanceIds.forEach(instId => {
+        allTimeBorrowHoursByInst[instId] = (allTimeBorrowHoursByInst[instId] || 0) + (hours / b.instanceIds.length);
+      });
+    }
+  });
+
   // Calculate Equipment Usage & Depreciation IN THIS PERIOD
   const filteredBorrows = borrows.filter(b => {
+    if (b.status === 'Đã hủy' || b.status === 'cancelled' || b.status === 'Hủy') return false;
+    if (!b.borrowDate) return false;
     const d = new Date(b.borrowDate);
     return d >= startDate && d <= endDate;
   });
 
+  const defaultLifespan = getSystemSetting('defaultLifespanHours') || 10000;
+
   const eqStats = {};
   equipment.forEach(e => {
+    const lifespan = e.lifespanHours || defaultLifespan;
+    const isConsumable = e.assetType === 'Linh kiện tiêu hao' || e.assetType === 'Vật tư tiêu hao';
+    const totalQty = Math.max(e.totalQty || 0, (e.instances || []).length, 1);
+
+    // Tính tổng giờ mượn tích lũy của thiết bị này từ toàn bộ lịch sử
+    const equipAllTimeHours = allTimeBorrowHoursByEquip[e.id] || Number(e.usedHours) || 0;
+
+    let totalInstUsed = 0;
+    const rawInstances = e.instances || [];
+
+    // Tạo danh sách máy con / đơn vị cá thể cho mọi thiết bị
+    let workingInstances = rawInstances;
+    if (rawInstances.length === 0) {
+      const perInst = totalQty > 0 ? (equipAllTimeHours / totalQty) : 0;
+      workingInstances = Array.from({ length: totalQty }, (_, idx) => ({
+        id: `auto-${e.id}-${idx + 1}`,
+        serialNumber: `${e.code}-${String(idx + 1).padStart(2, '0')}`,
+        status: e.status || 'Sẵn sàng',
+        usedHours: Number(perInst.toFixed(1)),
+        lifespanHours: lifespan
+      }));
+    }
+
+    const processedInstances = workingInstances.map((inst, idx) => {
+      const instLifespan = inst.lifespanHours || lifespan;
+      // Giờ của từng máy con: lấy từ borrow cụ thể của máy đó, hoặc inst.usedHours, hoặc phân bổ đều
+      let instHours = 0;
+      if (allTimeBorrowHoursByInst[inst.id] !== undefined) {
+        instHours = allTimeBorrowHoursByInst[inst.id];
+      } else if (Number(inst.usedHours) > 0) {
+        instHours = Number(inst.usedHours);
+      } else if (equipAllTimeHours > 0 && totalQty > 0) {
+        instHours = equipAllTimeHours / totalQty;
+      }
+      totalInstUsed += instHours;
+
+      return {
+        ...inst,
+        usedHours: Number(instHours.toFixed(1)),
+        lifespanHours: instLifespan
+      };
+    });
+
+    // Tổng thời gian đã dùng của thiết bị cha = TỔNG CỘNG của tất cả máy con (hoặc all-time borrow hours)
+    const totalUsedHours = totalInstUsed > 0 ? totalInstUsed : equipAllTimeHours;
+
+    // Tổng định mức vòng đời cả lô (tổng số máy * tuổi thọ 1 máy)
+    const totalBatchLifespan = totalQty * lifespan;
+    const batchDepreciation = totalBatchLifespan > 0 ? Number(((totalUsedHours / totalBatchLifespan) * 100).toFixed(1)) : 0;
+
     eqStats[e.id] = {
       id: e.id,
       name: e.name,
@@ -2650,31 +2981,34 @@ app.get('/api/reports/comprehensive', (req, res) => {
       totalQty: e.totalQty,
       borrowedQty: e.borrowedQty,
       minThreshold: e.minThreshold,
-      lifespanHours: e.lifespanHours || 0,
-      totalUsedHours: e.usedHours || 0,
+      lifespanHours: lifespan,
+      totalBatchLifespan: totalBatchLifespan,
+      totalUsedHours: Number(totalUsedHours.toFixed(1)),
       periodBorrowCount: 0,
       periodUsedHours: 0,
-      instances: e.instances || []
+      instances: processedInstances,
+      depreciationPercent: batchDepreciation
     };
   });
 
   filteredBorrows.forEach(b => {
     if (eqStats[b.equipmentId]) {
-      eqStats[b.equipmentId].periodBorrowCount += b.qty;
+      eqStats[b.equipmentId].periodBorrowCount += (Number(b.qty) || 1);
       const bDate = new Date(b.borrowDate);
       const now = new Date();
       // Nếu chưa trả, lấy thời điểm hiện tại hoặc endDate (nếu endDate ở quá khứ)
       const effectiveEndDate = now < endDate ? now : endDate;
       const rDate = b.returnDate ? new Date(b.returnDate) : effectiveEndDate;
       const hours = (rDate - bDate) / 3600000;
-      eqStats[b.equipmentId].periodUsedHours += (hours > 0 ? hours * b.qty : 0);
+      eqStats[b.equipmentId].periodUsedHours += (hours > 0 ? hours * (Number(b.qty) || 1) : 0);
     }
   });
 
   const equipmentReport = Object.values(eqStats).map(e => ({
     ...e,
     periodUsedHours: Number(e.periodUsedHours.toFixed(1)),
-    depreciationPercent: e.lifespanHours ? ((e.totalUsedHours / e.lifespanHours) * 100).toFixed(1) : 0
+    totalUsedHours: Number(e.totalUsedHours.toFixed(1)),
+    depreciationPercent: e.totalBatchLifespan ? Number(((e.totalUsedHours / e.totalBatchLifespan) * 100).toFixed(1)) : 0
   })).sort((a, b) => b.periodBorrowCount - a.periodBorrowCount);
 
   // Calculate borrow stats
@@ -3546,7 +3880,20 @@ app.delete('/api/categories/:id', authenticateToken, authorizeRoles('manager', '
 
 app.get('/api/maintenance', (req, res) => {
   const maintenance = readCollection('maintenance');
-  res.json(maintenance);
+  const equipment = readCollection('equipment');
+
+  const richMaintenance = maintenance.map(m => {
+    const eq = equipment.find(e => e.id === m.equipmentId);
+    return {
+      ...m,
+      equipmentCode: m.equipmentCode || (eq ? eq.code : (m.equipmentId ? m.equipmentId.substring(0, 8) : 'N/A')),
+      equipmentName: m.equipmentName || (eq ? eq.name : 'Thiết bị không xác định'),
+      category: m.category || (eq ? eq.category : 'Khác'),
+      location: m.location || (eq ? eq.location : 'Kho Lab')
+    };
+  });
+
+  res.json([...richMaintenance].reverse());
 });
 
 app.post('/api/maintenance', authenticateToken, (req, res) => {

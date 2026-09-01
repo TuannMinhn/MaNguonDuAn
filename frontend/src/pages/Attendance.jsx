@@ -26,9 +26,17 @@ export default function Attendance() {
 
     const handleKeyPress = async (e) => {
       if (scanningRef.current) return; // Chặn ngay lập tức (đồng bộ)
-      if (['1', '2', '3', '4'].includes(e.key)) {
+      const key = e.key;
+      let cardNum = null;
+      if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(key)) {
+        cardNum = key;
+      } else if (key.startsWith('Numpad') && ['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(key.replace('Numpad', ''))) {
+        cardNum = key.replace('Numpad', '');
+      }
+
+      if (cardNum) {
         scanningRef.current = true; // Khóa ngay trước khi gọi API
-        const cardId = `CARD-00${e.key}`;
+        const cardId = `CARD-00${cardNum}`;
         await handleRfidScan(cardId);
       }
     };

@@ -21,7 +21,7 @@ const COLORS = [
   '#84cc16', '#d946ef', '#0ea5e9', '#eab308', '#f43f5e'
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ onNavigate }) {
 
   // SWR Caching
   const { data: members } = useSWR(`${API_BASE_URL}/members`, fetcher);
@@ -37,7 +37,8 @@ export default function Dashboard() {
 
     // 1. Stats
     const active = members.filter(m => m.active);
-    const borrowedCount = equip.reduce((sum, item) => sum + item.borrowedQty, 0);
+    const activeBorrowTickets = borrows.filter(b => b.status === 'Đang mượn');
+    const borrowedCount = activeBorrowTickets.reduce((sum, item) => sum + (Number(item.qty) || 1), 0);
     const stats = {
       totalMembers: members.length,
       activeMembers: active.length,
@@ -47,7 +48,7 @@ export default function Dashboard() {
     // 2. Overdue Equipment
     const now = new Date();
     now.setHours(0,0,0,0);
-    const overdue = borrows.filter(b => b.status !== 'Đã trả' && b.status !== 'Đã tiêu hao' && b.expectedReturnDate && new Date(b.expectedReturnDate) < now);
+    const overdue = borrows.filter(b => b.status === 'Đang mượn' && b.expectedReturnDate && new Date(b.expectedReturnDate) < now);
     overdue.forEach(b => {
       const expected = new Date(b.expectedReturnDate);
       b.daysOverdue = Math.ceil(Math.abs(now - expected) / (1000 * 60 * 60 * 24));
@@ -188,7 +189,12 @@ export default function Dashboard() {
         data: dashboardData.activeMembersList || []
       });
     } else if (type === 'borrowed') {
-      const activeBorrows = (borrows || []).filter(b => b.status !== 'Đã trả' && b.status !== 'Đã tiêu hao');
+      // Nếu có prop onNavigate, điều hướng trực tiếp sang tab Phiếu mượn & Hoạt động trả
+      if (onNavigate) {
+        onNavigate('equipment-borrows', { borrowTab: 'Đang mượn' });
+        return;
+      }
+      const activeBorrows = (borrows || []).filter(b => b.status === 'Đang mượn');
       setModalConfig({
         isOpen: true,
         type: 'borrowed',
@@ -196,6 +202,10 @@ export default function Dashboard() {
         data: activeBorrows
       });
     } else if (type === 'overdue') {
+      if (onNavigate) {
+        onNavigate('equipment-borrows', { borrowTab: 'Trễ hạn' });
+        return;
+      }
       setModalConfig({
         isOpen: true,
         type: 'overdue',
@@ -235,8 +245,28 @@ export default function Dashboard() {
       <span style={{ color: row.daysOverdue ? 'var(--accent-red)' : 'var(--text-primary)', fontWeight: row.daysOverdue ? 600 : 400 }}>
         {formatTime(row.expectedReturnDate)}
       </span>
-    )}
-  ], []);
+    )},
+    {
+      accessorKey: 'actions',
+      header: 'Thao tác',
+      sortable: false,
+      align: 'right',
+      cell: (row) => (
+        <button
+          className="btn btn-sm btn-ghost"
+          style={{ fontSize: '0.78rem', color: 'var(--accent-blue)', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+          onClick={() => {
+            setModalConfig(prev => ({ ...prev, isOpen: false }));
+            if (onNavigate) {
+              onNavigate('equipment-borrows', { ticketId: row.id, borrowTab: 'Đang mượn' });
+            }
+          }}
+        >
+          Xem chi tiết <ArrowRight size={13} />
+        </button>
+      )
+    }
+  ], [onNavigate]);
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (!dashboardData) return (
@@ -639,7 +669,7 @@ export default function Dashboard() {
         isOpen={modalConfig.isOpen}
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
         title={modalConfig.title}
-        size="lg"
+        size="xl"
       >
         <div style={{ marginTop: '0.5rem' }}>
           {modalConfig.type === 'members' && (

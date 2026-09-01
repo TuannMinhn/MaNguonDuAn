@@ -18,6 +18,7 @@ const DAYS = [
   { key: 'thu', label: 'Thứ 5' },
   { key: 'fri', label: 'Thứ 6' },
   { key: 'sat', label: 'Thứ 7' },
+  { key: 'sun', label: 'Chủ nhật' },
 ];
 
 const DEFAULT_SESSIONS = [
@@ -165,7 +166,7 @@ export default function RoomBooking({ userRole }) {
     const allBookings = {};
     for (let i = 0; i < bookingsArray.length; i++) {
       const data = bookingsArray[i];
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && DAYS[i]) {
         data.forEach(b => {
           const key = `${DAYS[i].key}|${b.slotId}`;
           allBookings[key] = { ...b, dayKey: DAYS[i].key };
@@ -386,7 +387,7 @@ export default function RoomBooking({ userRole }) {
           </h2>
           <p className="page-subtitle">Chọn các buổi muốn đăng ký, sau đó bấm nút <strong style={{ color: 'var(--accent-blue)' }}>Đăng ký</strong> ở góc dưới phải.</p>
         </div>
-        <div style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', gap: '1rem', marginRight: '4.5rem' }}>
           {userRole !== 'student' && (
             <Button
               variant="danger"
@@ -622,7 +623,7 @@ export default function RoomBooking({ userRole }) {
             </div>
           </div>
         }
-        size="md"
+        size="lg"
         footer={memberPickerFooter}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '70vh' }}>
@@ -788,7 +789,7 @@ export default function RoomBooking({ userRole }) {
             <span>Chi tiết điểm danh ({detailsTarget?.session?.attendees?.length || 0} người)</span>
           </div>
         }
-        size="md"
+        size="lg"
         footer={
           <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>Đóng</Button>
         }

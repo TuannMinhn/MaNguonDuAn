@@ -113,16 +113,32 @@ export default function RfidManagement({ userRole }) {
     }
   }, [alert]);
 
+  // Helper lấy headers có token
+  const getAuthHeaders = useCallback((isJson = false) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
+    const headers = {};
+    if (isJson) headers['Content-Type'] = 'application/json';
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  }, []);
+
   // Fetch data
   const fetchCards = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/rfid-cards`);
+      const res = await fetch(`${API_BASE_URL}/rfid-cards`, {
+        headers: getAuthHeaders()
+      });
       const data = await res.json();
-      setCards(data);
+      if (res.ok && Array.isArray(data)) {
+        setCards(data);
+      } else {
+        setCards([]);
+      }
     } catch (err) {
       console.error('Lỗi khi tải danh sách thẻ:', err);
+      setCards([]);
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -130,23 +146,37 @@ export default function RfidManagement({ userRole }) {
       if (historyFilter.cardId) params.set('cardId', historyFilter.cardId);
       if (historyFilter.mssv) params.set('mssv', historyFilter.mssv);
       if (historyFilter.module) params.set('module', historyFilter.module);
-      const res = await fetch(`${API_BASE_URL}/rfid-history?${params.toString()}`);
+      const res = await fetch(`${API_BASE_URL}/rfid-history?${params.toString()}`, {
+        headers: getAuthHeaders()
+      });
       const data = await res.json();
-      setHistory(data);
+      if (res.ok && Array.isArray(data)) {
+        setHistory(data);
+      } else {
+        setHistory([]);
+      }
     } catch (err) {
       console.error('Lỗi khi tải lịch sử:', err);
+      setHistory([]);
     }
-  }, [historyFilter]);
+  }, [historyFilter, getAuthHeaders]);
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/members`);
+      const res = await fetch(`${API_BASE_URL}/members`, {
+        headers: getAuthHeaders()
+      });
       const data = await res.json();
-      setUsers(data);
+      if (res.ok && Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        setUsers([]);
+      }
     } catch (err) {
       console.error('Lỗi khi tải danh sách thành viên:', err);
+      setUsers([]);
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     fetchCards();
@@ -186,7 +216,7 @@ export default function RfidManagement({ userRole }) {
     try {
       const res = await fetch(`${API_BASE_URL}/rfid-cards`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(true),
         body: JSON.stringify(newCard)
       });
       const data = await res.json();
@@ -214,7 +244,7 @@ export default function RfidManagement({ userRole }) {
     try {
       const res = await fetch(`${API_BASE_URL}/rfid-cards/${editCard.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({ mssv: editCard.mssv, status: editCard.status })
       });
       const data = await res.json();
@@ -239,7 +269,8 @@ export default function RfidManagement({ userRole }) {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/rfid-cards/${card.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
       const data = await res.json();
 
@@ -263,7 +294,7 @@ export default function RfidManagement({ userRole }) {
     try {
       const res = await fetch(`${API_BASE_URL}/rfid-cards/${card.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({ status: newStatus })
       });
       const data = await res.json();
@@ -390,10 +421,11 @@ export default function RfidManagement({ userRole }) {
     { 
       accessorKey: 'actions', 
       header: 'Thao tác', 
+      width: '12%',
       align: 'right', 
       sortable: false, 
       cell: (row) => (
-        <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+        <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '0.5rem' }}>
           <Button size="sm" variant="ghost" icon={Edit2} onClick={() => { setEditCard(row); setShowEditModal(true); }} title="Cập nhật thẻ" aria-label="Cập nhật thẻ" />
           <Button size="sm" variant="danger-ghost" icon={Trash2} onClick={() => setShowDeleteConfirm(row)} title="Xóa thẻ" aria-label="Xóa thẻ" />
         </div>
@@ -784,15 +816,43 @@ export default function RfidManagement({ userRole }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 1.5rem',
+            margin: '0 auto 1.2rem',
             animation: 'pulse 2s infinite'
           }}>
             <CreditCard size={36} style={{ color: 'var(--accent-blue)' }} />
           </div>
-          <h3 style={{ marginBottom: '0.5rem', fontSize: 'var(--text-lg)' }}>Đang chờ quét thẻ...</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
-            Đặt thẻ RFID mới vào đầu đọc để đọc mã thẻ
+          <h3 style={{ marginBottom: '0.4rem', fontSize: 'var(--text-lg)' }}>Đang chờ quét thẻ...</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.2rem' }}>
+            Nhấn phím số (1 - 9) hoặc bấm chọn nhanh một thẻ bên dưới để đăng ký:
           </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+              <button
+                key={num}
+                type="button"
+                onClick={() => {
+                  setNewCard(prev => ({ ...prev, cardId: `CARD-00${num}` }));
+                  setShowRfidScanModal(false);
+                }}
+                style={{
+                  background: 'rgba(59, 130, 246, 0.12)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  color: 'var(--accent-blue)',
+                  borderRadius: '6px',
+                  padding: '0.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.25)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.12)'}
+              >
+                CARD-00{num}
+              </button>
+            ))}
+          </div>
         </div>
       </Modal>
 

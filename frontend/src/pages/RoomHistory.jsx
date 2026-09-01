@@ -294,7 +294,7 @@ export default function RoomHistory() {
             </h2>
             <p className="page-subtitle">Xem lại các ca đăng ký phòng trong quá khứ và đánh giá tình trạng tham gia</p>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', marginRight: '4.5rem' }}>
             <div style={{ width: '220px' }}>
               <Select 
                 value={period}
@@ -430,7 +430,7 @@ export default function RoomHistory() {
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
         title="Chi tiết ca sử dụng phòng"
-        size="md"
+        size="lg"
         footer={
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <div>

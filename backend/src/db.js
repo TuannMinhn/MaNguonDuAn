@@ -51,7 +51,8 @@ export const Equipment = sequelize.define('Equipment', {
   unit: { type: DataTypes.TEXT, defaultValue: 'Cái' },
   minThreshold: { type: DataTypes.INTEGER, defaultValue: 0 },
   usedHours: { type: DataTypes.INTEGER, defaultValue: 0 },
-  lifespanHours: { type: DataTypes.INTEGER, defaultValue: 0 }
+  lifespanHours: { type: DataTypes.INTEGER, defaultValue: 0 },
+  instances: { type: DataTypes.TEXT, defaultValue: '[]' }
 }, { tableName: 'equipment', timestamps: false });
 
 // 3. Bảng Borrow (Phiếu mượn trả)
@@ -68,7 +69,8 @@ export const Borrow = sequelize.define('Borrow', {
   initialCondition: { type: DataTypes.TEXT },
   borrowNotes: { type: DataTypes.TEXT },
   returnNotes: { type: DataTypes.TEXT },
-  finalCondition: { type: DataTypes.TEXT }
+  finalCondition: { type: DataTypes.TEXT },
+  instanceIds: { type: DataTypes.TEXT, defaultValue: '[]' }
 }, { tableName: 'borrows', timestamps: false });
 
 // 4. Bảng Schedule (Lịch trực)
@@ -213,18 +215,36 @@ export const AuditLog = sequelize.define('AuditLog', {
   action: { type: DataTypes.TEXT, allowNull: false },
   targetType: { type: DataTypes.TEXT, allowNull: false },
   targetId: { type: DataTypes.TEXT },
-  oldValue: { type: DataTypes.TEXT, defaultValue: null }, // JSON string
-  newValue: { type: DataTypes.TEXT, defaultValue: null }, // JSON string
-  metadata: { type: DataTypes.TEXT, defaultValue: null }, // JSON string
+  oldValue: { type: DataTypes.TEXT, defaultValue: null },
+  newValue: { type: DataTypes.TEXT, defaultValue: null },
+  metadata: { type: DataTypes.TEXT, defaultValue: null },
   success: { type: DataTypes.BOOLEAN, defaultValue: true },
   createdAt: { type: DataTypes.TEXT, allowNull: false }
 }, { tableName: 'audit_logs', timestamps: false });
+
+// 17. Bảng Waitlist (Hàng chờ thiết bị)
+export const Waitlist = sequelize.define('Waitlist', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  equipmentId: { type: DataTypes.TEXT, allowNull: false },
+  equipmentName: { type: DataTypes.TEXT },
+  equipmentCode: { type: DataTypes.TEXT },
+  mssv: { type: DataTypes.TEXT, allowNull: false },
+  userName: { type: DataTypes.TEXT },
+  qty: { type: DataTypes.INTEGER, defaultValue: 1 },
+  notes: { type: DataTypes.TEXT, defaultValue: '' },
+  purpose: { type: DataTypes.TEXT },
+  neededDate: { type: DataTypes.TEXT },
+  registeredDate: { type: DataTypes.TEXT, allowNull: false },
+  status: { type: DataTypes.TEXT, defaultValue: 'waiting' },
+  notifiedDate: { type: DataTypes.TEXT },
+  fulfilledDate: { type: DataTypes.TEXT }
+}, { tableName: 'waitlist', timestamps: false });
 
 // ==========================================
 // ĐỒNG BỘ & SEED DỮ LIỆU TỪ JSON CŨ SANG SQLITE
 // ==========================================
 export async function syncDatabase() {
-  await sequelize.sync({ alter: true });
+  await sequelize.sync();
   console.log('Database SQLite & tables synced successfully.');
 
   const seedIfEmpty = async (Model, fileName, defaultData = []) => {
@@ -409,7 +429,8 @@ const collectionToModelMap = {
   maintenance: Maintenance,
   settings: SystemSetting,
   categories: Category,
-  audit_logs: AuditLog
+  audit_logs: AuditLog,
+  waitlist: Waitlist
 };
 
 function getModelByCollectionName(colName) {
@@ -424,17 +445,41 @@ const cache = {};
 
 // Giao diện đọc collection đồng bộ giống hệt file db.js cũ (drop-in replacement)
 export function readCollection(collectionName, defaultData = []) {
-  if (cache[collectionName]) {
+  if (cache[collectionName] && Array.isArray(cache[collectionName]) && cache[collectionName].length > 0) {
     return cache[collectionName];
   }
-  return defaultData;
+
+  // Tự động đọc fallback từ file JSON trong data/
+  const jsonPath = path.join(DATA_DIR, `${collectionName}.json`);
+  if (fs.existsSync(jsonPath)) {
+    try {
+      const content = fs.readFileSync(jsonPath, 'utf-8');
+      const data = JSON.parse(content || '[]');
+      cache[collectionName] = data;
+      return data;
+    } catch (e) {
+      console.error(`Lỗi đọc file JSON ${collectionName}.json:`, e.message);
+    }
+  }
+
+  return cache[collectionName] || defaultData;
 }
 
 // Giao diện ghi collection đồng bộ, tự động ghi xuống SQLite bất đồng bộ dưới background
 export function writeCollection(collectionName, data) {
   cache[collectionName] = data;
 
+  // Ghi đồng thời vào file JSON để backup
+  const jsonPath = path.join(DATA_DIR, `${collectionName}.json`);
+  try {
+    fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {
+    console.error(`Lỗi ghi backup JSON ${collectionName}.json:`, e.message);
+  }
+
   const Model = getModelByCollectionName(collectionName);
+  if (!Model) return true;
+
   const mappedData = data.map(item => {
     const mapped = { ...item };
     Object.keys(Model.rawAttributes).forEach(key => {
@@ -446,7 +491,7 @@ export function writeCollection(collectionName, data) {
     return mapped;
   });
 
-  // Ghi xuống SQLite bất đồng bộ an toàn (hỗ trợ atomic upsert / replace)
+  // Ghi xuống SQLite bất đồng bộ an toàn
   Model.destroy({ where: {} })
     .then(() => {
       if (mappedData.length > 0) {

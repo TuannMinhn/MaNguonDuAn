@@ -11,7 +11,8 @@ const RfidScanModal = ({
   idleTitle,
   idleSubtitle = 'Vui lòng đưa thẻ vào máy quét để xác thực...',
   successTitle = 'Đã quét thẻ thành công',
-  successChildren
+  successChildren,
+  onSimulateScan
 }) => {
   if (!isOpen) return null;
 
@@ -88,8 +89,43 @@ const RfidScanModal = ({
             <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.7)' }}>
               {idleSubtitle}
             </p>
-            <div style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)' }}>
-              (Nhấn phím 1, 2, 3, 4 để giả lập quét thẻ)
+            <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+                Hoặc bấm nhanh vào thẻ bên dưới để quét:
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {[1, 2, 3, 4, 5, 6].map(num => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => {
+                      if (onSimulateScan) {
+                        onSimulateScan(`CARD-00${num}`);
+                      } else {
+                        window.dispatchEvent(new KeyboardEvent('keydown', { key: String(num) }));
+                      }
+                    }}
+                    style={{
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      border: '1px solid rgba(59, 130, 246, 0.4)',
+                      color: 'var(--accent-blue)',
+                      borderRadius: '8px',
+                      padding: '0.5rem 0.9rem',
+                      fontWeight: '600',
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.3)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'}
+                  >
+                    💳 Thẻ CARD-00{num}
+                  </button>
+                ))}
+              </div>
             </div>
           </>
         ) : (
