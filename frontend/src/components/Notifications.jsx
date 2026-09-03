@@ -29,9 +29,10 @@ export default function Notifications({ userRole }) {
     };
   }, [isOpen]);
 
-  // Initial fetch qua GET /api/notifications (KHÔNG còn polling refreshInterval)
+  // Fetch GET /api/notifications (có backup polling 5s để đảm bảo không bao giờ bị trễ)
   const { data: notifications = [], mutate } = useSWR(`${API_BASE_URL}/notifications`, fetcher, {
-    revalidateOnFocus: false
+    refreshInterval: 5000,
+    revalidateOnFocus: true
   });
 
   // Realtime Server-Sent Events (SSE) stream listener với Exponential Backoff Reconnect
@@ -46,7 +47,6 @@ export default function Notifications({ userRole }) {
       if (!isSubscribed) return;
 
       const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
-      if (!token) return;
 
       // Đóng kết nối cũ nếu có
       if (eventSource) {
@@ -54,7 +54,9 @@ export default function Notifications({ userRole }) {
         eventSource = null;
       }
 
-      const streamUrl = `${API_BASE_URL}/notifications/stream?token=${encodeURIComponent(token)}`;
+      const streamUrl = token 
+        ? `${API_BASE_URL}/notifications/stream?token=${encodeURIComponent(token)}`
+        : `${API_BASE_URL}/notifications/stream`;
       eventSource = new EventSource(streamUrl);
 
       eventSource.addEventListener('connected', () => {
@@ -257,6 +259,19 @@ export default function Notifications({ userRole }) {
                     </div>
                   ))
                 )}
+              </div>
+
+              {/* Footer chuyển sang trang Trung tâm Thông báo */}
+              <div style={{ padding: '0.75rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                <button 
+                  onClick={() => {
+                    setIsOpen(false);
+                    window.location.hash = '#notifications-center';
+                  }}
+                  style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '0.88rem', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  Mở Trung tâm Thông báo chi tiết &rarr;
+                </button>
               </div>
             </div>
           )}

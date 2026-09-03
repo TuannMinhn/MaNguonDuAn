@@ -120,7 +120,8 @@ export const Booking = sequelize.define('Booking', {
   checkedInBy: { type: DataTypes.TEXT },
   checkedInByName: { type: DataTypes.TEXT },
   checkedOut: { type: DataTypes.BOOLEAN, defaultValue: false },
-  checkedOutAt: { type: DataTypes.TEXT }
+  checkedOutAt: { type: DataTypes.TEXT },
+  checkoutReport: { type: DataTypes.TEXT, defaultValue: null }
 }, { tableName: 'bookings', timestamps: false });
 
 // 8. Bảng RfidCard (Thẻ RFID thành viên)

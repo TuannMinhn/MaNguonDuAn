@@ -22,7 +22,8 @@ import {
   AlertTriangle,
   PieChart,
   Menu,
-  ChevronLeft
+  ChevronLeft,
+  Bell
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -75,7 +76,7 @@ function SidebarItem({ icon: Icon, text, active, alert, onClick, hasSubmenu, sub
   );
 }
 
-export default function Sidebar({ currentPage, setCurrentPage, userRole, setUserRole, expanded, setExpanded }) {
+export default function Sidebar({ currentPage, setCurrentPage, userRole, setUserRole, expanded, setExpanded, modules = {} }) {
   const { theme, toggleTheme } = useTheme();
 
   const [equipmentOpen, setEquipmentOpen] = useState(
@@ -102,20 +103,25 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole, setUser
     }
   }, [currentPage]);
 
-  const allMenuItems = [
-    { id: 'dashboard',     label: 'Bảng điều khiển',    icon: LayoutDashboard, roles: ['admin'] },
-    { id: 'members',       label: 'Thành viên',          icon: Users, roles: ['admin'] },
-    { id: 'equipment-management', label: 'Quản lý kho', icon: Cpu, isParent: 'equipment-management', roles: ['admin'] },
-    { id: 'equipment-analytics', label: 'Khấu hao', icon: Activity, isParent: 'equipment-analytics', roles: ['admin'] },
-    { id: 'student-equipment', label: 'Kho thiết bị', icon: Boxes, roles: ['student'] },
+  // Determine if a module is enabled (default true if key not in modules)
+  const isEnabled = (key) => modules[key] !== false;
 
-    { id: 'room-booking-parent', label: 'Phòng Lab', icon: DoorOpen, isParent: 'room', roles: ['admin', 'student'] },
-    { id: 'rfid-management', label: 'Thẻ RFID',  icon: ShieldCheck, roles: ['admin'] },
-    { id: 'kiosk',         label: 'Kiosk',      icon: DoorOpen, roles: ['admin'] },
-    { id: 'settings',      label: 'Cài đặt',  icon: Settings, roles: ['admin'] },
+  const allMenuItems = [
+    { id: 'dashboard',            label: 'Bảng điều khiển', icon: LayoutDashboard, roles: ['admin'] },
+    { id: 'members',              label: 'Thành viên',       icon: Users,           roles: ['admin'] },
+    { id: 'equipment-management', label: 'Quản lý kho',      icon: Cpu,             isParent: 'equipment-management', roles: ['admin'] },
+    { id: 'equipment-analytics',  label: 'Khấu hao',         icon: Activity,        isParent: 'equipment-analytics',  roles: ['admin'], moduleKey: 'enableDepreciation' },
+    { id: 'student-equipment',    label: 'Kho thiết bị',     icon: Boxes,           roles: ['student'] },
+    { id: 'room-booking-parent',  label: 'Phòng Lab',        icon: DoorOpen,        isParent: 'room',                 roles: ['admin', 'student'], moduleKey: 'enableRoomBooking' },
+    { id: 'rfid-management',      label: 'Thẻ RFID',         icon: ShieldCheck,     roles: ['admin'], moduleKey: 'enableRFID' },
+    { id: 'notifications-center', label: 'Thông báo',        icon: Bell,            roles: ['admin', 'student'] },
+    { id: 'kiosk',                label: 'Kiosk',            icon: DoorOpen,        roles: ['admin'], moduleKey: 'enableKiosk' },
+    { id: 'settings',             label: 'Cài đặt',          icon: Settings,        roles: ['admin'] },
   ];
 
-  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
+  const menuItems = allMenuItems.filter(item =>
+    item.roles.includes(userRole) && (!item.moduleKey || isEnabled(item.moduleKey))
+  );
 
   return (
     <aside className={`sidebar ${expanded ? 'expanded' : 'collapsed'}`}>
@@ -179,7 +185,7 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole, setUser
                   icon={item.icon}
                   text={item.label}
                   active={isActive}
-                  alert={item.alert} // Will show red dot if item.alert is true
+                  alert={item.alert}
                   hasSubmenu={!!item.isParent}
                   submenuOpen={submenuOpen}
                   onClick={handleItemClick}
@@ -197,17 +203,21 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole, setUser
                     <button onClick={() => setCurrentPage('equipment-borrows')} className={`submenu-link ${currentPage === 'equipment-borrows' ? 'active' : ''}`}>
                       <FileText size={16} style={{ minWidth: '16px' }} /> <span className={`sb-text-transition ${expanded ? 'sb-w-full' : 'sb-w-0'}`}>Cấp phát</span>
                     </button>
-                    <button onClick={() => setCurrentPage('equipment-maintenance')} className={`submenu-link ${currentPage === 'equipment-maintenance' ? 'active' : ''}`}>
-                      <Wrench size={16} style={{ minWidth: '16px' }} /> <span className={`sb-text-transition ${expanded ? 'sb-w-full' : 'sb-w-0'}`}>Bảo trì</span>
-                    </button>
+                    {isEnabled('enableMaintenance') && (
+                      <button onClick={() => setCurrentPage('equipment-maintenance')} className={`submenu-link ${currentPage === 'equipment-maintenance' ? 'active' : ''}`}>
+                        <Wrench size={16} style={{ minWidth: '16px' }} /> <span className={`sb-text-transition ${expanded ? 'sb-w-full' : 'sb-w-0'}`}>Bảo trì</span>
+                      </button>
+                    )}
                   </div>
                 )}
 
                 {item.isParent === 'equipment-analytics' && analyticsOpen && (
                   <div className="submenu">
-                    <button onClick={() => setCurrentPage('analytics-overview')} className={`submenu-link ${currentPage === 'analytics-overview' ? 'active' : ''}`}>
-                      <PieChart size={16} style={{ minWidth: '16px' }} /> <span className={`sb-text-transition ${expanded ? 'sb-w-full' : 'sb-w-0'}`}>Tổng quan</span>
-                    </button>
+                    {isEnabled('enableAssetOverview') && (
+                      <button onClick={() => setCurrentPage('analytics-overview')} className={`submenu-link ${currentPage === 'analytics-overview' ? 'active' : ''}`}>
+                        <PieChart size={16} style={{ minWidth: '16px' }} /> <span className={`sb-text-transition ${expanded ? 'sb-w-full' : 'sb-w-0'}`}>Tổng quan</span>
+                      </button>
+                    )}
                     <button onClick={() => setCurrentPage('analytics-usage')} className={`submenu-link ${currentPage === 'analytics-usage' ? 'active' : ''}`}>
                       <Activity size={16} style={{ minWidth: '16px' }} /> <span className={`sb-text-transition ${expanded ? 'sb-w-full' : 'sb-w-0'}`}>Sử dụng</span>
                     </button>

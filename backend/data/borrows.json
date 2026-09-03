@@ -482,5 +482,51 @@
     "status": "Đã tiêu hao",
     "instanceIds": null,
     "instanceSerials": null
+  },
+  {
+    "id": "cfe3fafb-278c-4710-9fc3-5b9297c41a50",
+    "equipmentId": "eq-mrbve89ufncl70omxs7",
+    "equipmentName": "Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+    "equipmentCode": "CON-01",
+    "mssv": "20210001",
+    "borrowerName": "Nguyễn Văn A",
+    "qty": 1,
+    "borrowDate": "2026-09-02T11:34:09.519Z",
+    "expectedReturnDate": null,
+    "initialCondition": "Tốt",
+    "borrowNotes": "Xuất dùng trong ca trực phòng Lab (Checkout)",
+    "returnDate": "2026-09-02T11:34:09.519Z",
+    "returnMssv": "20210001",
+    "returnerName": "Nguyễn Văn A",
+    "finalCondition": "Đã tiêu hao",
+    "returnNotes": "Linh kiện tiêu hao xuất dùng trực tiếp (không thu hồi)",
+    "status": "Đã tiêu hao",
+    "instanceIds": null,
+    "instanceSerials": null
+  },
+  {
+    "id": "2f71c9c7-b95c-4599-a683-b607d382b3cc",
+    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "equipmentCode": "MEA-01",
+    "mssv": "20220003",
+    "borrowerName": "Lê Văn C",
+    "qty": 1,
+    "borrowDate": "2026-09-03T20:26:00.000Z",
+    "expectedReturnDate": "2026-09-05T10:00:00.000Z",
+    "initialCondition": "Tốt / Hoạt động bình thường",
+    "borrowNotes": "",
+    "returnDate": null,
+    "returnMssv": null,
+    "returnerName": null,
+    "finalCondition": null,
+    "returnNotes": null,
+    "status": "Đã đặt trước",
+    "instanceIds": [
+      "inst-egilmakay"
+    ],
+    "instanceSerials": [
+      "MEA-01-01"
+    ]
   }
 ]

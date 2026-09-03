@@ -23,8 +23,16 @@ export default function Settings() {
   const [deletingCatalog, setDeletingCatalog] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // System Settings state phân theo 3 nhóm
+  // System Settings state phân theo các nhóm
   const [sysConfig, setSysConfig] = useState({
+    // Nhóm Module Toggles
+    enableRoomBooking: 'true',
+    enableRFID: 'true',
+    enableKiosk: 'true',
+    enableMaintenance: 'true',
+    enableDepreciation: 'true',
+    enableSchedule: 'true',
+    enableAssetOverview: 'true',
     // Nhóm 1: Mượn trả & Kho
     defaultBorrowDays: 7,
     defaultReturnTime: '17:00',
@@ -33,16 +41,25 @@ export default function Settings() {
     maintenanceWarningPercent: 20,
     reserveAutoExpireHours: 2,
     reserveAdvanceNoticeMinutes: 29,
-    // Nhóm 2: Trực Lab & Điểm thưởng
+    // Nhóm 2: Trực Lab & Điểm thưởng Chuyên cần Sinh viên
+    enableStudentPoints: 'true',
     attendanceMinHours: 1.0,
     attendanceStandardPoints: 5,
     attendanceShortPoints: 2,
     taskDefaultPoints: 10,
-    // Nhóm 3: Vận hành & Bảo mật
+    attendanceBonusWeekend: 1.5,
+    // Nhóm 3: Vận hành, Bảng điều khiển & Thông báo
     adminPassword: '',
+    dashboardDefaultTimeRange: '7_days',
+    dashboardTopItemsCount: 5,
     maxNotificationHistory: 500,
+    notifyBorrowEquipment: 'true',
+    notifyReturnEquipment: 'true',
+    notifyRoomBooking: 'true',
+    notifyMaintenanceAlert: 'true',
     rfidScanCooldownSeconds: 5,
     defaultLabLocation: 'Kho Lab',
+    kioskIdleTimeoutSeconds: 30,
     // Nhóm 4: Tự động sao lưu & Lưu trữ
     autoBackupEnabled: false,
     backupIntervalHours: 24,
@@ -50,7 +67,20 @@ export default function Settings() {
     // Nhóm 5: Chính sách Đặt phòng Lab (Room Booking Policy)
     roomBookingCancelDeadlineHours: 2,
     roomBookingAdvanceDays: 14,
-    maxBookingSlotsPerWeek: 4
+    maxBookingSlotsPerWeek: 4,
+    // Nhóm 6: Cấu hình Ca Phòng Lab
+    slot_morning_1_start: '07:00',
+    slot_morning_1_end: '09:00',
+    slot_morning_2_start: '09:00',
+    slot_morning_2_end: '11:00',
+    slot_afternoon_1_start: '12:00',
+    slot_afternoon_1_end: '14:00',
+    slot_afternoon_2_start: '14:00',
+    slot_afternoon_2_end: '16:00',
+    slot_evening_1_start: '16:00',
+    slot_evening_1_end: '18:00',
+    slot_evening_2_start: '18:00',
+    slot_evening_2_end: '20:00'
   });
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   
@@ -58,6 +88,15 @@ export default function Settings() {
     if (systemSettings) {
       setSysConfig(prev => ({
         ...prev,
+        // Module toggles
+        enableRoomBooking: systemSettings.enableRoomBooking ?? 'true',
+        enableRFID: systemSettings.enableRFID ?? 'true',
+        enableKiosk: systemSettings.enableKiosk ?? 'true',
+        enableMaintenance: systemSettings.enableMaintenance ?? 'true',
+        enableDepreciation: systemSettings.enableDepreciation ?? 'true',
+        enableSchedule: systemSettings.enableSchedule ?? 'true',
+        enableAssetOverview: systemSettings.enableAssetOverview ?? 'true',
+        // Nhóm 1: Mượn trả & Kho
         defaultBorrowDays: systemSettings.defaultBorrowDays ?? 7,
         defaultReturnTime: systemSettings.defaultReturnTime ?? '17:00',
         defaultLowStockThreshold: systemSettings.defaultLowStockThreshold ?? 0,
@@ -65,19 +104,50 @@ export default function Settings() {
         maintenanceWarningPercent: systemSettings.maintenanceWarningPercent ?? 20,
         reserveAutoExpireHours: Number(systemSettings.reserveAutoExpireHours) ?? 2,
         reserveAdvanceNoticeMinutes: Number(systemSettings.reserveAdvanceNoticeMinutes) ?? 29,
+        // Nhóm 2: Trực Lab & Điểm thưởng Chuyên cần
+        enableStudentPoints: systemSettings.enableStudentPoints ?? 'true',
         attendanceMinHours: systemSettings.attendanceMinHours ?? 1.0,
         attendanceStandardPoints: systemSettings.attendanceStandardPoints ?? 5,
         attendanceShortPoints: systemSettings.attendanceShortPoints ?? 2,
         taskDefaultPoints: systemSettings.taskDefaultPoints ?? 10,
+        attendanceBonusWeekend: Number(systemSettings.attendanceBonusWeekend) || 1.5,
+        // Nhóm 3: Vận hành, Bảng điều khiển & Thông báo
+        dashboardDefaultTimeRange: systemSettings.dashboardDefaultTimeRange ?? '7_days',
+        dashboardTopItemsCount: Number(systemSettings.dashboardTopItemsCount) || 5,
         maxNotificationHistory: systemSettings.maxNotificationHistory ?? 500,
+        notifyBorrowEquipment: systemSettings.notifyBorrowEquipment ?? 'true',
+        notifyReturnEquipment: systemSettings.notifyReturnEquipment ?? 'true',
+        notifyRoomBooking: systemSettings.notifyRoomBooking ?? 'true',
+        notifyMaintenanceAlert: systemSettings.notifyMaintenanceAlert ?? 'true',
         rfidScanCooldownSeconds: systemSettings.rfidScanCooldownSeconds ?? 5,
         defaultLabLocation: systemSettings.defaultLabLocation ?? 'Kho Lab',
+        kioskIdleTimeoutSeconds: Number(systemSettings.kioskIdleTimeoutSeconds) || 30,
+        // Nhóm 4: Sao lưu
         autoBackupEnabled: String(systemSettings.autoBackupEnabled) === 'true' || systemSettings.autoBackupEnabled === true,
         backupIntervalHours: Number(systemSettings.backupIntervalHours) || 24,
         backupRetentionCount: Number(systemSettings.backupRetentionCount) || 7,
+        // Nhóm 5: Đặt phòng
         roomBookingCancelDeadlineHours: Number(systemSettings.roomBookingCancelDeadlineHours) || 2,
         roomBookingAdvanceDays: Number(systemSettings.roomBookingAdvanceDays) || 14,
-        maxBookingSlotsPerWeek: Number(systemSettings.maxBookingSlotsPerWeek) || 4
+        maxBookingSlotsPerWeek: Number(systemSettings.maxBookingSlotsPerWeek) || 4,
+        // Nhóm 6: Ca giờ phòng lab
+        slot_morning_1_start: systemSettings.slot_morning_1_start ?? '07:00',
+        slot_morning_1_end: systemSettings.slot_morning_1_end ?? '09:00',
+        slot_morning_2_start: systemSettings.slot_morning_2_start ?? '09:00',
+        slot_morning_2_end: systemSettings.slot_morning_2_end ?? '11:00',
+        slot_afternoon_1_start: systemSettings.slot_afternoon_1_start ?? '12:00',
+        slot_afternoon_1_end: systemSettings.slot_afternoon_1_end ?? '14:00',
+        slot_afternoon_2_start: systemSettings.slot_afternoon_2_start ?? '14:00',
+        slot_afternoon_2_end: systemSettings.slot_afternoon_2_end ?? '16:00',
+        slot_evening_1_start: systemSettings.slot_evening_1_start ?? '16:00',
+        slot_evening_1_end: systemSettings.slot_evening_1_end ?? '18:00',
+        slot_evening_2_start: systemSettings.slot_evening_2_start ?? '18:00',
+        slot_evening_2_end: systemSettings.slot_evening_2_end ?? '20:00',
+        // Nhóm 7: Báo cáo Ca phòng & Bảo trì
+        autoCreateMaintenanceOnIssue: systemSettings.autoCreateMaintenanceOnIssue ?? 'true',
+        requireCheckoutChecklist: systemSettings.requireCheckoutChecklist ?? 'true',
+        allowReportEdit: systemSettings.allowReportEdit ?? 'true',
+        allowWalkInExtraAttendees: systemSettings.allowWalkInExtraAttendees ?? 'true'
       }));
     }
   }, [systemSettings]);
@@ -507,6 +577,86 @@ export default function Settings() {
       {successMsg && <div className="alert-message alert-success">{successMsg}</div>}
       {errorMsg && <div className="alert-message alert-error">{errorMsg}</div>}
 
+      {/* NHÓM 0: BẬT/TẮT MODULE CHỨC NĂNG */}
+      <Card
+        title="Bật / Tắt Module Chức Năng"
+        icon={Sliders}
+        style={{ color: 'var(--accent-purple)' }}
+      >
+        <form onSubmit={handleSaveSysConfig}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+            Tắt module sẽ ẩn toàn bộ menu liên quan khỏi Sidebar và chặn truy cập trang đó. Tất cả dữ liệu vẫn được giữ nguyên.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+            {[
+              { key: 'enableRoomBooking',  label: 'Phòng Lab (Đặt phòng & Lịch sử)', color: 'var(--accent-blue)' },
+              { key: 'enableRFID',         label: 'Thẻ RFID (Quản lý thẻ & Lịch sử)', color: 'var(--accent-green)' },
+              { key: 'enableKiosk',        label: 'Kiosk (Màn hình tự phục vụ)',       color: 'var(--accent-amber)' },
+              { key: 'enableMaintenance',  label: 'Bảo trì thiết bị',                  color: 'var(--accent-red)' },
+              { key: 'enableDepreciation', label: 'Khấu hao & Dự báo thay thế',        color: 'var(--accent-purple)' },
+              { key: 'enableSchedule',     label: 'Lịch trực Lab',                     color: 'var(--accent-teal, #14b8a6)' },
+              { key: 'enableAssetOverview',label: 'Tổng quan Tài sản',                 color: 'var(--accent-blue)' },
+            ].map(({ key, label, color }) => {
+              const isOn = String(sysConfig[key]) !== 'false';
+              return (
+                <div
+                  key={key}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.85rem 1rem',
+                    borderRadius: 'var(--radius-md)',
+                    background: isOn ? 'var(--bg-secondary)' : 'var(--bg-overlay)',
+                    border: `1px solid ${isOn ? color : 'var(--border-color)'}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    opacity: isOn ? 1 : 0.65,
+                  }}
+                  onClick={() => setSysConfig(prev => ({ ...prev, [key]: isOn ? 'false' : 'true' }))}
+                >
+                  <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-primary)' }}>{label}</span>
+                  {/* Toggle switch */}
+                  <div style={{
+                    position: 'relative',
+                    width: '42px',
+                    height: '24px',
+                    background: isOn ? color : 'var(--border-color)',
+                    borderRadius: '12px',
+                    transition: 'background 0.2s',
+                    flexShrink: 0,
+                    marginLeft: '0.75rem'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '3px',
+                      left: isOn ? '21px' : '3px',
+                      width: '18px',
+                      height: '18px',
+                      background: '#fff',
+                      borderRadius: '50%',
+                      transition: 'left 0.2s',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                    }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              type="submit"
+              variant="primary"
+              icon={Save}
+              iconPosition="left"
+              disabled={isSavingConfig}
+            >
+              {isSavingConfig ? 'Đang lưu...' : 'Lưu cấu hình module'}
+            </Button>
+          </div>
+        </form>
+      </Card>
+
       {/* NHÓM 1: QUY ĐỊNH MƯỢN TRẢ & KHO */}
       <Card
         title="Quy định Mượn Trả & Quản lý Kho"
@@ -651,13 +801,60 @@ export default function Settings() {
         </form>
       </Card>
 
-      {/* NHÓM 2: TRỰC LAB & ĐIỂM THƯỞNG */}
+      {/* NHÓM 2: TRỰC LAB & ĐIỂM THƯỞNG CHUYÊN CẦN SINH VIÊN */}
       <Card
-        title="Chính sách Trực Lab & Điểm thưởng"
+        title="Chính sách Trực Lab & Điểm thưởng Chuyên cần Sinh viên"
         icon={Tag}
         style={{ color: 'var(--accent-amber)' }}
       >
         <form onSubmit={handleSaveSysConfig}>
+          {/* Toggle Bật/Tắt tích lũy điểm cho sinh viên */}
+          <div 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.85rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              background: sysConfig.enableStudentPoints !== 'false' ? 'rgba(245,158,11,0.08)' : 'var(--bg-overlay)',
+              border: `1px solid ${sysConfig.enableStudentPoints !== 'false' ? 'var(--accent-amber)' : 'var(--border-color)'}`,
+              cursor: 'pointer',
+              marginBottom: '1.25rem',
+              transition: 'all 0.2s'
+            }}
+            onClick={() => setSysConfig(prev => ({ ...prev, enableStudentPoints: prev.enableStudentPoints !== 'false' ? 'false' : 'true' }))}
+          >
+            <div>
+              <div style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                Tự động tích lũy điểm chuyên cần cho sinh viên
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Hệ thống tự động cộng điểm khi sinh viên trực Lab hoặc hoàn thành task (Quản lý/Admin không cần tích lũy điểm)
+              </div>
+            </div>
+            <div style={{
+              position: 'relative',
+              width: '42px',
+              height: '24px',
+              background: sysConfig.enableStudentPoints !== 'false' ? 'var(--accent-amber)' : 'var(--border-color)',
+              borderRadius: '12px',
+              transition: 'background 0.2s',
+              flexShrink: 0
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '3px',
+                left: sysConfig.enableStudentPoints !== 'false' ? '21px' : '3px',
+                width: '18px',
+                height: '18px',
+                background: '#fff',
+                borderRadius: '50%',
+                transition: 'left 0.2s',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+              }} />
+            </div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
             <div className="form-group" style={{ margin: 0 }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
@@ -731,6 +928,25 @@ export default function Settings() {
                 Điểm tích lũy khi tạo task mới (Mặc định: 10đ)
               </span>
             </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                Hệ số nhân ca tối / cuối tuần
+              </label>
+              <TextInput
+                type="number"
+                step="0.1"
+                min="1.0"
+                max="3.0"
+                required
+                value={sysConfig.attendanceBonusWeekend || 1.5}
+                onChange={(e) => setSysConfig({ ...sysConfig, attendanceBonusWeekend: Number(e.target.value) })}
+                placeholder="1.5"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Nhân hệ số điểm khi trực ca muộn / T7-CN (Mặc định: x1.5)
+              </span>
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -741,20 +957,40 @@ export default function Settings() {
               iconPosition="left"
               disabled={isSavingConfig}
             >
-              {isSavingConfig ? 'Đang lưu...' : 'Lưu chính sách điểm'}
+              {isSavingConfig ? 'Đang lưu...' : 'Lưu chính sách điểm chuyên cần'}
             </Button>
           </div>
         </form>
       </Card>
 
-      {/* NHÓM 3: VẬN HÀNH & BẢO MẬT */}
+      {/* NHÓM 3: VẬN HÀNH, BẢNG ĐIỀU KHIỂN & THÔNG BÁO */}
       <Card
-        title="Vận hành Hệ thống & Bảo mật"
+        title="Vận hành Hệ thống, Bảng điều khiển & Thông báo"
         icon={SettingsIcon}
         style={{ color: 'var(--accent-green)' }}
       >
         <form onSubmit={handleSaveSysConfig}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                Mốc thời gian mặc định (Dashboard)
+              </label>
+              <Select
+                value={sysConfig.dashboardDefaultTimeRange || '7_days'}
+                onChange={(val) => setSysConfig({ ...sysConfig, dashboardDefaultTimeRange: val })}
+                options={[
+                  { value: '7_days', label: '7 ngày qua' },
+                  { value: '30_days', label: '30 ngày qua' },
+                  { value: '3_months', label: '3 tháng gần nhất' },
+                  { value: '6_months', label: '6 tháng gần nhất' },
+                  { value: 'all', label: 'Toàn thời gian' }
+                ]}
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Thời gian hiển thị mặc định trên Bảng điều khiển
+              </span>
+            </div>
+
             <div className="form-group" style={{ margin: 0 }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
                 Mật khẩu Quản trị viên mới (Admin)
@@ -766,7 +1002,7 @@ export default function Settings() {
                 placeholder="Để trống nếu không đổi mật khẩu"
               />
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
-                Chỉ nhập khi muốn đổi mật khẩu đăng nhập Quản lý (để trống sẽ giữ nguyên)
+                Chỉ nhập khi muốn đổi mật khẩu đăng nhập Quản lý
               </span>
             </div>
 
@@ -818,7 +1054,104 @@ export default function Settings() {
                 placeholder="Kho Lab"
               />
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
-                Tên vị trí kho thiết bị khi thêm mới (Mặc định: Kho Lab)
+                Tên vị trí kho thiết bị khi thêm mới
+              </span>
+            </div>
+          </div>
+
+          {/* Cấu hình các loại thông báo tự động */}
+          <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+            <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.75rem', display: 'block', color: 'var(--text-secondary)' }}>
+              CÁC SỰ KIỆN PHÁT THÔNG BÁO REALTIME:
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+              {[
+                { key: 'notifyBorrowEquipment', label: 'Mượn thiết bị & Xuất linh kiện', color: 'var(--accent-blue)' },
+                { key: 'notifyReturnEquipment', label: 'Hoàn trả thiết bị & Kiểm tra', color: 'var(--accent-green)' },
+                { key: 'notifyRoomBooking', label: 'Đăng ký ca phòng & Điểm danh', color: 'var(--accent-purple)' },
+                { key: 'notifyMaintenanceAlert', label: 'Báo hỏng & Lịch bảo trì', color: 'var(--accent-red)' },
+              ].map(item => {
+                const isOn = sysConfig[item.key] !== 'false';
+                return (
+                  <div
+                    key={item.key}
+                    onClick={() => setSysConfig(prev => ({ ...prev, [item.key]: isOn ? 'false' : 'true' }))}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: 'var(--radius-md)',
+                      background: isOn ? 'var(--bg-secondary)' : 'var(--bg-overlay)',
+                      border: `1px solid ${isOn ? item.color : 'var(--border-color)'}`,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 500 }}>{item.label}</span>
+                    <div style={{
+                      position: 'relative',
+                      width: '36px',
+                      height: '20px',
+                      background: isOn ? item.color : 'var(--border-color)',
+                      borderRadius: '10px',
+                      transition: 'background 0.2s',
+                      flexShrink: 0
+                    }}>
+                      <div style={{
+                        position: 'absolute',
+                        top: '2px',
+                        left: isOn ? '18px' : '2px',
+                        width: '16px',
+                        height: '16px',
+                        background: '#fff',
+                        borderRadius: '50%',
+                        transition: 'left 0.2s'
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
+            <Button
+              type="submit"
+              variant="primary"
+              icon={Save}
+              iconPosition="left"
+              disabled={isSavingConfig}
+            >
+              {isSavingConfig ? 'Đang lưu...' : 'Lưu cấu hình vận hành & thông báo'}
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {/* NHÓM 4: CHÍNH SÁCH ĐẶT PHÒNG LAB & KIOSK */}
+      <Card
+        title="Chính sách Đặt phòng Lab & Màn hình Kiosk"
+        icon={Clock}
+        style={{ color: 'var(--accent-blue)' }}
+      >
+        <form onSubmit={handleSaveSysConfig}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                Kiosk: Thời gian tự thoát (Giây)
+              </label>
+              <TextInput
+                type="number"
+                min="5"
+                max="600"
+                required
+                value={sysConfig.kioskIdleTimeoutSeconds}
+                onChange={(e) => setSysConfig({ ...sysConfig, kioskIdleTimeoutSeconds: Number(e.target.value) })}
+                placeholder="30"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Tự động về màn hình chờ khi không có thao tác (Mặc định: 30s)
               </span>
             </div>
 
@@ -885,7 +1218,103 @@ export default function Settings() {
               iconPosition="left"
               disabled={isSavingConfig}
             >
-              {isSavingConfig ? 'Đang lưu...' : 'Lưu cấu hình vận hành'}
+              {isSavingConfig ? 'Đang lưu...' : 'Lưu chính sách đặt phòng & kiosk'}
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {/* NHÓM: QUY ĐỊNH BÁO CÁO CA PHÒNG & BIÊN BẢN BÀN GIAO */}
+      <Card
+        title="Quy định Báo cáo Ca phòng & Biên bản Bàn giao"
+        icon={ShieldAlert}
+        style={{ color: 'var(--accent-amber)' }}
+      >
+        <form onSubmit={handleSaveSysConfig}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+            {[
+              {
+                key: 'autoCreateMaintenanceOnIssue',
+                label: 'Tự động tạo phiếu Bảo trì khi báo hỏng',
+                desc: 'Tự động đẩy thiết bị báo hỏng sang tab Bảo trì & gửi thông báo cho quản lý'
+              },
+              {
+                key: 'requireCheckoutChecklist',
+                label: 'Bắt buộc hoàn thành Checklist',
+                desc: 'Yêu cầu kiểm tra đủ 3 mục (Vệ sinh, Tắt điện, Khóa cửa) khi nộp báo cáo'
+              },
+              {
+                key: 'allowReportEdit',
+                label: 'Cho phép Chỉnh sửa Báo cáo',
+                desc: 'Người đại diện hoặc quản lý có thể cập nhật lại báo cáo ca trực sau khi nộp'
+              },
+              {
+                key: 'allowWalkInExtraAttendees',
+                label: 'Ghi nhận khách ngoài danh sách',
+                desc: 'Ghi nhận và hiển thị sinh viên vãng lai (+ ngoài) khi quẹt thẻ vào phòng'
+              }
+            ].map(item => {
+              const isOn = String(sysConfig[item.key]) === 'true';
+              return (
+                <div 
+                  key={item.key}
+                  onClick={() => setSysConfig(prev => ({ ...prev, [item.key]: isOn ? 'false' : 'true' }))}
+                  style={{
+                    padding: '0.85rem 1rem',
+                    background: 'var(--bg-overlay)',
+                    borderRadius: 'var(--radius-md)',
+                    border: `1px solid ${isOn ? 'var(--accent-blue)' : 'var(--border-color)'}`,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0, paddingRight: '0.75rem' }}>
+                    <div style={{ fontWeight: '600', fontSize: '0.875rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
+                      {item.label}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {item.desc}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    position: 'relative',
+                    width: '42px',
+                    height: '24px',
+                    background: isOn ? 'var(--accent-blue)' : 'var(--border-color)',
+                    borderRadius: '12px',
+                    transition: 'background 0.2s',
+                    flexShrink: 0
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '3px',
+                      left: isOn ? '21px' : '3px',
+                      width: '18px',
+                      height: '18px',
+                      background: '#fff',
+                      borderRadius: '50%',
+                      transition: 'left 0.2s',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                    }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              type="submit"
+              variant="primary"
+              icon={Save}
+              iconPosition="left"
+              disabled={isSavingConfig}
+            >
+              {isSavingConfig ? 'Đang lưu...' : 'Lưu quy định báo cáo'}
             </Button>
           </div>
         </form>
@@ -911,6 +1340,57 @@ export default function Settings() {
       >
         <div style={{ marginBottom: '1.25rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
           Tạo bản sao lưu toàn bộ cơ sở dữ liệu SQLite và phục hồi trạng thái hệ thống khi cần thiết.
+        </div>
+
+        {/* Cấu hình Ca Phòng Lab */}
+        <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <div style={{ fontWeight: '700', fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Clock size={16} style={{ color: 'var(--accent-purple)' }} /> Cấu hình Ca Phòng Lab
+          </div>
+          <form onSubmit={handleSaveSysConfig}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+              {[
+                { startKey: 'slot_morning_1_start',   endKey: 'slot_morning_1_end',   label: 'Ca Sáng 1',   color: '#f59e0b' },
+                { startKey: 'slot_morning_2_start',   endKey: 'slot_morning_2_end',   label: 'Ca Sáng 2',   color: '#f59e0b' },
+                { startKey: 'slot_afternoon_1_start', endKey: 'slot_afternoon_1_end', label: 'Ca Chiều 1',  color: '#3b82f6' },
+                { startKey: 'slot_afternoon_2_start', endKey: 'slot_afternoon_2_end', label: 'Ca Chiều 2',  color: '#3b82f6' },
+                { startKey: 'slot_evening_1_start',   endKey: 'slot_evening_1_end',   label: 'Ca Tối 1',    color: '#8b5cf6' },
+                { startKey: 'slot_evening_2_start',   endKey: 'slot_evening_2_end',   label: 'Ca Tối 2',    color: '#8b5cf6' },
+              ].map(({ startKey, endKey, label, color }) => (
+                <div key={startKey} style={{ padding: '0.75rem', background: 'var(--bg-overlay)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: '700', color, marginBottom: '0.6rem' }}>{label}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Bắt đầu</div>
+                      <TimePicker24
+                        value={sysConfig[startKey]}
+                        onChange={(t) => setSysConfig(prev => ({ ...prev, [startKey]: t }))}
+                      />
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', paddingTop: '1.2rem' }}>→</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Kết thúc</div>
+                      <TimePicker24
+                        value={sysConfig[endKey]}
+                        onChange={(t) => setSysConfig(prev => ({ ...prev, [endKey]: t }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                type="submit"
+                variant="primary"
+                icon={Save}
+                iconPosition="left"
+                disabled={isSavingConfig}
+              >
+                {isSavingConfig ? 'Đang lưu...' : 'Lưu giờ ca phòng Lab'}
+              </Button>
+            </div>
+          </form>
         </div>
 
         {/* Cấu hình Tự động sao lưu & Chính sách lưu giữ (Auto Backup & Retention Policy) */}

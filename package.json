@@ -11,5 +11,8 @@
   },
   "dependencies": {
     "concurrently": "^8.2.2"
+  },
+  "devDependencies": {
+    "docx": "^9.7.1"
   }
 }

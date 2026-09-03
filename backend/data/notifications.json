@@ -1,5 +1,48 @@
 [
   {
+    "id": "723b359f-6e24-4a22-a86f-2bbed53623ad",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Lê Văn C (20220003) vừa mượn/xuất 1x Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "details": {
+      "borrowId": "2f71c9c7-b95c-4599-a683-b607d382b3cc",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "qty": 1,
+      "userName": "Lê Văn C",
+      "mssv": "20220003",
+      "date": "2026-09-03T20:26:00.000Z"
+    },
+    "timestamp": "2026-09-03T19:57:32.705Z",
+    "read": true
+  },
+  {
+    "id": "cca8f58b-c531-42e2-9f6c-aebf12a727fa",
+    "type": "warning",
+    "title": "Báo hỏng thiết bị từ ca trực phòng Lab",
+    "content": "Sinh viên Nguyễn Văn A (20210001) báo hỏng thiết bị \"Máy phát xung/hàm Siglent SDG1032X\" (MEA-03) trong ca trực 2026-08-20. Chi tiết: Hỏng hóc trong ca trực (chưa ghi chú chi tiết) (SL: 1).",
+    "details": {
+      "bookingId": "5901c81a-9eed-4d0e-aaf9-2846db3aac79",
+      "equipmentId": "eq-mrbve89uj5ptfqyxn0l",
+      "maintenanceId": "200aa0b3-e4a5-49fe-b454-df650c8286c3"
+    },
+    "timestamp": "2026-09-02T11:34:49.508Z",
+    "read": true
+  },
+  {
+    "id": "dda0d320-7d74-4511-908d-b5754a12ed0f",
+    "type": "warning",
+    "title": "Báo hỏng thiết bị từ ca trực phòng Lab",
+    "content": "Sinh viên Nguyễn Văn A (20210001) báo hỏng thiết bị \"Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)\" (MEA-01) trong ca trực 2026-08-22. Chi tiết: Hỏng màn hình hiển thị LCD (SL: 1).",
+    "details": {
+      "bookingId": "8105c388-d3ea-4da0-bf9b-bb08c82a3194",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "maintenanceId": "06a6c48d-3787-42b5-b506-591ca17f59fc"
+    },
+    "timestamp": "2026-09-02T11:33:32.900Z",
+    "read": true
+  },
+  {
     "id": "c211fc6b-5f71-4923-a9b0-b1436537a40a",
     "type": "warning",
     "title": "Tự động hủy phiếu quá hạn nhận",
@@ -11,7 +54,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.564Z",
-    "read": false
+    "read": true
   },
   {
     "id": "97af7706-e900-4c56-b250-5f92ead9a5c1",
@@ -25,7 +68,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.561Z",
-    "read": false
+    "read": true
   },
   {
     "id": "c6d38a09-e960-4c36-8d54-478c93c335e2",
@@ -39,7 +82,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.557Z",
-    "read": false
+    "read": true
   },
   {
     "id": "f77bf81a-7fb7-4a4c-8296-364522f23f04",
@@ -53,7 +96,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.554Z",
-    "read": false
+    "read": true
   },
   {
     "id": "9d709aef-c6e1-4f0c-bd2f-55276af54044",
@@ -67,7 +110,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.550Z",
-    "read": false
+    "read": true
   },
   {
     "id": "75ffc786-8923-4f96-8993-c22b9be380bb",
@@ -81,7 +124,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.544Z",
-    "read": false
+    "read": true
   },
   {
     "id": "996cd311-e5dd-4d9a-b882-251674d04bc3",
@@ -95,7 +138,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.541Z",
-    "read": false
+    "read": true
   },
   {
     "id": "0c33e08f-ea85-42c3-809c-3e49659e167d",
@@ -109,7 +152,7 @@
       "qty": 1
     },
     "timestamp": "2026-09-01T19:40:49.534Z",
-    "read": false
+    "read": true
   },
   {
     "id": "1ae7afb2-bca8-4f9f-8b33-c8e3ba4a6394",
@@ -221,7 +264,7 @@
       ]
     },
     "timestamp": "2026-08-21T04:24:43.835Z",
-    "read": false
+    "read": true
   },
   {
     "id": "1a18a384-9a9e-409b-acfa-03470ce3222f",
@@ -238,7 +281,7 @@
       "date": "2026-08-21T02:51:18.210Z"
     },
     "timestamp": "2026-08-21T02:51:18.213Z",
-    "read": false
+    "read": true
   },
   {
     "id": "c806ed3e-34f5-47cc-9c5d-222f28b217df",
@@ -251,7 +294,7 @@
       "maintenanceId": "5b343fbe-6a32-4e77-9437-8a27ea2b78b9"
     },
     "timestamp": "2026-08-21T02:50:47.394Z",
-    "read": false
+    "read": true
   },
   {
     "id": "28bb49ab-0ba8-431b-be95-c1200329be26",
@@ -268,7 +311,7 @@
       "date": "2026-08-21T02:49:13.734Z"
     },
     "timestamp": "2026-08-21T02:49:13.737Z",
-    "read": false
+    "read": true
   },
   {
     "id": "a8d36dfd-ed88-42e3-9fdc-3e836684f2e5",
@@ -285,7 +328,7 @@
       "date": "2026-08-21T02:48:58.570Z"
     },
     "timestamp": "2026-08-21T02:48:58.572Z",
-    "read": false
+    "read": true
   },
   {
     "id": "502a8830-6275-413c-9e52-353eb4070e5a",
@@ -302,7 +345,7 @@
       "date": "2026-08-21T02:38:56.544Z"
     },
     "timestamp": "2026-08-21T02:38:56.546Z",
-    "read": false
+    "read": true
   },
   {
     "id": "9fa7449a-d257-4a4c-b3f8-1b1a4d159a54",
@@ -319,7 +362,7 @@
       "date": "2026-08-21T02:38:33.750Z"
     },
     "timestamp": "2026-08-21T02:38:33.752Z",
-    "read": false
+    "read": true
   },
   {
     "id": "a0efdfcd-f2bc-4fa9-84fa-674d34382da3",
@@ -336,7 +379,7 @@
       "date": "2026-08-21T02:37:40.293Z"
     },
     "timestamp": "2026-08-21T02:37:40.295Z",
-    "read": false
+    "read": true
   },
   {
     "id": "38b3a827-58d1-478a-ab9b-335d22d19925",
@@ -349,7 +392,7 @@
       "maintenanceId": "d1080423-1985-4998-8ed7-2082390791d6"
     },
     "timestamp": "2026-08-21T02:14:48.268Z",
-    "read": false
+    "read": true
   },
   {
     "id": "b3b20be7-9831-483e-8687-43756e832e31",

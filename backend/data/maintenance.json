@@ -43,26 +43,6 @@
     "notes": []
   },
   {
-    "id": "6ac54d75-f8d5-48e7-886e-b535bd3630b4",
-    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
-    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
-    "issueDescription": "qưeqweqw",
-    "status": "Đang sửa",
-    "cost": 0,
-    "reportedDate": "2026-08-21T01:43:24.803Z",
-    "resolvedDate": null
-  },
-  {
-    "id": "07b3c5e6-59f2-4ac8-adbf-08c6d25cbb17",
-    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
-    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
-    "issueDescription": "[Mức độ: Khẩn cấp] ahiwhr ",
-    "status": "Đang sửa",
-    "cost": 0,
-    "reportedDate": "2026-08-21T02:07:45.404Z",
-    "resolvedDate": null
-  },
-  {
     "id": "d1080423-1985-4998-8ed7-2082390791d6",
     "equipmentId": "eq-mrbve89usjtq310tc8g",
     "equipmentName": "Động cơ RC Servo nhỏ SG90 & Servo tải nặng chân kim loại MG996R",
@@ -93,6 +73,52 @@
         "id": "9fe33561-cccd-43c2-9661-01a992ec5416",
         "text": "Hệ thống tự động tạo do người trả Nguyễn Văn A (20210001) hoàn trả thiết bị trong tình trạng không nguyên vẹn.",
         "date": "2026-08-21T02:50:47.392Z"
+      }
+    ]
+  },
+  {
+    "id": "06a6c48d-3787-42b5-b506-591ca17f59fc",
+    "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+    "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "equipmentCode": "MEA-01",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "issueDescription": "Hỏng màn hình hiển thị LCD [SL hỏng: 1] (Báo cáo từ ca trực: Nguyễn Văn A - 2026-08-22)",
+    "status": "Đang sửa",
+    "priority": "Trung bình",
+    "cost": 0,
+    "reportedDate": "2026-09-02T11:33:32.898Z",
+    "resolvedDate": null,
+    "reportedBy": "Nguyễn Văn A (20210001)",
+    "bookingId": "8105c388-d3ea-4da0-bf9b-bb08c82a3194",
+    "notes": [
+      {
+        "id": "6b3b6efa-3505-47f5-bada-d8b91ea07511",
+        "text": "Hệ thống tự động tạo phiếu bảo trì do sinh viên Nguyễn Văn A (20210001) báo hỏng thiết bị khi checkout ca trực ngày 2026-08-22.",
+        "date": "2026-09-02T11:33:32.898Z"
+      }
+    ]
+  },
+  {
+    "id": "200aa0b3-e4a5-49fe-b454-df650c8286c3",
+    "equipmentId": "eq-mrbve89uj5ptfqyxn0l",
+    "equipmentName": "Máy phát xung/hàm Siglent SDG1032X",
+    "equipmentCode": "MEA-03",
+    "category": "Thiết bị đo lường",
+    "location": "Kho Lab",
+    "issueDescription": "Hỏng hóc trong ca trực (chưa ghi chú chi tiết) [SL hỏng: 1] (Báo cáo từ ca trực: Nguyễn Văn A - 2026-08-20)",
+    "status": "Đang sửa",
+    "priority": "Trung bình",
+    "cost": 0,
+    "reportedDate": "2026-09-02T11:34:49.507Z",
+    "resolvedDate": null,
+    "reportedBy": "Nguyễn Văn A (20210001)",
+    "bookingId": "5901c81a-9eed-4d0e-aaf9-2846db3aac79",
+    "notes": [
+      {
+        "id": "c5275d32-ec31-4318-b881-4e8c0151483f",
+        "text": "Hệ thống tự động tạo phiếu bảo trì do sinh viên Nguyễn Văn A (20210001) báo hỏng thiết bị khi checkout ca trực ngày 2026-08-20.",
+        "date": "2026-09-02T11:34:49.507Z"
       }
     ]
   }

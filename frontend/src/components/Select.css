@@ -52,8 +52,9 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
+  right: 0;
   width: 100%;
-  min-width: max-content;
+  box-sizing: border-box;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -98,8 +99,10 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 150ms ease, color 150ms ease;
-  display: flex;
-  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 
 .custom-select-item:hover {

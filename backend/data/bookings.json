@@ -540,7 +540,29 @@
         "mssv": "SV001",
         "name": "Sinh vien Test"
       }
-    ]
+    ],
+    "checkoutReport": {
+      "reportedAt": "2026-09-02T11:34:49.507Z",
+      "updatedAt": "2026-09-02T11:34:49.507Z",
+      "checkedBy": "Nguyễn Văn A (20210001)",
+      "checklist": {
+        "cleanedRoom": true,
+        "powerTurnedOff": true,
+        "doorsLocked": true
+      },
+      "notes": "",
+      "consumables": [],
+      "issues": [
+        {
+          "equipmentId": "eq-mrbve89uj5ptfqyxn0l",
+          "name": "Máy phát xung/hàm Siglent SDG1032X",
+          "code": "MEA-03",
+          "category": "Thiết bị đo lường",
+          "qty": 1,
+          "issueDescription": "Hỏng hóc trong ca trực (chưa ghi chú chi tiết)"
+        }
+      ]
+    }
   },
   {
     "id": "f92faf6d-a5c3-4fb9-b722-b9bcbb2d2782",
@@ -664,7 +686,20 @@
         "mssv": "SV001",
         "name": "Sinh vien Test"
       }
-    ]
+    ],
+    "checkoutReport": {
+      "reportedAt": "2026-09-02T11:27:24.694Z",
+      "updatedAt": "2026-09-02T11:27:24.694Z",
+      "checkedBy": "Nguyễn Văn A (20210001)",
+      "checklist": {
+        "cleanedRoom": true,
+        "powerTurnedOff": true,
+        "doorsLocked": true
+      },
+      "notes": "",
+      "consumables": [],
+      "issues": []
+    }
   },
   {
     "id": "8105c388-d3ea-4da0-bf9b-bb08c82a3194",
@@ -695,7 +730,38 @@
         "mssv": "SV001",
         "name": "Sinh vien Test"
       }
-    ]
+    ],
+    "checkoutReport": {
+      "reportedAt": "2026-09-02T10:41:13.962Z",
+      "updatedAt": "2026-09-02T11:33:32.898Z",
+      "checkedBy": "Nguyễn Văn A",
+      "checklist": {
+        "cleanedRoom": true,
+        "powerTurnedOff": true,
+        "doorsLocked": true
+      },
+      "notes": "Báo cáo ca trực tối có thiết bị hỏng",
+      "consumables": [
+        {
+          "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+          "name": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+          "code": "MEA-01",
+          "category": "Thiết bị đo lường",
+          "unit": "Cái",
+          "qty": 2
+        }
+      ],
+      "issues": [
+        {
+          "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+          "name": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+          "code": "MEA-01",
+          "category": "Thiết bị đo lường",
+          "qty": 1,
+          "issueDescription": "Hỏng màn hình hiển thị LCD"
+        }
+      ]
+    }
   },
   {
     "id": "44b7f914-3d06-4381-9d86-b9681e26b57d",
@@ -726,7 +792,20 @@
         "mssv": "SV001",
         "name": "Sinh vien Test"
       }
-    ]
+    ],
+    "checkoutReport": {
+      "reportedAt": "2026-09-02T10:42:44.768Z",
+      "updatedAt": "2026-09-02T10:42:44.768Z",
+      "checkedBy": "Unknown (20210001)",
+      "checklist": {
+        "cleanedRoom": true,
+        "powerTurnedOff": true,
+        "doorsLocked": true
+      },
+      "notes": "",
+      "consumables": [],
+      "issues": []
+    }
   },
   {
     "id": "f3de0c2f-718c-4792-a092-1b5bc847a310",
@@ -757,7 +836,20 @@
         "mssv": "SV001",
         "name": "Sinh vien Test"
       }
-    ]
+    ],
+    "checkoutReport": {
+      "reportedAt": "2026-09-02T11:26:23.624Z",
+      "updatedAt": "2026-09-02T11:26:23.624Z",
+      "checkedBy": "Nguyễn Văn A (20210001)",
+      "checklist": {
+        "cleanedRoom": true,
+        "powerTurnedOff": true,
+        "doorsLocked": true
+      },
+      "notes": "123433",
+      "consumables": [],
+      "issues": []
+    }
   },
   {
     "id": "3344b40d-737d-4f0e-97be-1b6dbd0a1399",
@@ -788,7 +880,20 @@
         "mssv": "SV001",
         "name": "Sinh vien Test"
       }
-    ]
+    ],
+    "checkoutReport": {
+      "reportedAt": "2026-09-02T11:27:03.459Z",
+      "updatedAt": "2026-09-02T11:27:03.459Z",
+      "checkedBy": "Nguyễn Văn A (20210001)",
+      "checklist": {
+        "cleanedRoom": true,
+        "powerTurnedOff": true,
+        "doorsLocked": true
+      },
+      "notes": "",
+      "consumables": [],
+      "issues": []
+    }
   },
   {
     "id": "05cdfaaa-8e76-4153-ba33-eeab831a4ef8",
@@ -819,6 +924,28 @@
         "mssv": "SV001",
         "name": "Sinh vien Test"
       }
-    ]
+    ],
+    "checkoutReport": {
+      "reportedAt": "2026-09-02T11:34:09.519Z",
+      "updatedAt": "2026-09-02T11:34:09.519Z",
+      "checkedBy": "Nguyễn Văn A (20210001)",
+      "checklist": {
+        "cleanedRoom": true,
+        "powerTurnedOff": true,
+        "doorsLocked": true
+      },
+      "notes": "",
+      "consumables": [
+        {
+          "equipmentId": "eq-mrbve89ufncl70omxs7",
+          "name": "Cuộn thiếc hàn (Asahi loại không chì), mỡ hàn, nhựa thông, dây hút thiếc",
+          "code": "CON-01",
+          "category": "Vật tư hàn",
+          "unit": "Cái",
+          "qty": 1
+        }
+      ],
+      "issues": []
+    }
   }
 ]

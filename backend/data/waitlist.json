@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "id": "df3fa2a3-6bfe-4ea2-bb9c-f05214bd814b",
+    "equipmentId": "eq-mrbve89uol0c1t1bat",
+    "equipmentName": "Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+    "equipmentCode": "CON-02",
+    "mssv": "1",
+    "userName": "Sinh viên (1)",
+    "qty": 1,
+    "purpose": "Đồ án môn học / Khóa luận tốt nghiệp",
+    "neededDate": "",
+    "notes": "",
+    "registeredDate": "2026-09-03T17:51:42.082Z",
+    "status": "waiting",
+    "notifiedDate": null,
+    "fulfilledDate": null
+  },
+  {
+    "id": "b5b39e22-db7d-4f01-8e99-f872701c1489",
+    "equipmentId": "eq-mrbve89uol0c1t1bat",
+    "equipmentName": "Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+    "equipmentCode": "CON-02",
+    "mssv": "2",
+    "userName": "Sinh viên (2)",
+    "qty": 1,
+    "purpose": "Đồ án môn học / Khóa luận tốt nghiệp",
+    "neededDate": "",
+    "notes": "",
+    "registeredDate": "2026-09-03T17:51:52.398Z",
+    "status": "waiting",
+    "notifiedDate": null,
+    "fulfilledDate": null
+  },
+  {
+    "id": "68fafebb-da6a-4d48-934d-8a5cf1b12b8e",
+    "equipmentId": "eq-mrbve89uol0c1t1bat",
+    "equipmentName": "Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+    "equipmentCode": "CON-02",
+    "mssv": "100213",
+    "userName": "Sinh viên (100213)",
+    "qty": 1,
+    "purpose": "Đồ án môn học / Khóa luận tốt nghiệp",
+    "neededDate": "2026-09-12",
+    "notes": "",
+    "registeredDate": "2026-09-03T17:52:15.668Z",
+    "status": "waiting",
+    "notifiedDate": null,
+    "fulfilledDate": null
+  },
+  {
+    "id": "088a7ee4-6b3f-4f61-b13f-3de9b83219cf",
+    "equipmentId": "eq-mrbve89uol0c1t1bat",
+    "equipmentName": "Thùng cáp mạng (CAT6 UTP) và hộp hạt mạng RJ45",
+    "equipmentCode": "CON-02",
+    "mssv": "100289",
+    "userName": "Sinh viên (100289)",
+    "qty": 1,
+    "purpose": "Đồ án môn học / Khóa luận tốt nghiệp",
+    "neededDate": "2026-09-18",
+    "notes": "",
+    "registeredDate": "2026-09-03T17:52:24.965Z",
+    "status": "waiting",
+    "notifiedDate": null,
+    "fulfilledDate": null
+  }
+]

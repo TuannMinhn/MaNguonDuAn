@@ -54,5 +54,120 @@
         "activity": "Sử dụng Lab"
       }
     ]
+  },
+  {
+    "id": "sess-2026-08-22-evening-1",
+    "date": "2026-08-22",
+    "slotId": "evening_1",
+    "bookingId": "8105c388-d3ea-4da0-bf9b-bb08c82a3194",
+    "attendees": [
+      {
+        "mssv": "20210001",
+        "name": "Nguyễn Văn A",
+        "type": "registered",
+        "checkInAt": "2026-08-22T16:05:00Z",
+        "checkOutAt": "2026-08-22T17:55:00Z",
+        "activity": "Làm đồ án IoT"
+      },
+      {
+        "mssv": "20210002",
+        "name": "Trần Thị B",
+        "type": "registered",
+        "checkInAt": "2026-08-22T16:10:00Z",
+        "checkOutAt": "2026-08-22T17:50:00Z",
+        "activity": "Làm đồ án IoT"
+      },
+      {
+        "mssv": "20220003",
+        "name": "Lê Văn C",
+        "type": "registered",
+        "checkInAt": "2026-08-22T16:15:00Z",
+        "checkOutAt": "2026-08-22T18:00:00Z",
+        "activity": "Làm đồ án IoT"
+      },
+      {
+        "mssv": "20230005",
+        "name": "Hoàng Gia Bảo",
+        "type": "walk-in",
+        "checkInAt": "2026-08-22T16:30:00Z",
+        "checkOutAt": "2026-08-22T17:45:00Z",
+        "activity": "Hỗ trợ testboard mạch"
+      },
+      {
+        "mssv": "20230006",
+        "name": "Vũ Thị Mai",
+        "type": "walk-in",
+        "checkInAt": "2026-08-22T16:35:00Z",
+        "checkOutAt": "2026-08-22T17:40:00Z",
+        "activity": "Tham quan mô hình"
+      }
+    ]
+  },
+  {
+    "id": "sess-2026-08-22-evening-2",
+    "date": "2026-08-22",
+    "slotId": "evening_2",
+    "bookingId": "44b7f914-3d06-4381-9d86-b9681e26b57d",
+    "attendees": [
+      {
+        "mssv": "20210001",
+        "name": "Nguyễn Văn A",
+        "type": "registered",
+        "checkInAt": "2026-08-22T18:02:00Z",
+        "checkOutAt": "2026-08-22T19:50:00Z"
+      },
+      {
+        "mssv": "20210002",
+        "name": "Trần Thị B",
+        "type": "registered",
+        "checkInAt": "2026-08-22T18:05:00Z",
+        "checkOutAt": "2026-08-22T19:55:00Z"
+      },
+      {
+        "mssv": "20220003",
+        "name": "Lê Văn C",
+        "type": "registered",
+        "checkInAt": "2026-08-22T18:10:00Z",
+        "checkOutAt": "2026-08-22T20:00:00Z"
+      },
+      {
+        "mssv": "20220004",
+        "name": "Phạm Minh D",
+        "type": "registered",
+        "checkInAt": "2026-08-22T18:12:00Z",
+        "checkOutAt": "2026-08-22T19:58:00Z"
+      },
+      {
+        "mssv": "SV001",
+        "name": "Sinh vien Test",
+        "type": "registered",
+        "checkInAt": "2026-08-22T18:15:00Z",
+        "checkOutAt": "2026-08-22T20:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": "sess-2026-08-22-afternoon-1",
+    "date": "2026-08-22",
+    "slotId": "afternoon_1",
+    "bookingId": "3344b40d-737d-4f0e-97be-1b6dbd0a1399",
+    "attendees": [
+      {
+        "mssv": "20230007",
+        "name": "Đỗ Minh Khang",
+        "type": "walk-in",
+        "checkInAt": "2026-08-22T12:30:00Z",
+        "checkOutAt": "2026-08-22T13:45:00Z",
+        "activity": "Tự học"
+      },
+      {
+        "mssv": "20230008",
+        "name": "Bùi Thanh Thảo",
+        "type": "walk-in",
+        "checkInAt": "2026-08-22T12:40:00Z",
+        "checkOutAt": "2026-08-22T13:50:00Z",
+        "activity": "Mượn bàn đọc sách"
+      }
+    ]
   }
 ]

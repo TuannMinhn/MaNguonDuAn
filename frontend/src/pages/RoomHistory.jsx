@@ -11,7 +11,7 @@ import SessionReportModal from '../components/bookings/SessionReportModal';
 import Modal from '../components/Modal';
 import Card from '../components/Card';
 import EmptyState from '../components/EmptyState';
-import { Users, Clock, Calendar, Info, X, CheckCircle, XCircle, UserPlus, Download, Zap, Briefcase, FileText, Plus } from 'lucide-react';
+import { Users, Clock, Calendar, Info, X, CheckCircle, XCircle, UserPlus, Download, Zap, Briefcase, FileText, Plus, Edit3, CheckSquare, ShieldCheck, UserCheck } from 'lucide-react';
 
 const DEFAULT_SESSIONS = [
   {
@@ -113,9 +113,11 @@ export default function RoomHistory() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all'); // 'all' | 'full' | 'partial' | 'absent' | 'reported' | 'unreported'
 
-  const history = useMemo(() => {
-    if (!historyData) return null;
+  // Filter theo khoảng thời gian
+  const periodFilteredHistory = useMemo(() => {
+    if (!historyData) return [];
     let start, end;
     const today = new Date();
     
@@ -151,6 +153,79 @@ export default function RoomHistory() {
     return historyData;
   }, [historyData, period, customStart, customEnd]);
 
+  // Thống kê số lượng cho các Tabs Category
+  const categoryCounts = useMemo(() => {
+    const counts = {
+      all: periodFilteredHistory.length,
+      full: 0,
+      partial: 0,
+      absent: 0,
+      reported: 0,
+      unreported: 0
+    };
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    periodFilteredHistory.forEach(h => {
+      const regPresent = h.registeredPresentCount !== undefined ? h.registeredPresentCount : (h.session?.attendees?.filter(a => (h.members || []).some(m => m.mssv === a.mssv)).length || 0);
+      const totalReg = h.totalRegistered !== undefined ? h.totalRegistered : (h.members ? h.members.length : 0);
+      const extra = h.extraAttendeesCount !== undefined ? h.extraAttendeesCount : (h.session?.attendees?.filter(a => !(h.members || []).some(m => m.mssv === a.mssv)).length || 0);
+      const isPast = new Date(h.date) < today;
+
+      // Đi đủ
+      if (regPresent === totalReg && totalReg > 0) {
+        counts.full++;
+      } else if (regPresent > 0 || extra > 0) {
+        // Gần đủ / Đi một phần / Có khách
+        counts.partial++;
+      } else if (isPast) {
+        // Phòng vắng
+        counts.absent++;
+      }
+
+      // Bàn giao
+      if (h.checkoutReport) {
+        counts.reported++;
+      } else if (isPast) {
+        counts.unreported++;
+      }
+    });
+
+    return counts;
+  }, [periodFilteredHistory]);
+
+  // Lọc theo Category
+  const history = useMemo(() => {
+    if (categoryFilter === 'all') return periodFilteredHistory;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    return periodFilteredHistory.filter(h => {
+      const regPresent = h.registeredPresentCount !== undefined ? h.registeredPresentCount : (h.session?.attendees?.filter(a => (h.members || []).some(m => m.mssv === a.mssv)).length || 0);
+      const totalReg = h.totalRegistered !== undefined ? h.totalRegistered : (h.members ? h.members.length : 0);
+      const extra = h.extraAttendeesCount !== undefined ? h.extraAttendeesCount : (h.session?.attendees?.filter(a => !(h.members || []).some(m => m.mssv === a.mssv)).length || 0);
+      const isPast = new Date(h.date) < today;
+
+      if (categoryFilter === 'full') {
+        return regPresent === totalReg && totalReg > 0;
+      }
+      if (categoryFilter === 'partial') {
+        return (regPresent > 0 && regPresent < totalReg) || (regPresent === 0 && extra > 0);
+      }
+      if (categoryFilter === 'absent') {
+        return regPresent === 0 && extra === 0 && (isPast || h.status === 'Phòng vắng' || h.status === 'Vắng mặt');
+      }
+      if (categoryFilter === 'reported') {
+        return !!h.checkoutReport;
+      }
+      if (categoryFilter === 'unreported') {
+        return !h.checkoutReport && isPast;
+      }
+      return true;
+    });
+  }, [periodFilteredHistory, categoryFilter]);
 
   const roomHistoryExportColumns = [
     { id: 'date', label: 'Thời gian', defaultChecked: true },
@@ -221,21 +296,6 @@ export default function RoomHistory() {
     }
   };
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'Đã hoàn thành':
-        return { bg: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', border: '1px solid rgba(16, 185, 129, 0.2)' };
-      case 'Đang diễn ra':
-        return { bg: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-blue)', border: '1px solid rgba(59, 130, 246, 0.2)' };
-      case 'Vắng mặt':
-        return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-red)', border: '1px solid rgba(239, 68, 68, 0.2)' };
-      case 'Sắp tới':
-      case 'Hôm nay':
-      default:
-        return { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--accent-amber)', border: '1px solid rgba(245, 158, 11, 0.2)' };
-    }
-  };
-
   const getSlotLabel = (slotId) => {
     for (let s of SESSIONS) {
       const found = s.slots.find(x => x.id === slotId);
@@ -268,16 +328,142 @@ export default function RoomHistory() {
         </span>
       </div>
     )},
-    { accessorKey: 'membersCount', header: 'Thành viên tham gia', sortable: true, cell: (row) => (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
-        <Users size={15} /> {row.members ? row.members.length : 0} người
-      </span>
-    )},
-    { accessorKey: 'status', header: 'Trạng thái', sortable: true, cell: (row) => {
-      const style = getStatusStyle(row.status);
+    { accessorKey: 'membersCount', header: 'Thành viên tham gia', sortable: true, cell: (row) => {
+      const regPresent = row.registeredPresentCount !== undefined ? row.registeredPresentCount : (row.session?.attendees?.filter(a => (row.members || []).some(m => m.mssv === a.mssv)).length || 0);
+      const totalReg = row.totalRegistered !== undefined ? row.totalRegistered : (row.members ? row.members.length : 0);
+      const extra = row.extraAttendeesCount !== undefined ? row.extraAttendeesCount : (row.session?.attendees?.filter(a => !(row.members || []).some(m => m.mssv === a.mssv)).length || 0);
+      
       return (
-        <span className="text-sm" style={{ background: style.bg, color: style.color, border: style.border, padding: '0.3rem 0.6rem', borderRadius: '20px', fontWeight: '500', display: 'inline-block' }}>
-          {row.status}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <span style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.3rem', 
+            color: regPresent > 0 ? 'var(--accent-blue)' : 'var(--text-muted)',
+            fontWeight: '600',
+            fontSize: '0.9rem'
+          }}>
+            <Users size={14} />
+            {regPresent}/{totalReg}
+          </span>
+          {extra > 0 && (
+            <span style={{ 
+              fontSize: '0.75rem', 
+              color: 'var(--accent-green)', 
+              background: 'rgba(16, 185, 129, 0.12)', 
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              padding: '0.1rem 0.4rem', 
+              borderRadius: '4px',
+              fontWeight: 'bold' 
+            }} title={`Có ${extra} sinh viên không đăng ký trước nhưng có mặt trong ca`}>
+              +{extra} ngoài
+            </span>
+          )}
+        </div>
+      );
+    }},
+    { accessorKey: 'status', header: 'Trạng thái phòng', sortable: true, cell: (row) => {
+      let label = row.status;
+      let style = { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--accent-amber)', border: '1px solid rgba(245, 158, 11, 0.2)' };
+      let IconComp = Clock;
+
+      if (row.status === 'Đi đủ' || row.status === 'Đi đủ (Hôm nay)' || row.status === 'Đã hoàn thành') {
+        label = 'Đi đủ';
+        style = { bg: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', border: '1px solid rgba(16, 185, 129, 0.3)' };
+        IconComp = CheckCircle;
+      } else if (row.status === 'Gần đủ' || row.status === 'Gần đủ (Hôm nay)') {
+        label = 'Gần đủ';
+        style = { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--accent-amber)', border: '1px solid rgba(245, 158, 11, 0.3)' };
+        IconComp = Users;
+      } else if (row.status === 'Phòng vắng' || row.status === 'Vắng mặt') {
+        label = 'Phòng vắng';
+        style = { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-red)', border: '1px solid rgba(239, 68, 68, 0.3)' };
+        IconComp = XCircle;
+      } else if (row.status === 'Chỉ có khách') {
+        label = 'Chỉ có khách';
+        style = { bg: 'rgba(168, 85, 247, 0.1)', color: 'var(--accent-purple)', border: '1px solid rgba(168, 85, 247, 0.3)' };
+        IconComp = UserPlus;
+      } else if (row.status === 'Đang diễn ra') {
+        label = 'Đang diễn ra';
+        style = { bg: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-blue)', border: '1px solid rgba(59, 130, 246, 0.3)' };
+        IconComp = Clock;
+      }
+
+      return (
+        <span style={{ 
+          background: style.bg, 
+          color: style.color, 
+          border: style.border, 
+          padding: '0.25rem 0.6rem', 
+          borderRadius: '20px', 
+          fontWeight: '600', 
+          fontSize: '0.8rem',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.35rem'
+        }}>
+          <IconComp size={13} />
+          {label}
+        </span>
+      );
+    }},
+    { accessorKey: 'reportStatus', header: 'Biên bản bàn giao', sortable: true, cell: (row) => {
+      const isReported = !!row.checkoutReport;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const isPast = new Date(row.date) < today;
+      
+      if (isReported) {
+        return (
+          <span style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.35rem', 
+            padding: '0.25rem 0.6rem', 
+            borderRadius: 'var(--radius-sm)', 
+            background: 'rgba(16, 185, 129, 0.12)', 
+            color: 'var(--accent-green)', 
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            fontSize: '0.78rem',
+            fontWeight: '600'
+          }} title="Đã nộp biên bản bàn giao ca trực">
+            <ShieldCheck size={14} /> Đã bàn giao
+          </span>
+        );
+      }
+      
+      if (isPast) {
+        return (
+          <span style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.35rem', 
+            padding: '0.25rem 0.6rem', 
+            borderRadius: 'var(--radius-sm)', 
+            background: 'rgba(245, 158, 11, 0.1)', 
+            color: 'var(--accent-amber)', 
+            border: '1px solid rgba(245, 158, 11, 0.25)',
+            fontSize: '0.78rem',
+            fontWeight: '500'
+          }} title="Ca trực đã kết thúc nhưng chưa lập biên bản bàn giao">
+            <Clock size={14} /> Chưa báo cáo
+          </span>
+        );
+      }
+
+      return (
+        <span style={{ 
+          display: 'inline-flex', 
+          alignItems: 'center', 
+          gap: '0.35rem', 
+          padding: '0.25rem 0.6rem', 
+          borderRadius: 'var(--radius-sm)', 
+          background: 'var(--bg-overlay)', 
+          color: 'var(--text-muted)', 
+          border: '1px solid var(--border-color)',
+          fontSize: '0.78rem'
+        }}>
+          Chưa tới giờ
         </span>
       );
     }}
@@ -400,28 +586,74 @@ export default function RoomHistory() {
         <div style={{ color: 'var(--accent-red)', padding: '1rem', textAlign: 'center' }}>
           Không thể tải dữ liệu lịch sử.
         </div>
-      ) : !history ? (
+      ) : !historyData ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
           Đang tải dữ liệu...
         </div>
-      ) : history.length === 0 ? (
-        <Card>
-          <EmptyState
-            icon={Calendar}
-            title="Chưa có dữ liệu lịch sử dùng phòng"
-            description="Không tìm thấy bản ghi sử dụng phòng nào trong khoảng thời gian đã chọn."
-          />
-        </Card>
       ) : (
         <Card
-          title={`Danh sách các ca đã dùng (${history.length})`}
+          title={`Danh sách ca phòng (${history.length})`}
           icon={Calendar}
+          action={
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {[
+                { key: 'all', label: 'Tất cả', count: categoryCounts.all },
+                { key: 'full', label: 'Đi đủ', count: categoryCounts.full, color: 'var(--accent-green)' },
+                { key: 'partial', label: 'Gần đủ', count: categoryCounts.partial, color: 'var(--accent-amber)' },
+                { key: 'absent', label: 'Phòng vắng', count: categoryCounts.absent, color: 'var(--accent-red)' },
+                { key: 'reported', label: 'Đã bàn giao', count: categoryCounts.reported, color: 'var(--accent-green)' },
+                { key: 'unreported', label: 'Chưa bàn giao', count: categoryCounts.unreported, color: 'var(--accent-amber)' }
+              ].map(cat => {
+                const isActive = categoryFilter === cat.key;
+                return (
+                  <button
+                    key={cat.key}
+                    type="button"
+                    onClick={() => setCategoryFilter(cat.key)}
+                    style={{
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: `1px solid ${isActive ? (cat.color || 'var(--accent-blue)') : 'var(--border-color)'}`,
+                      background: isActive ? (cat.color ? `color-mix(in srgb, ${cat.color} 15%, transparent)` : 'var(--accent-blue)') : 'var(--bg-overlay)',
+                      color: isActive ? (cat.color || '#fff') : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                      fontWeight: isActive ? '600' : 'normal',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span>{cat.label}</span>
+                    <span style={{
+                      padding: '0.05rem 0.35rem',
+                      borderRadius: '10px',
+                      background: isActive ? 'rgba(0,0,0,0.2)' : 'var(--bg-secondary)',
+                      fontSize: '0.72rem',
+                      fontWeight: 'bold'
+                    }}>
+                      {cat.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          }
         >
-          <DataTable
-            data={history.map(item => ({...item, membersCount: item.members ? item.members.length : 0}))}
-            columns={historyColumns}
-            onRowClick={(row) => setSelectedItem({...row, slotLabel: getSlotLabel(row.slotId)})}
-          />
+          {history.length === 0 ? (
+            <EmptyState
+              icon={Calendar}
+              title="Không có ca trực nào phù hợp với bộ lọc"
+              description="Thử chọn danh mục khác hoặc khoảng thời gian khác để xem dữ liệu."
+            />
+          ) : (
+            <DataTable
+              data={history.map(item => ({...item, membersCount: item.members ? item.members.length : 0}))}
+              columns={historyColumns}
+              onRowClick={(row) => setSelectedItem({...row, slotLabel: getSlotLabel(row.slotId)})}
+            />
+          )}
         </Card>
       )}
 
@@ -440,8 +672,13 @@ export default function RoomHistory() {
                 </Button>
               )}
               {selectedItem?.checkoutReport && (
-                <div style={{ padding: '0.5rem 1rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle size={18} /> Đã báo cáo ca trực
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ padding: '0.4rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '500' }}>
+                    <CheckCircle size={16} /> Đã bàn giao ca
+                  </div>
+                  <Button variant="secondary" size="sm" icon={Edit3} iconPosition="left" onClick={() => setShowReportModal(true)}>
+                    Sửa báo cáo
+                  </Button>
                 </div>
               )}
             </div>
@@ -531,40 +768,93 @@ export default function RoomHistory() {
             {/* Báo cáo ca trực */}
             {selectedItem.checkoutReport && (
               <div style={{ marginTop: '1.5rem' }}>
-                <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--accent-green)' }}>
-                  <FileText size={18} /> Báo cáo Ca trực / Bàn giao
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--accent-green)' }}>
+                  <ShieldCheck size={18} /> Báo cáo Ca trực & Biên bản Bàn giao
                 </h4>
-                <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1rem', borderRadius: '8px' }}>
-                  <div className="text-sm text-muted" style={{ marginBottom: '1rem' }}>
-                    Được báo cáo lúc: {new Date(selectedItem.checkoutReport.reportedAt).toLocaleString('vi-VN')}
+                <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1.25rem', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(16, 185, 129, 0.15)' }}>
+                    <div className="text-xs text-muted">
+                      🕒 Báo cáo lúc: <strong style={{ color: 'var(--text-primary)' }}>{new Date(selectedItem.checkoutReport.reportedAt).toLocaleString('vi-VN')}</strong>
+                    </div>
+                    {selectedItem.checkoutReport.checkedBy && (
+                      <div className="text-xs" style={{ color: 'var(--accent-blue)' }}>
+                        👤 Người bàn giao: <strong>{selectedItem.checkoutReport.checkedBy}</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Checklist Bàn giao */}
+                  <div style={{ marginBottom: '1rem' }}>
+                    <strong className="text-xs text-muted" style={{ display: 'block', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Checklist bàn giao:</strong>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.5rem' }}>
+                      <div style={{ padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)', background: selectedItem.checkoutReport.checklist?.cleanedRoom !== false ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${selectedItem.checkoutReport.checklist?.cleanedRoom !== false ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        {selectedItem.checkoutReport.checklist?.cleanedRoom !== false ? <CheckCircle size={14} style={{ color: 'var(--accent-green)' }} /> : <XCircle size={14} style={{ color: 'var(--accent-red)' }} />}
+                        <span>Vệ sinh: {selectedItem.checkoutReport.checklist?.cleanedRoom !== false ? 'Đã dọn sạch' : 'Chưa đạt'}</span>
+                      </div>
+
+                      <div style={{ padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)', background: selectedItem.checkoutReport.checklist?.powerTurnedOff !== false ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${selectedItem.checkoutReport.checklist?.powerTurnedOff !== false ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        {selectedItem.checkoutReport.checklist?.powerTurnedOff !== false ? <CheckCircle size={14} style={{ color: 'var(--accent-green)' }} /> : <XCircle size={14} style={{ color: 'var(--accent-red)' }} />}
+                        <span>Nguồn điện: {selectedItem.checkoutReport.checklist?.powerTurnedOff !== false ? 'Đã ngắt' : 'Chưa ngắt'}</span>
+                      </div>
+
+                      <div style={{ padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)', background: selectedItem.checkoutReport.checklist?.doorsLocked !== false ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${selectedItem.checkoutReport.checklist?.doorsLocked !== false ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        {selectedItem.checkoutReport.checklist?.doorsLocked !== false ? <CheckCircle size={14} style={{ color: 'var(--accent-green)' }} /> : <XCircle size={14} style={{ color: 'var(--accent-red)' }} />}
+                        <span>Cửa phòng: {selectedItem.checkoutReport.checklist?.doorsLocked !== false ? 'Đã khóa' : 'Chưa khóa'}</span>
+                      </div>
+                    </div>
                   </div>
                   
                   {selectedItem.checkoutReport.consumables?.length > 0 && (
                     <div style={{ marginBottom: '1rem' }}>
-                      <strong className="text-sm" style={{ color: 'var(--text-primary)' }}>Linh kiện tiêu hao:</strong>
-                      <ul className="text-sm" style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
+                      <strong className="text-xs text-muted" style={{ display: 'block', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        📦 Linh kiện đã tiêu hao ({selectedItem.checkoutReport.consumables.length}):
+                      </strong>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                         {selectedItem.checkoutReport.consumables.map((c, idx) => (
-                          <li key={idx}>{c.name} - SL: {c.qty}</li>
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.65rem', borderRadius: 'var(--radius-sm)', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)', fontSize: '0.82rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{c.name}</span>
+                              {c.code && <span style={{ fontSize: '0.72rem', padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(167, 139, 250, 0.15)', color: '#a78bfa', fontWeight: 'bold' }}>{c.code}</span>}
+                            </div>
+                            <span style={{ fontWeight: 'bold', color: 'var(--accent-blue)' }}>
+                              Số lượng: {c.qty} {c.unit || 'Cái'}
+                            </span>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
 
                   {selectedItem.checkoutReport.issues?.length > 0 && (
                     <div style={{ marginBottom: '1rem' }}>
-                      <strong className="text-sm" style={{ color: 'var(--accent-amber)' }}>Báo hỏng thiết bị:</strong>
-                      <ul className="text-sm" style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
+                      <strong className="text-xs" style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--accent-amber)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        ⚠️ Thiết bị hư hỏng / báo lỗi ({selectedItem.checkoutReport.issues.length}):
+                      </strong>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                         {selectedItem.checkoutReport.issues.map((i, idx) => (
-                          <li key={idx}>{i.name}: {i.issueDescription}</li>
+                          <div key={idx} style={{ padding: '0.5rem 0.65rem', borderRadius: 'var(--radius-sm)', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', fontSize: '0.82rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <span style={{ fontWeight: '600', color: 'var(--accent-amber)' }}>{i.name}</span>
+                                {i.code && <span style={{ fontSize: '0.72rem', padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(167, 139, 250, 0.15)', color: '#a78bfa', fontWeight: 'bold' }}>{i.code}</span>}
+                              </div>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-amber)' }}>
+                                SL hỏng: {i.qty || 1}
+                              </span>
+                            </div>
+                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
+                              Lỗi: <em>{i.issueDescription}</em>
+                            </div>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
 
                   {selectedItem.checkoutReport.notes && (
                     <div>
-                      <strong className="text-sm" style={{ color: 'var(--text-primary)' }}>Ghi chú:</strong>
-                      <p className="text-sm" style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontStyle: 'italic' }}>
+                      <strong className="text-xs text-muted" style={{ display: 'block', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ghi chú chung:</strong>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)', margin: 0, fontStyle: 'italic', background: 'var(--bg-overlay)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
                         "{selectedItem.checkoutReport.notes}"
                       </p>
                     </div>
@@ -582,9 +872,11 @@ export default function RoomHistory() {
           isOpen={showReportModal} 
           onClose={() => setShowReportModal(false)} 
           booking={selectedItem}
-          onSuccess={(msg) => {
+          onSuccess={(msg, updatedReport) => {
             setSuccessMsg(msg);
-            setSelectedItem(null);
+            if (selectedItem && updatedReport) {
+              setSelectedItem(prev => ({ ...prev, checkoutReport: updatedReport }));
+            }
             mutateHistory();
             setTimeout(() => setSuccessMsg(''), 3000);
           }}

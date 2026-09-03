@@ -1,0 +1,107 @@
+[
+  {
+    "id": "811de153-bef1-4545-97ea-c2a22b7b84ca",
+    "actorUserId": "admin-root",
+    "actorMssv": "ADMIN",
+    "actorName": "Quản trị viên Lab",
+    "actorRole": "admin",
+    "action": "DELETE",
+    "targetType": "maintenance_ticket",
+    "targetId": "6ac54d75-f8d5-48e7-886e-b535bd3630b4",
+    "oldValue": {
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "issueDescription": "qưeqweqw",
+      "status": "Đang sửa",
+      "cost": 0
+    },
+    "newValue": null,
+    "metadata": null,
+    "success": true,
+    "createdAt": "2026-09-03T18:01:34.680Z"
+  },
+  {
+    "id": "026a9f31-4ff0-4baf-8737-8af23625c843",
+    "actorUserId": "admin-root",
+    "actorMssv": "ADMIN",
+    "actorName": "Quản trị viên Lab",
+    "actorRole": "admin",
+    "action": "DELETE",
+    "targetType": "maintenance_ticket",
+    "targetId": "07b3c5e6-59f2-4ac8-adbf-08c6d25cbb17",
+    "oldValue": {
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "issueDescription": "[Mức độ: Khẩn cấp] ahiwhr ",
+      "status": "Đang sửa",
+      "cost": 0
+    },
+    "newValue": null,
+    "metadata": null,
+    "success": true,
+    "createdAt": "2026-09-03T18:01:36.783Z"
+  },
+  {
+    "id": "06676d1d-cf32-463a-9259-40ebbd391b59",
+    "actorUserId": "admin-root",
+    "actorMssv": "ADMIN",
+    "actorName": "Quản trị viên Lab",
+    "actorRole": "admin",
+    "action": "MARK_ALL_READ",
+    "targetType": "notification",
+    "targetId": "batch",
+    "oldValue": null,
+    "newValue": {
+      "read": true,
+      "updatedCount": 19
+    },
+    "metadata": null,
+    "success": true,
+    "createdAt": "2026-09-03T19:44:15.171Z"
+  },
+  {
+    "id": "d5a4937f-d3d1-4f59-86a6-728dae6c4985",
+    "actorUserId": null,
+    "actorMssv": null,
+    "actorName": "System",
+    "actorRole": "system",
+    "action": "BORROW",
+    "targetType": "borrow_ticket",
+    "targetId": "2f71c9c7-b95c-4599-a683-b607d382b3cc",
+    "oldValue": null,
+    "newValue": {
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "equipmentCode": "MEA-01",
+      "borrowerMssv": "20220003",
+      "borrowerName": "Lê Văn C",
+      "qty": 1,
+      "status": "Đã đặt trước",
+      "isConsumable": false
+    },
+    "metadata": {
+      "initialCondition": "Tốt / Hoạt động bình thường",
+      "expectedReturnDate": "2026-09-05T10:00:00.000Z"
+    },
+    "success": true,
+    "createdAt": "2026-09-03T19:57:32.707Z"
+  },
+  {
+    "id": "113edece-1b5b-4b7e-bedd-bcb02624efae",
+    "actorUserId": "admin-default",
+    "actorMssv": null,
+    "actorName": "Quản trị viên",
+    "actorRole": "manager",
+    "action": "MARK_ALL_READ",
+    "targetType": "notification",
+    "targetId": "batch",
+    "oldValue": null,
+    "newValue": {
+      "read": true,
+      "updatedCount": 1
+    },
+    "metadata": null,
+    "success": true,
+    "createdAt": "2026-09-03T20:00:14.585Z"
+  }
+]

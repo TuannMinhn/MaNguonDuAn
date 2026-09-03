@@ -31,16 +31,31 @@ export default function Dashboard({ onNavigate }) {
   const { data: allBookings } = useSWR(`${API_BASE_URL}/bookings/all`, fetcher);
   const { data: systemSettings } = useSWR(`${API_BASE_URL}/settings`, fetcher);
 
-  // Tối ưu O(1) — tính toán 1 lần khi data đổi
+  // Bộ lọc thời gian cho 3 biểu đồ phân tích (đồng bộ theo cấu hình Settings)
+  const [analyticsTimeRange, setAnalyticsTimeRange] = useState('7_days');
+
+  React.useEffect(() => {
+    if (systemSettings?.dashboardDefaultTimeRange) {
+      setAnalyticsTimeRange(systemSettings.dashboardDefaultTimeRange);
+    }
+  }, [systemSettings?.dashboardDefaultTimeRange]);
+
+  // Tối ưu O(1) — tính toán 1 lần khi data hoặc khoảng thời gian đổi
   const dashboardData = useMemo(() => {
-    if (!members || !equip || !rfidHistory || !borrows || !allBookings) return null;
+    if (!members && !equip) return null;
+
+    const mList = Array.isArray(members) ? members : [];
+    const eList = Array.isArray(equip) ? equip : [];
+    const rList = Array.isArray(rfidHistory) ? rfidHistory : [];
+    const bList = Array.isArray(borrows) ? borrows : [];
+    const bkList = Array.isArray(allBookings) ? allBookings : [];
 
     // 1. Stats
-    const active = members.filter(m => m.active);
-    const activeBorrowTickets = borrows.filter(b => b.status === 'Đang mượn');
+    const active = mList.filter(m => m.active);
+    const activeBorrowTickets = bList.filter(b => b.status === 'Đang mượn');
     const borrowedCount = activeBorrowTickets.reduce((sum, item) => sum + (Number(item.qty) || 1), 0);
     const stats = {
-      totalMembers: members.length,
+      totalMembers: mList.length,
       activeMembers: active.length,
       borrowedEquip: borrowedCount
     };
@@ -48,7 +63,7 @@ export default function Dashboard({ onNavigate }) {
     // 2. Overdue Equipment
     const now = new Date();
     now.setHours(0,0,0,0);
-    const overdue = borrows.filter(b => b.status === 'Đang mượn' && b.expectedReturnDate && new Date(b.expectedReturnDate) < now);
+    const overdue = bList.filter(b => b.status === 'Đang mượn' && b.expectedReturnDate && new Date(b.expectedReturnDate) < now);
     overdue.forEach(b => {
       const expected = new Date(b.expectedReturnDate);
       b.daysOverdue = Math.ceil(Math.abs(now - expected) / (1000 * 60 * 60 * 24));
@@ -56,12 +71,12 @@ export default function Dashboard({ onNavigate }) {
     overdue.sort((a,b) => b.daysOverdue - a.daysOverdue);
 
     // 3. Recent Activity (Grouped & Top 10)
-    const sortedHistory = [...rfidHistory].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const sortedHistory = [...rList].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
     const groupedHistory = [];
     let i = 0;
     while (i < sortedHistory.length) {
       const current = sortedHistory[i];
-      const match = borrows.find(b => b.mssv === current.mssv && b.borrowDate && Math.abs(new Date(b.borrowDate) - new Date(current.timestamp)) < 60000);
+      const match = bList.find(b => b.mssv === current.mssv && b.borrowDate && Math.abs(new Date(b.borrowDate) - new Date(current.timestamp)) < 60000);
       if (match) {
         groupedHistory.push({ ...current, equipmentName: match.equipmentName, equipmentCode: match.equipmentCode });
       } else {
@@ -70,40 +85,108 @@ export default function Dashboard({ onNavigate }) {
       i++;
     }
 
-    // 4. Charts Data
-    const equipCategory = equip.reduce((acc, item) => {
-      acc[item.category] = (acc[item.category] || 0) + item.totalQty;
+    // 4. Charts Data theo khoảng thời gian đã chọn (Hỗ trợ 7 ngày, 30 ngày, 3 tháng, 6 tháng, Tất cả)
+    const rawEquipCategory = eList.reduce((acc, item) => {
+      const cat = item.category || 'Khác';
+      acc[cat] = (acc[cat] || 0) + (Number(item.totalQty) || 1);
       return acc;
     }, {});
-    const equipCategoryData = Object.entries(equipCategory).map(([name, value]) => ({ name, value }));
 
-    // Traffic Trends (Last 7 Days)
-    const last7Days = [];
-    const validDates = [];
-    for (let d = 6; d >= 0; d--) {
-      const targetDate = new Date();
-      targetDate.setDate(targetDate.getDate() - d);
-      const dateStr = targetDate.toISOString().split('T')[0];
-      validDates.push(dateStr);
-      const dayName = targetDate.toLocaleDateString('vi-VN', { weekday: 'short' });
-      const dayHistory = rfidHistory.filter(h => h.timestamp && h.timestamp.startsWith(dateStr));
-      last7Days.push({
-        name: dayName,
-        checkIn: dayHistory.filter(h => h.action.includes('checkin') || h.action.includes('check-in')).length,
-        checkOut: dayHistory.filter(h => h.action.includes('checkout') || h.action.includes('check-out')).length
-      });
+    // Sắp xếp danh mục giảm dần, lấy Top 5 và gom các nhóm còn lại vào "Khác"
+    const sortedCategories = Object.entries(rawEquipCategory)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
+    const totalEquipQty = sortedCategories.reduce((sum, c) => sum + c.value, 0);
+    
+    let equipCategoryData = [];
+    if (sortedCategories.length <= 6) {
+      equipCategoryData = sortedCategories;
+    } else {
+      const top5 = sortedCategories.slice(0, 5);
+      const othersVal = sortedCategories.slice(5).reduce((sum, c) => sum + c.value, 0);
+      equipCategoryData = [
+        ...top5,
+        { name: 'Khác (Các nhóm còn lại)', value: othersVal }
+      ];
     }
 
-    // 5. Top Equipment & Top Slots
+    // Tính toán Traffic Trends (Lưu lượng sử dụng)
+    const trafficTrends = [];
+    const validDates = [];
+    const currentDate = new Date();
+
+    if (analyticsTimeRange === '3_months' || analyticsTimeRange === '6_months' || analyticsTimeRange === 'all') {
+      // Nhóm theo THÁNG khi xem 3 tháng / 6 tháng / Tất cả
+      const monthCount = analyticsTimeRange === '3_months' ? 3 : (analyticsTimeRange === '6_months' ? 6 : 6);
+      
+      for (let m = monthCount - 1; m >= 0; m--) {
+        const targetMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - m, 1);
+        const year = targetMonthDate.getFullYear();
+        const monthNum = String(targetMonthDate.getMonth() + 1).padStart(2, '0');
+        const monthPrefix = `${year}-${monthNum}`;
+        const display = `Thg ${monthNum}/${String(year).substring(2)}`;
+
+        const monthHistory = rList.filter(h => h.timestamp && h.timestamp.startsWith(monthPrefix));
+        const monthBookings = bkList.filter(b => b.date && b.date.startsWith(monthPrefix));
+        const monthBorrows = bList.filter(b => b.borrowDate && b.borrowDate.startsWith(monthPrefix));
+
+        // Lưu danh sách ngày của tháng này vào validDates để lọc Top mượn & Top slot
+        const daysInMonth = new Date(year, targetMonthDate.getMonth() + 1, 0).getDate();
+        for (let day = 1; day <= daysInMonth; day++) {
+          validDates.push(`${monthPrefix}-${String(day).padStart(2, '0')}`);
+        }
+
+        trafficTrends.push({
+          display,
+          attendanceCount: monthHistory.filter(h => h.action && (h.action.includes('checkin') || h.action.includes('check-in'))).length,
+          bookingCount: monthBookings.length,
+          borrowCount: monthBorrows.length
+        });
+      }
+    } else {
+      // Nhóm theo NGÀY khi xem 7 ngày hoặc 30 ngày
+      const numDays = analyticsTimeRange === '30_days' ? 30 : 7;
+      
+      for (let d = numDays - 1; d >= 0; d--) {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() - d);
+        const dateStr = targetDate.toISOString().split('T')[0];
+        validDates.push(dateStr);
+        
+        const display = numDays <= 7 
+          ? targetDate.toLocaleDateString('vi-VN', { weekday: 'short' }) + ' ' + targetDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+          : targetDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+
+        const dayHistory = rList.filter(h => h.timestamp && h.timestamp.startsWith(dateStr));
+        const dayBookings = bkList.filter(b => b.date === dateStr);
+        const dayBorrows = bList.filter(b => b.borrowDate && b.borrowDate.startsWith(dateStr));
+
+        trafficTrends.push({
+          display,
+          attendanceCount: dayHistory.filter(h => h.action && (h.action.includes('checkin') || h.action.includes('check-in'))).length,
+          bookingCount: dayBookings.length,
+          borrowCount: dayBorrows.length
+        });
+      }
+    }
+
+    // 5. Top Equipment (Lọc theo khoảng thời gian đã chọn)
     const equipmentMap = {};
-    borrows.forEach(b => {
-      equipmentMap[b.equipmentName] = (equipmentMap[b.equipmentName] || 0) + (b.qty || 1);
+    const filteredBorrows = bList.filter(b => b.borrowDate && validDates.includes(b.borrowDate.substring(0, 10)));
+
+    filteredBorrows.forEach(b => {
+      if (b.equipmentName) {
+        equipmentMap[b.equipmentName] = (equipmentMap[b.equipmentName] || 0) + (Number(b.qty) || 1);
+      }
     });
+
     const topEquipment = Object.entries(equipmentMap)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
 
+    // 6. Top Slots (Lọc theo khoảng thời gian đã chọn)
     const s = systemSettings || {};
     const slotLabels = [
       { id: 'morning_1', label: `${s.slot_morning_1_start || '07:00'}–${s.slot_morning_1_end || '09:00'}` },
@@ -113,13 +196,28 @@ export default function Dashboard({ onNavigate }) {
       { id: 'evening_1', label: `${s.slot_evening_1_start || '16:00'}–${s.slot_evening_1_end || '18:00'}` },
       { id: 'evening_2', label: `${s.slot_evening_2_start || '18:00'}–${s.slot_evening_2_end || '20:00'}` }
     ];
+
+    const filteredBookings = bkList.filter(b => validDates.includes(b.date));
+
     const topSlots = slotLabels.map(slot => ({
       name: slot.label,
-      value: allBookings.filter(b => validDates.includes(b.date) && String(b.slotId) === slot.id).length
+      value: filteredBookings.filter(b => String(b.slotId) === slot.id).length
     }));
 
-    return { stats, activeMembersList: active, overdueEquip: overdue, recentActivities: groupedHistory.slice(0, 10), chartData: { equipCategory: equipCategoryData, trafficTrends: last7Days, topEquipment, topSlots } };
-  }, [members, equip, rfidHistory, borrows, allBookings, systemSettings]);
+    return { 
+      stats, 
+      activeMembersList: active, 
+      overdueEquip: overdue, 
+      recentActivities: groupedHistory.slice(0, 10), 
+      chartData: { 
+        equipCategory: equipCategoryData, 
+        totalEquipQty,
+        trafficTrends, 
+        topEquipment, 
+        topSlots 
+      } 
+    };
+  }, [members, equip, rfidHistory, borrows, allBookings, systemSettings, analyticsTimeRange]);
 
   const formatTime = (isoString) => {
     if (!isoString) return '-';
@@ -425,13 +523,46 @@ export default function Dashboard({ onNavigate }) {
         {/* LEFT: Analytics Column */}
         <div className="analytics-column">
 
-          {/* Biểu đồ lưu lượng 7 ngày */}
+          {/* Biểu đồ lưu lượng */}
           <div className="glass-card chart-card">
-            <h3 className="chart-header">
-              <Activity size={16} style={{ color: 'var(--accent-green)' }} />
-              Lưu lượng sử dụng (7 ngày qua)
-            </h3>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <h3 className="chart-header" style={{ margin: 0 }}>
+                <Activity size={16} style={{ color: 'var(--accent-green)' }} />
+                Lưu lượng sử dụng
+              </h3>
+              
+              {/* Bộ lọc khoảng thời gian đồng bộ cho 3 biểu đồ */}
+              <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(0,0,0,0.25)', padding: '0.2rem', borderRadius: 'var(--radius-md)' }}>
+                {[
+                  { id: '7_days', label: '7 ngày' },
+                  { id: '30_days', label: '30 ngày' },
+                  { id: '3_months', label: '3 tháng' },
+                  { id: '6_months', label: '6 tháng' },
+                  { id: 'all', label: 'Tất cả' },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setAnalyticsTimeRange(tab.id)}
+                    style={{
+                      background: analyticsTimeRange === tab.id ? 'var(--accent-blue)' : 'transparent',
+                      color: analyticsTimeRange === tab.id ? '#fff' : 'var(--text-secondary)',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.75rem',
+                      fontWeight: analyticsTimeRange === tab.id ? '600' : '400',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
               {[
                 { label: 'Điểm danh', color: 'var(--accent-green)' },
                 { label: 'Đặt phòng', color: 'var(--accent-blue)' },
@@ -445,9 +576,19 @@ export default function Dashboard({ onNavigate }) {
             </div>
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData.trafficTrends} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <BarChart data={chartData.trafficTrends} margin={{ top: 10, right: 20, left: 0, bottom: analyticsTimeRange === '30_days' ? 10 : 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                  <XAxis dataKey="display" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
+                  <XAxis 
+                    dataKey="display" 
+                    stroke="var(--text-secondary)" 
+                    fontSize={analyticsTimeRange === '30_days' ? 10 : 11} 
+                    tickLine={false} 
+                    axisLine={false}
+                    interval={analyticsTimeRange === '30_days' ? 3 : 0}
+                    angle={analyticsTimeRange === '30_days' ? -20 : 0}
+                    textAnchor={analyticsTimeRange === '30_days' ? 'end' : 'middle'}
+                    height={analyticsTimeRange === '30_days' ? 35 : 25}
+                  />
                   <YAxis stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                   <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} cursor={false} />
                   <Bar dataKey="attendanceCount" name="Lượt điểm danh" stackId="a" fill="var(--accent-green)" radius={[0,0,4,4]} />
@@ -461,31 +602,73 @@ export default function Dashboard({ onNavigate }) {
           {/* Cơ cấu kho + Top equipment — 2 cột */}
           <div className="db-inner-grid">
 
-            {/* Cơ cấu kho — Pie */}
+            {/* Cơ cấu kho — Donut Chart hiện đại, gọn gàng và không bị đè chữ */}
             <div className="glass-card chart-card">
-              <h3 className="chart-header">
-                <Package2 size={16} style={{ color: 'var(--accent-blue)' }} />
-                Cơ cấu kho thiết bị
-              </h3>
-              <div style={{ height: 200 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 className="chart-header" style={{ margin: 0 }}>
+                  <Package2 size={16} style={{ color: 'var(--accent-blue)' }} />
+                  Cơ cấu kho thiết bị
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Tổng: <strong style={{ color: 'var(--text-primary)' }}>{chartData.totalEquipQty || 0}</strong>
+                </span>
+              </div>
+
+              <div style={{ height: 180, marginTop: '0.25rem' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={chartData.equipCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={({percent}) => `${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                    <Pie 
+                      data={chartData.equipCategory} 
+                      dataKey="value" 
+                      nameKey="name" 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius={48} 
+                      outerRadius={72} 
+                      paddingAngle={3}
+                      label={false}
+                    >
                       {chartData.equipCategory.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                    <RechartsTooltip 
+                      formatter={(val, name) => [`${val} cái (${chartData.totalEquipQty > 0 ? Math.round((val / chartData.totalEquipQty) * 100) : 0}%)`, name]}
+                      contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} 
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem 0.75rem', justifyContent: 'center' }}>
-                {chartData.equipCategory.map((entry, index) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.72rem' }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: COLORS[index % COLORS.length], flexShrink: 0 }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>{entry.name}</span>
-                  </div>
-                ))}
+
+              {/* Bảng phân bổ danh mục Top 5 + Khác rõ ràng, không bị đè */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem 0.5rem', marginTop: '0.35rem' }}>
+                {chartData.equipCategory.map((entry, index) => {
+                  const pct = chartData.totalEquipQty > 0 ? Math.round((entry.value / chartData.totalEquipQty) * 100) : 0;
+                  return (
+                    <div 
+                      key={index} 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between', 
+                        fontSize: '0.73rem', 
+                        background: 'rgba(255,255,255,0.02)', 
+                        padding: '0.25rem 0.45rem', 
+                        borderRadius: '4px',
+                        borderLeft: `2px solid ${COLORS[index % COLORS.length]}`
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', minWidth: 0 }}>
+                        <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={entry.name}>
+                          {entry.name}
+                        </span>
+                      </div>
+                      <span style={{ fontWeight: '600', color: 'var(--text-primary)', marginLeft: '0.25rem', flexShrink: 0 }}>
+                        {pct}%
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -493,7 +676,7 @@ export default function Dashboard({ onNavigate }) {
             <div className="glass-card chart-card">
               <h3 className="chart-header">
                 <Package size={16} style={{ color: 'var(--accent-amber)' }} />
-                Top mượn nhiều (7 ngày)
+                Top mượn nhiều
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', flex: 1 }}>
                 {chartData.topEquipment.length === 0 ? (
@@ -642,7 +825,7 @@ export default function Dashboard({ onNavigate }) {
           <div className="glass-card chart-card">
             <h3 className="chart-header">
               <Calendar size={16} style={{ color: '#06b6d4' }} />
-              Khung giờ phổ biến (7 ngày)
+              Khung giờ phổ biến
             </h3>
             <div style={{ height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
