@@ -2,41 +2,61 @@
   {
     "id": "rc1",
     "cardId": "CARD-001",
-    "mssv": "20210001",
-    "userName": "Nguyễn Văn A",
+    "mssv": "20220001",
+    "userName": "Nguyễn Hoàng Long",
     "status": "active",
     "registeredDate": "2026-06-01T08:00:00.000Z",
-    "lastUsed": "2026-08-21T02:51:24.607Z",
-    "usageCount": 77
+    "lastUsed": "2026-09-05T13:56:00.624Z",
+    "usageCount": 43
   },
   {
     "id": "rc2",
     "cardId": "CARD-002",
-    "mssv": "20210002",
-    "userName": "Trần Thị B",
+    "mssv": "20220003",
+    "userName": "Lê Văn Cường",
     "status": "active",
     "registeredDate": "2026-06-01T08:00:00.000Z",
-    "lastUsed": "2026-07-16T01:45:08.895Z",
-    "usageCount": 7
+    "lastUsed": "2026-09-05T09:15:00.000Z",
+    "usageCount": 28
   },
   {
     "id": "rc3",
     "cardId": "CARD-003",
-    "mssv": "20220003",
-    "userName": "Lê Văn C",
+    "mssv": "20220015",
+    "userName": "Đỗ Thị Mai Hương",
     "status": "active",
-    "registeredDate": "2026-06-01T08:00:00.000Z",
-    "lastUsed": "2026-08-21T02:11:06.922Z",
-    "usageCount": 13
+    "registeredDate": "2026-06-05T10:00:00.000Z",
+    "lastUsed": "2026-09-04T14:20:00.000Z",
+    "usageCount": 19
   },
   {
     "id": "rc4",
     "cardId": "CARD-004",
-    "mssv": "20220004",
-    "userName": "Phạm Minh D",
+    "mssv": "20230005",
+    "userName": "Vũ Hải Đăng",
     "status": "active",
-    "registeredDate": "2026-06-01T08:00:00.000Z",
-    "lastUsed": "2026-07-28T09:40:33.162Z",
+    "registeredDate": "2026-06-10T14:00:00.000Z",
+    "lastUsed": "2026-09-05T07:45:00.000Z",
+    "usageCount": 12
+  },
+  {
+    "id": "rc5",
+    "cardId": "CARD-005",
+    "mssv": "20230012",
+    "userName": "Bùi Phương Linh",
+    "status": "active",
+    "registeredDate": "2026-06-12T09:30:00.000Z",
+    "lastUsed": "2026-09-03T16:00:00.000Z",
     "usageCount": 8
+  },
+  {
+    "id": "54363bf9-743e-4d55-bcee-f0c0fff04b2b",
+    "cardId": "TEST-RFID-999",
+    "mssv": "20249999",
+    "userName": "Sinh Viên Mới Auto",
+    "status": "active",
+    "registeredDate": "2026-09-05T14:32:13.646Z",
+    "lastUsed": "2026-09-05T14:32:49.299Z",
+    "usageCount": 2
   }
 ]

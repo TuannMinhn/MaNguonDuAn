@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Button from '../components/Button';
-import { Search, Package, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Search, Package, CheckCircle, AlertTriangle, ShieldAlert, Award, Sparkles, User, Lock, Check } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import Select from '../components/Select';
 import DataTable from '../components/DataTable';
@@ -43,6 +43,7 @@ const getTomorrowDateStr = (baseDateStr) => {
 
 export default function StudentEquipment() {
   const [equipment, setEquipment] = useState([]);
+  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
@@ -61,15 +62,17 @@ export default function StudentEquipment() {
   };
   
   const [mssv, setMssv] = useState('');
-  const [qty, setQty] = useState(1);
-  const [borrowDate, setBorrowDate] = useState(() => getTodayDateStr());
-  const [borrowTime, setBorrowTime] = useState(() => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 30);
-    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const [studentInfo, setStudentInfo] = useState(null);
+  const [borrowForm, setBorrowForm] = useState({
+    equipmentId: '',
+    qty: 1,
+    borrowDate: getTodayDateStr(),
+    borrowTime: getDefaultBorrowTime(),
+    expectedReturnDate: getTomorrowDateStr(),
+    expectedReturnTime: '17:00',
+    notes: '',
+    initialCondition: 'Tốt / Hoạt động bình thường'
   });
-  const [expectedReturnDate, setExpectedReturnDate] = useState(() => getTomorrowDateStr());
-  const [expectedReturnTime, setExpectedReturnTime] = useState('17:00');
 
   const [waitlistForm, setWaitlistForm] = useState({
     mssv: '',
@@ -82,12 +85,20 @@ export default function StudentEquipment() {
   const [alert, setAlert] = useState(null);
   const [toast, setToast] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-
   const [equipmentWaitlists, setEquipmentWaitlists] = useState({});
 
   useEffect(() => {
     fetchEquipment();
+    fetchMembers();
   }, []);
+
+  const fetchMembers = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/members`);
+      const data = await res.json();
+      if (Array.isArray(data)) setMembers(data);
+    } catch (e) {}
+  };
 
   const fetchEquipment = async () => {
     try {
@@ -115,13 +126,58 @@ export default function StudentEquipment() {
     }
   };
 
-  const handleReserve = async (e) => {
-    e.preventDefault();
+  // Tra cứu thông tin sinh viên & điểm khi nhập MSSV
+  useEffect(() => {
     if (!mssv.trim()) {
+      setStudentInfo(null);
+      return;
+    }
+    const found = members.find(m => m.mssv?.toLowerCase() === mssv.trim().toLowerCase());
+    if (found) {
+      setStudentInfo(found);
+    } else {
+      setStudentInfo({
+        mssv: mssv.trim(),
+        name: `Sinh viên ${mssv.trim()}`,
+        role: 'Sinh viên',
+        points: 100, // Điểm khởi tạo mặc định nếu là sinh viên mới
+        isNew: true
+      });
+    }
+  }, [mssv, members]);
+
+  // Xác định cấp độ truy cập của sinh viên
+  const studentPoints = studentInfo ? (Number(studentInfo.points !== undefined ? studentInfo.points : 100)) : 100;
+  const isLocked = studentPoints < 80;
+  
+  // Phân cấp thiết bị hiển thị theo điểm tín nhiệm (Access Control List):
+  // - Nếu điểm < 80: Khóa quyền mượn
+  // - Điểm 80-100: Chỉ thấy Cấp 1
+  // - Điểm 101-150: Thấy Cấp 1 & Cấp 2
+  // - Điểm > 150: Thấy toàn bộ Cấp 1, 2, 3
+  const allowedLevelMax = useMemo(() => {
+    if (studentPoints >= 151) return 3;
+    if (studentPoints >= 101) return 2;
+    if (studentPoints >= 80) return 1;
+    return 0; // Bị khóa
+  }, [studentPoints]);
+
+  const handleReserve = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const targetMssv = (borrowForm.mssv || mssv || '').trim();
+    if (!targetMssv) {
       setToast({ type: 'error', message: 'Vui lòng nhập MSSV' });
       return;
     }
-    const parsedQty = Number(qty);
+
+    const foundUser = members.find(m => m.mssv?.toLowerCase() === targetMssv.toLowerCase());
+    const userPts = foundUser ? Number(foundUser.points !== undefined ? foundUser.points : 100) : 100;
+    if (userPts < 80) {
+      setToast({ type: 'error', message: 'Tài khoản của bạn đang dưới 80 điểm nên quyền mượn tạm thời bị khóa.' });
+      return;
+    }
+
+    const parsedQty = Number(borrowForm.qty) || 1;
     const maxAvailable = selectedEq.assetType && (selectedEq.assetType.toLowerCase().includes('linh kiện') || selectedEq.assetType.toLowerCase().includes('vật tư'))
       ? selectedEq.totalQty 
       : selectedEq.totalQty - (selectedEq.borrowedQty || 0);
@@ -133,43 +189,34 @@ export default function StudentEquipment() {
 
     setSubmitting(true);
     try {
-      const formattedBorrowDate = new Date(borrowDate + 'T' + (borrowTime || '08:30') + ':00').toISOString();
-      const formattedReturnDate = expectedReturnDate ? new Date(expectedReturnDate + 'T' + (expectedReturnTime || '17:00') + ':00').toISOString() : null;
-
-      const token = typeof window !== 'undefined' ? localStorage.getItem('lab_auth_token') : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      const formattedBorrowDate = new Date(borrowForm.borrowDate + 'T' + (borrowForm.borrowTime || '08:30') + ':00').toISOString();
+      const formattedReturnDate = borrowForm.expectedReturnDate ? new Date(borrowForm.expectedReturnDate + 'T' + (borrowForm.expectedReturnTime || '17:00') + ':00').toISOString() : null;
 
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEq.id}/reserve`, {
         method: 'POST',
-        headers,
-        body: JSON.stringify({ 
-          mssv: mssv.trim(), 
-          qty: parsedQty, 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...borrowForm,
+          mssv: targetMssv,
+          qty: parsedQty,
           borrowDate: formattedBorrowDate,
-          expectedReturnDate: formattedReturnDate 
+          expectedReturnDate: formattedReturnDate,
+          borrowNotes: borrowForm.borrowNotes || borrowForm.notes || ''
         })
       });
+
       const data = await res.json();
-      
-      if (res.ok) {
-        setShowModal(false);
-        setToast({ type: 'success', message: 'Đã đặt trước thành công! Vui lòng đến Lab theo lịch hẹn để nhận thiết bị.' });
-        fetchEquipment();
-        setMssv('');
-        setQty(1);
-        setBorrowDate(new Date().toISOString().split('T')[0]);
-        setBorrowTime('08:30');
-        setExpectedReturnDate('');
-        setExpectedReturnTime('17:00');
-        setTimeout(() => setToast(null), 3000);
+      if (!res.ok) {
+        setAlert({ type: 'error', message: data.error || 'Đã có lỗi xảy ra khi đặt trước' });
       } else {
-        setToast({ type: 'error', message: data.error || 'Đặt trước thất bại' });
+        setShowModal(false);
+        setToast({ type: 'success', message: `✅ Đặt trước thành công ${parsedQty}x ${selectedEq.name}! Vui lòng đến Lab quét thẻ RFID để nhận đồ.` });
+        fetchEquipment();
+        fetchMembers();
+        setTimeout(() => setToast(null), 5000);
       }
     } catch (err) {
-      setToast({ type: 'error', message: 'Lỗi kết nối máy chủ' });
+      setAlert({ type: 'error', message: 'Lỗi kết nối tới máy chủ' });
     } finally {
       setSubmitting(false);
     }
@@ -177,9 +224,8 @@ export default function StudentEquipment() {
 
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
-    const cleanMssv = waitlistForm.mssv?.includes('–') ? waitlistForm.mssv.split('–')[0].trim() : waitlistForm.mssv?.trim();
-    if (!cleanMssv || Number(waitlistForm.qty) <= 0) {
-      setToast({ type: 'error', message: 'Vui lòng điền đầy đủ MSSV và số lượng' });
+    if (!waitlistForm.mssv.trim()) {
+      setToast({ type: 'error', message: 'Vui lòng nhập MSSV' });
       return;
     }
 
@@ -187,16 +233,12 @@ export default function StudentEquipment() {
       const res = await fetch(`${API_BASE_URL}/equipment/${selectedEq.id}/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...waitlistForm,
-          mssv: cleanMssv
-        })
+        body: JSON.stringify(waitlistForm)
       });
       const data = await res.json();
-
       setShowWaitlistModal(false);
       if (!res.ok) {
-        setToast({ type: 'error', message: data.error || 'Lỗi đăng ký chờ' });
+        setToast({ type: 'error', message: data.error || 'Lỗi khi đăng ký danh sách chờ' });
       } else {
         setToast({ type: 'success', message: `🔔 Đã tiếp nhận đăng ký chờ mượn ${selectedEq.name}! Hệ thống sẽ gửi thông báo ngay khi có thiết bị.` });
         setWaitlistForm({ mssv: '', qty: 1, purpose: 'Đồ án môn học / Khóa luận tốt nghiệp', neededDate: '', notes: '' });
@@ -220,17 +262,22 @@ export default function StudentEquipment() {
     return Array.from(uniqueCats).sort();
   }, [equipment, activeTab]);
 
+  // Lọc thiết bị: CHỈ HIỂN THỊ THIẾT BỊ NẰM TRONG CẤP ĐỘ MÀ SINH VIÊN ĐỦ ĐIỂM TRUY CẬP
   const filteredEq = useMemo(() => equipment.filter(eq => {
     const isComponent = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
     if (activeTab === 'components' && !isComponent) return false;
     if (activeTab === 'equipment' && isComponent) return false;
+
+    // Phân cấp Access Control List: Ẩn đồ nếu vượt cấp độ cho phép của sinh viên
+    const requiredLvl = Number(eq.requiredLevel) || 1;
+    if (requiredLvl > allowedLevelMax) return false;
 
     const matchSearch = eq.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                         eq.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         eq.location?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCat = selectedCategory === 'Tất cả' || eq.category === selectedCategory;
     return matchSearch && matchCat;
-  }), [equipment, searchTerm, selectedCategory, activeTab]);
+  }), [equipment, searchTerm, selectedCategory, activeTab, allowedLevelMax]);
 
   const equipmentColumns = useMemo(() => [
     { 
@@ -238,37 +285,48 @@ export default function StudentEquipment() {
       header: 'Mã TB', 
       width: '12%',
       sortable: true,
-      cell: (row) => <span style={{ fontWeight: '600', color: 'var(--accent-blue)' }}>{row.code}</span>
+      cell: (row) => <span style={{ fontWeight: '700', color: 'var(--accent-blue)' }}>{row.code}</span>
     },
     { 
       accessorKey: 'name', 
       header: activeTab === 'equipment' ? 'Tên thiết bị' : 'Tên linh kiện', 
       width: '38%',
       sortable: true,
-      cell: (row) => (
-        <div>
-          <div style={{ fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.35 }}>{row.name}</div>
-          <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', marginTop: '0.25rem', fontSize: '0.78rem', flexWrap: 'wrap' }}>
-            <span style={{ color: 'var(--text-muted)' }}>{row.category || 'Khác'}</span>
-            <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
-            <span style={{ color: 'var(--text-secondary)' }}>
-              Vị trí: <strong style={{ color: 'var(--accent-blue)', fontWeight: '600' }}>{row.location || 'Kho Lab'}</strong>
-            </span>
+      cell: (row) => {
+        const lvl = Number(row.requiredLevel) || 1;
+        let lvlBadge = { text: '🟢 Cấp 1', color: 'var(--accent-green)', bg: 'rgba(16, 185, 129, 0.12)' };
+        if (lvl === 2) lvlBadge = { text: '🔵 Cấp 2', color: 'var(--accent-blue)', bg: 'rgba(59, 130, 246, 0.12)' };
+        if (lvl === 3) lvlBadge = { text: '🟣 Cấp 3', color: 'var(--accent-purple)', bg: 'rgba(139, 92, 246, 0.12)' };
+
+        return (
+          <div>
+            <div style={{ fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.35 }}>{row.name}</div>
+            <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', marginTop: '0.3rem', fontSize: '0.78rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.72rem', padding: '1px 6px', borderRadius: '4px', fontWeight: '600', color: lvlBadge.color, background: lvlBadge.bg }}>
+                {lvlBadge.text}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+              <span style={{ color: 'var(--text-muted)' }}>{row.category || 'Khác'}</span>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+              <span style={{ color: 'var(--text-secondary)' }}>
+                Vị trí: <strong style={{ color: 'var(--accent-blue)', fontWeight: '600' }}>{row.location || 'Kho Lab'}</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      )
+        );
+      }
     },
     { 
       accessorKey: 'category', 
       header: 'Phân loại', 
-      width: '20%',
+      width: '18%',
       sortable: true,
       cell: (row) => <span className="text-secondary">{row.category || 'Khác'}</span>
     },
     { 
       accessorKey: 'availability', 
       header: 'Khả dụng / Tổng', 
-      width: '18%',
+      width: '16%',
       sortable: true, 
       align: 'center', 
       cell: (row) => {
@@ -286,29 +344,43 @@ export default function StudentEquipment() {
     { 
       accessorKey: 'actions', 
       header: 'Thao tác', 
-      width: '18%',
+      width: '16%',
       sortable: false, 
       align: 'right', 
       cell: (row) => {
         const isComponent = row.assetType && (row.assetType.toLowerCase().includes('linh kiện') || row.assetType.toLowerCase().includes('vật tư'));
         const available = isComponent ? row.totalQty : row.totalQty - (row.borrowedQty || 0);
         const isAvailable = available > 0;
+        
+        if (isLocked) {
+          return (
+            <Button size="sm" variant="ghost" disabled title="Tài khoản dưới 80đ bị khóa quyền mượn">
+              🔒 Đã khóa
+            </Button>
+          );
+        }
+
         return isAvailable ? (
           <Button
             size="sm"
             variant="primary"
             onClick={() => { 
               setSelectedEq(row); 
-              setQty(1);
-              setBorrowDate(getTodayDateStr());
-              setBorrowTime(getDefaultBorrowTime());
-              setExpectedReturnDate(getTomorrowDateStr());
-              setExpectedReturnTime('17:00');
+              setBorrowForm({
+                equipmentId: row.id,
+                qty: 1,
+                borrowDate: getTodayDateStr(),
+                borrowTime: getDefaultBorrowTime(),
+                expectedReturnDate: getTomorrowDateStr(),
+                expectedReturnTime: '17:00',
+                notes: '',
+                initialCondition: 'Tốt / Hoạt động bình thường'
+              });
               setAlert(null); 
               setShowModal(true); 
             }}
           >
-            {activeTab === 'equipment' ? 'Mượn' : 'Xin cấp phát'}
+            {activeTab === 'equipment' ? 'Mượn TB' : 'Xin cấp phát'}
           </Button>
         ) : (
           <Button
@@ -316,7 +388,7 @@ export default function StudentEquipment() {
             variant="secondary"
             onClick={() => {
               setSelectedEq(row);
-              setWaitlistForm({ mssv: '', qty: 1, purpose: 'Đồ án môn học / Khóa luận tốt nghiệp', neededDate: '', notes: '' });
+              setWaitlistForm({ mssv: mssv.trim(), qty: 1, purpose: 'Đồ án môn học / Khóa luận tốt nghiệp', neededDate: '', notes: '' });
               setShowWaitlistModal(true);
             }}
             style={{ color: 'var(--accent-amber)', borderColor: 'rgba(245, 158, 11, 0.3)' }}
@@ -326,159 +398,118 @@ export default function StudentEquipment() {
         );
       }
     }
-  ], [activeTab]);
+  ], [activeTab, isLocked]);
 
   return (
-    <div className="page-container fade-in">
-      {loading ? (
-        <div className="glass-card" style={{ textAlign: 'center', padding: '2rem' }}>Đang tải danh mục thiết bị...</div>
-      ) : (<>
-      <div>
+    <div className="page-container fade-in" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Header tiêu đề chuẩn hóa */}
+      <div style={{ paddingRight: '60px' }}>
         <h2 className="page-header">
           <Package className="text-blue-500" size={20} />
-          Kho thiết bị & Dụng cụ
+          Kho thiết bị &amp; Linh kiện CLB
         </h2>
-        <p className="page-subtitle">Xem trước số lượng và đặt mượn online. Vui lòng đến phòng Lab quét thẻ RFID để nhận thiết bị</p>
+        <p className="page-subtitle">
+          Tra cứu danh mục thiết bị, linh kiện khả dụng và bấm nút <strong style={{ color: 'var(--accent-blue)' }}>Mượn TB</strong> để đăng ký mượn sử dụng.
+        </p>
       </div>
 
-      <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+      {/* TABS THIẾT BỊ / LINH KIỆN */}
+      <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.25rem' }}>
         <button
           onClick={() => { setActiveTab('equipment'); setSelectedCategory('Tất cả'); setSearchTerm(''); }}
           style={{
             padding: '0.75rem 1rem',
             background: 'none', border: 'none', cursor: 'pointer',
-            fontWeight: activeTab === 'equipment' ? '600' : '500',
+            fontWeight: activeTab === 'equipment' ? '700' : '500',
             color: activeTab === 'equipment' ? 'var(--accent-blue)' : 'var(--text-secondary)',
             borderBottom: activeTab === 'equipment' ? '2px solid var(--accent-blue)' : '2px solid transparent',
-            display: 'flex', alignItems: 'center', gap: '0.5rem',
-            fontFamily: 'var(--font-family)', fontSize: '0.95rem'
+            fontSize: '1rem', transition: 'all 0.2s'
           }}
         >
-          <Package size={18} /> Thiết bị
+          Thiết bị &amp; Dụng cụ Lab
         </button>
         <button
           onClick={() => { setActiveTab('components'); setSelectedCategory('Tất cả'); setSearchTerm(''); }}
           style={{
             padding: '0.75rem 1rem',
             background: 'none', border: 'none', cursor: 'pointer',
-            fontWeight: activeTab === 'components' ? '600' : '500',
+            fontWeight: activeTab === 'components' ? '700' : '500',
             color: activeTab === 'components' ? 'var(--accent-blue)' : 'var(--text-secondary)',
             borderBottom: activeTab === 'components' ? '2px solid var(--accent-blue)' : '2px solid transparent',
-            display: 'flex', alignItems: 'center', gap: '0.5rem',
-            fontFamily: 'var(--font-family)', fontSize: '0.95rem'
+            fontSize: '1rem', transition: 'all 0.2s'
           }}
         >
-          <Package size={18} /> Linh kiện / Vật tư
+          Linh kiện &amp; Vật tư tiêu hao
         </button>
       </div>
 
+      {/* DANH MỤC & TÌM KIẾM */}
       <Card
-        title={`Danh sách ${activeTab === 'equipment' ? 'thiết bị' : 'linh kiện'} (${filteredEq.length})`}
+        title={`Danh mục ${activeTab === 'equipment' ? 'Thiết bị & Dụng cụ' : 'Linh kiện'} (${filteredEq.length})`}
         icon={Package}
         style={{ color: 'var(--accent-blue)' }}
-        action={
-          <div style={{ width: '240px', flexShrink: 0 }}>
-            <Select
-              value={selectedCategory}
-              onChange={setSelectedCategory}
-              options={['Tất cả', ...availableCategories].map(cat => ({
-                value: cat,
-                label: cat === 'Tất cả' ? 'Tất cả danh mục' : cat
-              }))}
-            />
-          </div>
-        }
       >
         <DataTable
           data={filteredEq}
           columns={equipmentColumns}
           globalFilter={searchTerm}
           setGlobalFilter={setSearchTerm}
-          searchKeys={['name', 'code', 'category', 'location']}
-          searchPlaceholder="Tìm theo tên, mã thiết bị hoặc vị trí..."
+          searchPlaceholder="Tìm theo tên thiết bị, mã TB hoặc vị trí tủ..."
         />
       </Card>
 
-      {/* Borrow & Reserve Equipment / Components Modal */}
-      {selectedEq && (
-        <BorrowEquipmentModal
-          isOpen={showModal}
-          onClose={() => { setShowModal(false); setAlert(null); }}
-          selectedEquip={selectedEq}
-          borrowForm={{
-            mssv,
-            qty,
-            borrowDate,
-            borrowTime,
-            expectedReturnDate,
-            expectedReturnTime,
-            initialCondition: 'Tốt / Hoạt động bình thường',
-            borrowNotes: ''
-          }}
-          setBorrowForm={(updated) => {
-            if (updated.mssv !== undefined) setMssv(updated.mssv);
-            if (updated.qty !== undefined) setQty(updated.qty);
-            if (updated.borrowDate !== undefined) setBorrowDate(updated.borrowDate);
-            if (updated.borrowTime !== undefined) setBorrowTime(updated.borrowTime);
-            if (updated.expectedReturnDate !== undefined) setExpectedReturnDate(updated.expectedReturnDate);
-            if (updated.expectedReturnTime !== undefined) setExpectedReturnTime(updated.expectedReturnTime);
-          }}
-          memberSearchQuery={mssv}
-          setMemberSearchQuery={setMssv}
-          suggestedMembers={[]}
-          setSuggestedMembers={() => {}}
-          handleBorrowSubmit={handleReserve}
-          getTodayDateString={() => new Date().toISOString().split('T')[0]}
-          isStudentMode={true}
-          submitBtnText={activeTab === 'equipment' ? 'Xác nhận Đặt mượn' : 'Xác nhận Cấp phát'}
-        />
-      )}
-
-      {/* Waitlist Modal */}
-      {selectedEq && (
-        <WaitlistModal
-          isOpen={showWaitlistModal}
-          onClose={() => setShowWaitlistModal(false)}
-          selectedEquip={selectedEq}
-          equipmentWaitlists={equipmentWaitlists}
-          waitlistForm={waitlistForm}
-          setWaitlistForm={setWaitlistForm}
-          memberSearchQuery={waitlistForm.mssv}
-          setMemberSearchQuery={(val) => setWaitlistForm({ ...waitlistForm, mssv: val })}
-          suggestedMembers={[]}
-          setSuggestedMembers={() => {}}
-          handleMemberSearch={() => {}}
-          handleWaitlistSubmit={handleWaitlistSubmit}
-          getTodayDateString={() => new Date().toISOString().split('T')[0]}
-        />
-      )}
-
-      {/* Toast Notification */}
+      {/* TOAST NOTIFICATION */}
       {toast && (
         <div style={{
-          position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999,
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          padding: '12px 20px',
           background: toast.type === 'success' ? 'var(--accent-green)' : 'var(--accent-red)',
           color: '#fff',
-          padding: '1rem 1.5rem',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-          animation: 'slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+          borderRadius: 'var(--radius-md)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+          fontWeight: '600',
+          zIndex: 9999
         }}>
-          {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
-          <span style={{ fontWeight: '500' }}>{toast.message}</span>
+          {toast.message}
         </div>
       )}
-      
-      <style>{`
-        @keyframes slideInToast {
-          from { transform: translateY(120%) scale(0.9); opacity: 0; }
-          to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-      `}</style>
-      </>)}
+
+      {/* MODAL MƯỢN THIẾT BỊ */}
+      <BorrowEquipmentModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setAlert(null);
+        }}
+        selectedEquip={selectedEq}
+        borrowForm={borrowForm}
+        setBorrowForm={setBorrowForm}
+        handleBorrowSubmit={handleReserve}
+        memberSearchQuery={mssv}
+        setMemberSearchQuery={setMssv}
+        suggestedMembers={[]}
+        setSuggestedMembers={() => {}}
+        handleMemberSearch={() => {}}
+        isStudentMode={true}
+        submitBtnText="Xác nhận Đặt trước"
+      />
+
+      {/* MODAL DANH SÁCH CHỜ */}
+      <WaitlistModal
+        isOpen={showWaitlistModal}
+        onClose={() => setShowWaitlistModal(false)}
+        selectedEquip={selectedEq}
+        waitlistForm={waitlistForm}
+        setWaitlistForm={setWaitlistForm}
+        handleWaitlistSubmit={handleWaitlistSubmit}
+        memberSearchQuery={waitlistForm.mssv}
+        setMemberSearchQuery={(val) => setWaitlistForm({ ...waitlistForm, mssv: val })}
+        suggestedMembers={[]}
+        setSuggestedMembers={() => {}}
+        handleMemberSearch={() => {}}
+      />
     </div>
   );
 }

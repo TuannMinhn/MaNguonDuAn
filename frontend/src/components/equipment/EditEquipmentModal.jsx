@@ -189,6 +189,22 @@ const EditEquipmentModal = ({
           </div>
 
           <div className="form-group">
+            <label>Cấp độ thiết bị theo điểm tín nhiệm (Access Control List)</label>
+            <Select
+              value={editingEquip.requiredLevel || 1}
+              onChange={(val) => setEditingEquip({ ...editingEquip, requiredLevel: Number(val) })}
+              options={[
+                { value: 1, label: "🟢 Cấp 1 (Từ 80 điểm: Cáp, Breadboard, Cảm biến, Module...)" },
+                { value: 2, label: "🔵 Cấp 2 (Từ 101 - 150 điểm: Kit STM32, ESP32, Mỏ hàn, Đồng hồ VOM...)" },
+                { value: 3, label: "🟣 Cấp 3 (Trên 150 điểm: Máy hiện sóng, Máy in 3D, Nguồn DC...)" }
+              ]}
+            />
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              Chỉ sinh viên có đủ điểm tín nhiệm theo cấp độ này mới có thể nhìn thấy và mượn thiết bị.
+            </span>
+          </div>
+
+          <div className="form-group">
             <label>Tuổi thọ dự kiến của nhà sản xuất (Giờ hoạt động)</label>
             <input
               type="number"

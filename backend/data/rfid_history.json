@@ -1328,5 +1328,25 @@
     "module": "equipment",
     "timestamp": "2026-08-21T02:51:24.604Z",
     "success": true
+  },
+  {
+    "id": "79e89d37-7012-4bb7-8d43-28b6a3df3f8f",
+    "cardId": "CARD-001",
+    "mssv": "20220001",
+    "userName": "Nguyễn Hoàng Long",
+    "action": "update",
+    "module": "management",
+    "timestamp": "2026-09-05T13:56:00.623Z",
+    "success": true
+  },
+  {
+    "id": "2ba553d2-c876-4203-9ec4-b8f439e7daf1",
+    "cardId": "CARD-001",
+    "mssv": "20220001",
+    "userName": "Nguyễn Hoàng Long",
+    "action": "update",
+    "module": "management",
+    "timestamp": "2026-09-05T13:56:01.020Z",
+    "success": true
   }
 ]

@@ -48,6 +48,21 @@ export default function Settings() {
     attendanceShortPoints: 2,
     taskDefaultPoints: 10,
     attendanceBonusWeekend: 1.5,
+    // Nhóm 2.5: Điểm Tín Nhiệm & Phân Cấp Thiết Bị (Access Control List)
+    defaultScore: 100,
+    borrowLockThreshold: 80,
+    level1MinScore: 80,
+    level2MinScore: 101,
+    level3MinScore: 151,
+    weeklyPointCap: 20,
+    guestCleanupDays: 120,
+    // Nhóm 2.6: Chính sách Mượn thiết bị cho Sinh viên ngoài CLB (Guest Policy)
+    enableGuestBorrowing: 'true',
+    allowMemberSponsor: 'true',
+    maxActiveGuaranteesPerMember: 1,
+    sponsorMinScore: 80,
+    allowGuestDeposit: 'true',
+    guestOverdueFinePerDay: 15000,
     // Nhóm 3: Vận hành, Bảng điều khiển & Thông báo
     adminPassword: '',
     dashboardDefaultTimeRange: '7_days',
@@ -111,6 +126,21 @@ export default function Settings() {
         attendanceShortPoints: systemSettings.attendanceShortPoints ?? 2,
         taskDefaultPoints: systemSettings.taskDefaultPoints ?? 10,
         attendanceBonusWeekend: Number(systemSettings.attendanceBonusWeekend) || 1.5,
+        // Nhóm 2.5: Điểm Tín Nhiệm & Phân Cấp Thiết Bị
+        defaultScore: Number(systemSettings.defaultScore) || 100,
+        borrowLockThreshold: Number(systemSettings.borrowLockThreshold) || 80,
+        level1MinScore: Number(systemSettings.level1MinScore) || 80,
+        level2MinScore: Number(systemSettings.level2MinScore) || 101,
+        level3MinScore: Number(systemSettings.level3MinScore) || 151,
+        weeklyPointCap: Number(systemSettings.weeklyPointCap) || 20,
+        guestCleanupDays: Number(systemSettings.guestCleanupDays) || 120,
+        // Nhóm 2.6: Chính sách Mượn thiết bị cho Sinh viên ngoài CLB (Guest Policy)
+        enableGuestBorrowing: systemSettings.enableGuestBorrowing ?? 'true',
+        allowMemberSponsor: systemSettings.allowMemberSponsor ?? 'true',
+        maxActiveGuaranteesPerMember: Number(systemSettings.maxActiveGuaranteesPerMember) || 1,
+        sponsorMinScore: Number(systemSettings.sponsorMinScore) || 80,
+        allowGuestDeposit: systemSettings.allowGuestDeposit ?? 'true',
+        guestOverdueFinePerDay: Number(systemSettings.guestOverdueFinePerDay) || 15000,
         // Nhóm 3: Vận hành, Bảng điều khiển & Thông báo
         dashboardDefaultTimeRange: systemSettings.dashboardDefaultTimeRange ?? '7_days',
         dashboardTopItemsCount: Number(systemSettings.dashboardTopItemsCount) || 5,
@@ -159,6 +189,7 @@ export default function Settings() {
     assetType: 'Thiết bị',
     unit: 'Cái',
     lifespanHours: 10000,
+    requiredLevel: 1,
     description: ''
   });
 
@@ -176,6 +207,7 @@ export default function Settings() {
       unit: 'Cái',
       minThreshold: 0,
       lifespanHours: 10000,
+      requiredLevel: 1,
       description: ''
     });
   };
@@ -410,6 +442,20 @@ export default function Settings() {
         <div className="text-muted">{row.assetType} • {row.unit}</div>
       </div>
     )},
+    { accessorKey: 'requiredLevel', header: 'Cấp độ (ACL)', sortable: true, align: 'center', cell: (row) => {
+      const level = Number(row.requiredLevel) || 1;
+      const badges = {
+        1: { label: '🟢 Cấp 1', bg: 'rgba(16, 185, 129, 0.12)', color: '#10b981' },
+        2: { label: '🔵 Cấp 2', bg: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' },
+        3: { label: '🟣 Cấp 3', bg: 'rgba(168, 85, 247, 0.12)', color: '#a855f7' }
+      };
+      const badge = badges[level] || badges[1];
+      return (
+        <span style={{ padding: '0.2rem 0.6rem', borderRadius: '12px', background: badge.bg, color: badge.color, fontSize: '0.75rem', fontWeight: '600' }}>
+          {badge.label}
+        </span>
+      );
+    }},
     { accessorKey: 'lifespanHours', header: 'Tuổi thọ dự kiến', sortable: true, align: 'center', cell: (row) => (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--accent-green)' }}>
         <Clock size={14} /> {row.lifespanHours} giờ
@@ -958,6 +1004,481 @@ export default function Settings() {
               disabled={isSavingConfig}
             >
               {isSavingConfig ? 'Đang lưu...' : 'Lưu chính sách điểm chuyên cần'}
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {/* NHÓM 2.5: ĐIỂM TÍN NHIỆM & PHÂN CẤP THIẾT BỊ (ACCESS CONTROL LIST) */}
+      <Card
+        title="Hệ thống Điểm Tín Nhiệm & Phân Cấp Thiết Bị (Access Control List)"
+        icon={Sliders}
+        style={{ color: 'var(--accent-purple)' }}
+      >
+        <form onSubmit={handleSaveSysConfig}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+            Cấu hình hạn mức điểm tín nhiệm, cơ chế phân cấp thiết bị 3 Cấp độ, ngưỡng khóa quyền mượn, và thời gian dọn dẹp tài khoản sinh viên theo học kỳ.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                Điểm khởi tạo (Thành viên mới)
+              </label>
+              <TextInput
+                type="number"
+                min="50"
+                max="200"
+                required
+                value={sysConfig.defaultScore}
+                onChange={(e) => setSysConfig({ ...sysConfig, defaultScore: Number(e.target.value) })}
+                placeholder="100"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Điểm cấp tự động khi quẹt thẻ lần đầu (Mặc định: 100đ)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block', color: 'var(--accent-red)' }}>
+                Ngưỡng khóa quyền mượn (Điểm)
+              </label>
+              <TextInput
+                type="number"
+                min="1"
+                max="100"
+                required
+                value={sysConfig.borrowLockThreshold}
+                onChange={(e) => setSysConfig({ ...sysConfig, borrowLockThreshold: Number(e.target.value) })}
+                placeholder="80"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Dưới mức này sẽ bị khóa nút Mượn (Mặc định: &lt; 80đ)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block', color: 'var(--accent-green)' }}>
+                Điểm tối thiểu Cấp 1
+              </label>
+              <TextInput
+                type="number"
+                min="1"
+                max="200"
+                required
+                value={sysConfig.level1MinScore}
+                onChange={(e) => setSysConfig({ ...sysConfig, level1MinScore: Number(e.target.value) })}
+                placeholder="80"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Cáp, breadboard, cảm biến... (Mặc định: &ge; 80đ)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block', color: 'var(--accent-blue)' }}>
+                Điểm tối thiểu Cấp 2
+              </label>
+              <TextInput
+                type="number"
+                min="1"
+                max="300"
+                required
+                value={sysConfig.level2MinScore}
+                onChange={(e) => setSysConfig({ ...sysConfig, level2MinScore: Number(e.target.value) })}
+                placeholder="101"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Kit vi điều khiển, mỏ hàn, đồng hồ đo... (Mặc định: 101 - 150đ)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block', color: 'var(--accent-purple)' }}>
+                Điểm tối thiểu Cấp 3
+              </label>
+              <TextInput
+                type="number"
+                min="1"
+                max="500"
+                required
+                value={sysConfig.level3MinScore}
+                onChange={(e) => setSysConfig({ ...sysConfig, level3MinScore: Number(e.target.value) })}
+                placeholder="151"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Máy hiện sóng, máy in 3D, nguồn DC... (Mặc định: &gt; 150đ)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block', color: 'var(--accent-amber)' }}>
+                Trần điểm cộng tuần (Point Cap)
+              </label>
+              <TextInput
+                type="number"
+                min="5"
+                max="100"
+                required
+                value={sysConfig.weeklyPointCap}
+                onChange={(e) => setSysConfig({ ...sysConfig, weeklyPointCap: Number(e.target.value) })}
+                placeholder="20"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Tối đa điểm cộng/tuần chống lạm phát (Mặc định: +20đ)
+              </span>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>
+                Dọn dẹp sinh viên theo học kỳ (Ngày)
+              </label>
+              <TextInput
+                type="number"
+                min="30"
+                max="365"
+                required
+                value={sysConfig.guestCleanupDays}
+                onChange={(e) => setSysConfig({ ...sysConfig, guestCleanupDays: Number(e.target.value) })}
+                placeholder="120"
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Xóa sinh viên vãng lai không hoạt động sau X ngày (Mặc định: 120 ngày)
+              </span>
+            </div>
+          </div>
+
+          {/* Bảng cấu hình 13 Quy tắc hành vi: Tự động vs Giáo viên duyệt */}
+          <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <div style={{ fontWeight: '700', fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShieldAlert size={16} style={{ color: 'var(--accent-purple)' }} /> Cấu hình Chế độ Thực thi 13 Quy tắc Hành vi (Tự động vs Giáo viên duyệt)
+            </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+              Tùy chỉnh hành vi nào được hệ thống tự động cộng/trừ điểm và hành vi nào cần Giáo viên / Quản trị viên duyệt xác nhận.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1rem' }}>
+              {/* CỘNG ĐIỂM */}
+              <div style={{ padding: '0.85rem', background: 'var(--bg-overlay)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--accent-green)' }}>
+                <div style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--accent-green)', marginBottom: '0.75rem' }}>🟢 6 Hành vi Cộng Điểm Khuyến khích</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {[
+                    { key: 'rule_mode_return_ontime', label: '+2đ: Trả thiết bị đúng hạn & nguyên vẹn', defaultMode: 'auto' },
+                    { key: 'rule_mode_checkin_ontime', label: '+3đ: Check-in ca trực đúng giờ', defaultMode: 'auto' },
+                    { key: 'rule_mode_lab_cleanup', label: '+5đ: Tham gia dọn dẹp vệ sinh Lab', defaultMode: 'manual' },
+                    { key: 'rule_mode_bounty_task', label: '+15đ: Hoàn thành nhiệm vụ phục hồi điểm', defaultMode: 'manual' },
+                    { key: 'rule_mode_tech_support', label: '+10đ: Hỗ trợ kỹ thuật / Sửa chữa thiết bị', defaultMode: 'manual' },
+                    { key: 'rule_mode_doc_contribution', label: '+10đ: Đóng góp tài liệu / Code cho Lab', defaultMode: 'manual' }
+                  ].map(rule => {
+                    const currentMode = sysConfig[rule.key] || rule.defaultMode;
+                    return (
+                      <div key={rule.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                        <span style={{ color: 'var(--text-primary)', flex: 1, paddingRight: '0.5rem' }}>{rule.label}</span>
+                        <select
+                          value={currentMode}
+                          onChange={(e) => setSysConfig({ ...sysConfig, [rule.key]: e.target.value })}
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            background: currentMode === 'auto' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                            color: currentMode === 'auto' ? 'var(--accent-green)' : 'var(--accent-blue)',
+                            border: `1px solid ${currentMode === 'auto' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)'}`,
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="auto">⚡ Tự động</option>
+                          <option value="manual">👨‍🏫 GV duyệt</option>
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* TRỪ ĐIỂM */}
+              <div style={{ padding: '0.85rem', background: 'var(--bg-overlay)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--accent-red)' }}>
+                <div style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--accent-red)', marginBottom: '0.75rem' }}>🔴 7 Hành vi Trừ Điểm Vi phạm</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {[
+                    { key: 'rule_mode_late_return', label: '-5đ/ngày: Quá hạn trả thiết bị (Lũy tiến)', defaultMode: 'auto' },
+                    { key: 'rule_mode_noshow_shift', label: '-15đ: Bỏ ca trực không phép / Check-in ảo', defaultMode: 'manual' },
+                    { key: 'rule_mode_dirty_accessories', label: '-10đ: Trả thiết bị bẩn / Thiếu phụ kiện', defaultMode: 'manual' },
+                    { key: 'rule_mode_misuse', label: '-20đ: Sử dụng thiết bị sai mục đích Lab', defaultMode: 'manual' },
+                    { key: 'rule_mode_share_account', label: '-20đ: Cho người khác mượn ké tài khoản', defaultMode: 'manual' },
+                    { key: 'rule_mode_damage_loss', label: '-40đ: Làm hỏng hóc hoặc mất mát thiết bị', defaultMode: 'manual' },
+                    { key: 'rule_mode_report_bug', label: '+3đ: Phát hiện & báo cáo sớm lỗi thiết bị', defaultMode: 'manual' }
+                  ].map(rule => {
+                    const currentMode = sysConfig[rule.key] || rule.defaultMode;
+                    return (
+                      <div key={rule.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                        <span style={{ color: 'var(--text-primary)', flex: 1, paddingRight: '0.5rem' }}>{rule.label}</span>
+                        <select
+                          value={currentMode}
+                          onChange={(e) => setSysConfig({ ...sysConfig, [rule.key]: e.target.value })}
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            background: currentMode === 'auto' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                            color: currentMode === 'auto' ? 'var(--accent-red)' : 'var(--accent-blue)',
+                            border: `1px solid ${currentMode === 'auto' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)'}`,
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="auto">⚡ Tự động</option>
+                          <option value="manual">👨‍🏫 GV duyệt</option>
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
+            <Button
+              type="submit"
+              variant="primary"
+              icon={Save}
+              iconPosition="left"
+              disabled={isSavingConfig}
+            >
+              {isSavingConfig ? 'Đang lưu...' : 'Lưu cấu hình điểm & ACL'}
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {/* NHÓM 2.6: CHÍNH SÁCH MƯỢN THIẾT BỊ CHO SINH VIÊN NGOÀI CLB */}
+      <Card
+        title="Chính sách Mượn thiết bị cho Sinh viên ngoài CLB (Guest Policy)"
+        icon={ShieldAlert}
+        style={{ color: 'var(--accent-purple)' }}
+      >
+        <form onSubmit={handleSaveSysConfig}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+            Quy định các cơ chế kiểm soát rủi ro, bảo lãnh, ký quỹ và bảng chế tài vi phạm áp dụng riêng cho sinh viên vãng lai không có điểm tích lũy hệ thống.
+          </p>
+
+          {/* Toggle Bật/Tắt mượn thiết bị cho khách */}
+          <div 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.85rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              background: sysConfig.enableGuestBorrowing !== 'false' ? 'rgba(168,85,247,0.08)' : 'var(--bg-overlay)',
+              border: `1px solid ${sysConfig.enableGuestBorrowing !== 'false' ? 'var(--accent-purple)' : 'var(--border-color)'}`,
+              cursor: 'pointer',
+              marginBottom: '1.25rem',
+              transition: 'all 0.2s'
+            }}
+            onClick={() => setSysConfig(prev => ({ ...prev, enableGuestBorrowing: prev.enableGuestBorrowing !== 'false' ? 'false' : 'true' }))}
+          >
+            <div>
+              <div style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                Cho phép sinh viên ngoài CLB mượn / sử dụng thiết bị
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Bật/tắt toàn bộ tính năng tiếp nhận đơn mượn từ sinh viên ngoài CLB (Guest Accounts)
+              </div>
+            </div>
+            <div style={{
+              position: 'relative',
+              width: '42px',
+              height: '24px',
+              background: sysConfig.enableGuestBorrowing !== 'false' ? 'var(--accent-purple)' : 'var(--border-color)',
+              borderRadius: '12px',
+              transition: 'background 0.2s',
+              flexShrink: 0
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '3px',
+                left: sysConfig.enableGuestBorrowing !== 'false' ? '21px' : '3px',
+                width: '18px',
+                height: '18px',
+                background: '#fff',
+                borderRadius: '50%',
+                transition: 'left 0.2s',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+              }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+            {/* Cấu hình Phương án A */}
+            <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--accent-blue)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                🛡️ Phương án A: Bảo lãnh qua Thành viên CLB
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                Sinh viên ngoài CLB mượn đồ phải có thành viên chính thức bảo lãnh. Trách nhiệm đền bù và điểm số tính trực tiếp vào tài khoản người bảo lãnh.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.3rem', display: 'block' }}>
+                    Điểm uy tín tối thiểu để bảo lãnh
+                  </label>
+                  <TextInput
+                    type="number"
+                    min="80"
+                    max="200"
+                    value={sysConfig.sponsorMinScore}
+                    onChange={(e) => setSysConfig({ ...sysConfig, sponsorMinScore: Number(e.target.value) })}
+                    placeholder="80"
+                  />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                    Chỉ thành viên có điểm $\ge$ ngưỡng này mới được bảo lãnh (Mặc định: 80đ)
+                  </span>
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.3rem', display: 'block' }}>
+                    Số đơn bảo lãnh tối đa cùng lúc / thành viên
+                  </label>
+                  <TextInput
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={sysConfig.maxActiveGuaranteesPerMember}
+                    onChange={(e) => setSysConfig({ ...sysConfig, maxActiveGuaranteesPerMember: Number(e.target.value) })}
+                    placeholder="1"
+                  />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                    Giới hạn 1 đơn/thành viên để tránh nể nang nhận bảo lãnh hộ bừa bãi (Mặc định: 1 đơn)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cấu hình Phương án B & Chế tài tiền mặt */}
+            <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--accent-amber)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                💵 Phương án B & Mức phạt Tiền mặt
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                Ký quỹ tiền đặt cọc hiện vật hoặc giữ Thẻ SV / CCCD gốc tại Ban chủ nhiệm trong suốt thời gian mượn.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.3rem', display: 'block' }}>
+                    Mức phạt trả trễ hạn (VNĐ / Ngày)
+                  </label>
+                  <TextInput
+                    type="number"
+                    step="5000"
+                    min="5000"
+                    max="100000"
+                    value={sysConfig.guestOverdueFinePerDay}
+                    onChange={(e) => setSysConfig({ ...sysConfig, guestOverdueFinePerDay: Number(e.target.value) })}
+                    placeholder="15000"
+                  />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                    Phạt tiền nộp vào quỹ CLB nếu trả trễ hạn (Mặc định: 15.000đ/ngày)
+                  </span>
+                </div>
+
+                <div 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    background: sysConfig.allowGuestDeposit !== 'false' ? 'rgba(245,158,11,0.08)' : 'var(--bg-overlay)',
+                    border: `1px solid ${sysConfig.allowGuestDeposit !== 'false' ? 'var(--accent-amber)' : 'var(--border-color)'}`,
+                    cursor: 'pointer',
+                    marginTop: '0.35rem'
+                  }}
+                  onClick={() => setSysConfig(prev => ({ ...prev, allowGuestDeposit: prev.allowGuestDeposit !== 'false' ? 'false' : 'true' }))}
+                >
+                  <div style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                    Cho phép Ký quỹ tiền mặt / Giữ Thẻ SV
+                  </div>
+                  <div style={{
+                    width: '36px',
+                    height: '20px',
+                    background: sysConfig.allowGuestDeposit !== 'false' ? 'var(--accent-amber)' : 'var(--border-color)',
+                    borderRadius: '10px',
+                    position: 'relative',
+                    flexShrink: 0
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '2px',
+                      left: sysConfig.allowGuestDeposit !== 'false' ? '18px' : '2px',
+                      width: '16px',
+                      height: '16px',
+                      background: '#fff',
+                      borderRadius: '50%',
+                      transition: 'left 0.2s'
+                    }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* BẢNG QUY ĐỔI / XỬ LÝ VI PHẠM DÀNH CHO SINH VIÊN NGOÀI CLB */}
+          <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+            <div style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--accent-red)', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              ⚠️ Bảng Quy Chế / Xử lý Vi phạm Dành cho Sinh viên Ngoài CLB
+            </div>
+            <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse', borderRadius: '6px', overflow: 'hidden' }}>
+              <thead>
+                <tr style={{ background: 'var(--bg-overlay)', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
+                  <th style={{ padding: '8px 12px', width: '35%', color: 'var(--text-primary)' }}>Tình huống phát sinh</th>
+                  <th style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>Hình thức xử lý & Chế tài</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <td style={{ padding: '8px 12px', fontWeight: '600', color: 'var(--accent-amber)' }}>Trả thiết bị trễ hạn</td>
+                  <td style={{ padding: '8px 12px', color: 'var(--text-secondary)' }}>
+                    Phạt tiền mặt theo quy định quỹ CLB ({Number(sysConfig.guestOverdueFinePerDay || 15000).toLocaleString('vi-VN')}đ/ngày) hoặc báo cáo về Khoa/Giám thị phụ trách nếu quá 3 ngày.
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <td style={{ padding: '8px 12px', fontWeight: '600', color: 'var(--accent-red)' }}>Làm hỏng / Mất thiết bị</td>
+                  <td style={{ padding: '8px 12px', color: 'var(--text-secondary)' }}>
+                    Buộc đền bù 100% giá trị thiết bị theo giá thị trường hiện tại; trường hợp không hợp tác sẽ gửi danh sách về Đoàn Thanh niên / Khoa quản lý sinh viên.
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '8px 12px', fontWeight: '600', color: 'var(--accent-purple)' }}>Mang thiết bị ra khỏi Lab không phép</td>
+                  <td style={{ padding: '8px 12px', color: 'var(--text-secondary)' }}>
+                    Khóa vĩnh viễn quyền ra vào phòng Lab, thông báo vi phạm kỷ luật cấp Khoa/Trường.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Lưu ý thực tế & Mô hình Open Labs / MakerSpace */}
+            <div style={{ marginTop: '0.85rem', padding: '0.65rem 0.85rem', background: 'rgba(59, 130, 246, 0.06)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              <div style={{ fontWeight: '700', color: 'var(--accent-blue)', marginBottom: '0.25rem' }}>
+                🔗 Mô hình tham khảo: MakerSpace / Open Labs Policy
+              </div>
+              <div>
+                Áp dụng cơ chế <em>"External User Agreement"</em> kết hợp lưu số định danh / scan CCCD gốc và phân định trách nhiệm 1:1 với người bảo lãnh nội bộ để kiểm soát rủi ro thất thoát tài sản tuyệt đối.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
+            <Button
+              type="submit"
+              variant="primary"
+              icon={Save}
+              iconPosition="left"
+              disabled={isSavingConfig}
+            >
+              {isSavingConfig ? 'Đang lưu...' : 'Lưu chính sách khách ngoài CLB'}
             </Button>
           </div>
         </form>
@@ -1850,6 +2371,22 @@ export default function Settings() {
                   options={ASSET_TYPES.map(t => ({ value: t.value, label: t.label }))}
                 />
               </div>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Cấp độ thiết bị (Access Control List)</label>
+              <Select
+                value={form.requiredLevel || 1}
+                onChange={(val) => setForm({...form, requiredLevel: Number(val)})}
+                options={[
+                  { value: 1, label: '🟢 Cấp 1 (Từ 80 điểm: Cáp, Breadboard, Cảm biến...)' },
+                  { value: 2, label: '🔵 Cấp 2 (Từ 101 - 150 điểm: Kit STM32, ESP32, Mỏ hàn...)' },
+                  { value: 3, label: '🟣 Cấp 3 (Trên 150 điểm: Máy hiện sóng, Máy in 3D, Nguồn DC...)' }
+                ]}
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                Chỉ thành viên đạt đủ điểm tín nhiệm mới nhìn thấy và mượn được thiết bị này.
+              </span>
             </div>
 
             <div className="form-group" style={{ margin: 0 }}>

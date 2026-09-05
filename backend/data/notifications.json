@@ -1,5 +1,139 @@
 [
   {
+    "id": "040836c8-0906-4143-b8fe-332ff9da52a8",
+    "type": "room_booking_bulk",
+    "title": "Đăng ký phòng (Nhiều buổi)",
+    "content": "Trần Hoàng Nam (20210001) vừa đăng ký 2 buổi phòng Lab",
+    "details": {
+      "mssv": "20210001",
+      "representativeName": "Trần Hoàng Nam",
+      "participantsCount": 2,
+      "members": [
+        {
+          "mssv": "20210001",
+          "name": "Trần Hoàng Nam"
+        },
+        {
+          "mssv": "20210002",
+          "name": "Phạm Minh Tuấn"
+        }
+      ],
+      "slots": [
+        {
+          "date": "2026-09-06",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-09-06",
+          "slotId": "morning_2"
+        }
+      ]
+    },
+    "timestamp": "2026-09-05T14:56:46.649Z",
+    "read": true
+  },
+  {
+    "id": "299a4f9e-fbf1-4534-b769-3e7ecab1b176",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 9x \"undefined\" của Lê Văn C (20220003) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "816d5e97-3c58-4429-be5f-ca991f3ecbb8",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "qty": 9
+    },
+    "timestamp": "2026-09-05T14:54:16.066Z",
+    "read": true
+  },
+  {
+    "id": "93a6e7f9-f929-4a06-9961-d4d57055f046",
+    "type": "equipment_borrow",
+    "title": "Khách ngoài CLB mượn thiết bị",
+    "content": "Hoàng Văn Khách 4 (20249004 - Sinh viên ngoài CLB) vừa mượn 1x Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+    "details": {
+      "borrowId": "17e7a937-42a3-45ed-89d0-8af1c42fc4cc",
+      "equipmentId": "eq-mrbve89up0k3ggggci9",
+      "equipmentName": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+      "qty": 1,
+      "userName": "Hoàng Văn Khách 4",
+      "mssv": "20249004",
+      "date": "2026-09-05T14:52:45.157Z",
+      "isGuest": true,
+      "guaranteeMethod": "deposit_money"
+    },
+    "timestamp": "2026-09-05T14:52:45.159Z",
+    "read": true
+  },
+  {
+    "id": "84f39447-ea6e-4aff-99a1-4077b7fa035b",
+    "type": "equipment_borrow",
+    "title": "Khách ngoài CLB mượn thiết bị",
+    "content": "Nguyễn Văn Khách 1 (20249001 - Sinh viên ngoài CLB) vừa mượn 1x Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet) (Bảo lãnh bởi: Trần Hoàng Nam)",
+    "details": {
+      "borrowId": "b41b621d-dc6c-403d-ba6c-0bef87725b88",
+      "equipmentId": "eq-mrbve89up0k3ggggci9",
+      "equipmentName": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+      "qty": 1,
+      "userName": "Nguyễn Văn Khách 1",
+      "mssv": "20249001",
+      "date": "2026-09-05T14:52:45.125Z",
+      "isGuest": true,
+      "guaranteeMethod": "sponsor"
+    },
+    "timestamp": "2026-09-05T14:52:45.127Z",
+    "read": true
+  },
+  {
+    "id": "a37b0473-a59d-4059-840b-3955e57ac047",
+    "type": "equipment_borrow",
+    "title": "Khách ngoài CLB mượn thiết bị",
+    "content": "Lê Văn Khách (20249999 - Sinh viên ngoài CLB) vừa mượn 1x Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet) (Bảo lãnh bởi: Phạm Văn Dũng)",
+    "details": {
+      "borrowId": "b0352403-0eab-4dd6-95c5-a54f37013984",
+      "equipmentId": "eq-mrbve89up0k3ggggci9",
+      "equipmentName": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+      "qty": 1,
+      "userName": "Lê Văn Khách",
+      "mssv": "20249999",
+      "date": "2026-09-05T14:52:45.111Z",
+      "isGuest": true,
+      "guaranteeMethod": "sponsor"
+    },
+    "timestamp": "2026-09-05T14:52:45.113Z",
+    "read": true
+  },
+  {
+    "id": "ccf7ea34-b302-4f0c-9283-5f077aa3c4d7",
+    "type": "equipment_borrow",
+    "title": "Mượn thiết bị mới",
+    "content": "Lê Văn C (20220003) vừa mượn/xuất 9x Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+    "details": {
+      "borrowId": "816d5e97-3c58-4429-be5f-ca991f3ecbb8",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "qty": 9,
+      "userName": "Lê Văn C",
+      "mssv": "20220003",
+      "date": "2026-09-05T12:54:00.000Z"
+    },
+    "timestamp": "2026-09-05T12:25:44.916Z",
+    "read": true
+  },
+  {
+    "id": "39942850-3bdd-4c5d-ba29-f4e3ed01eeef",
+    "type": "warning",
+    "title": "Tự động hủy phiếu quá hạn nhận",
+    "content": "Phiếu đặt trước 1x \"Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)\" của Lê Văn C (20220003) đã tự động bị hủy do quá hạn nhận 2 giờ. Đã hoàn trả lại kho.",
+    "details": {
+      "borrowId": "2f71c9c7-b95c-4599-a683-b607d382b3cc",
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "qty": 1
+    },
+    "timestamp": "2026-09-05T11:27:46.738Z",
+    "read": true
+  },
+  {
     "id": "723b359f-6e24-4a22-a86f-2bbed53623ad",
     "type": "equipment_borrow",
     "title": "Mượn thiết bị mới",

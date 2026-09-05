@@ -1,0 +1,44 @@
+[
+  {
+    "id": "66d57949-5c5c-4b79-822a-b3a92dcdd79a",
+    "mssv": "20249999",
+    "userName": "Sinh Viên Mới Auto",
+    "type": "reward",
+    "actionKey": "admin_adjust",
+    "amount": 10,
+    "balanceAfter": 130,
+    "reason": "Hỗ trợ trực ca Lab ban sáng",
+    "evidence": "Biên bản bàn giao ca trực ngày 05/09",
+    "createdBy": "admin-default",
+    "createdByName": "Quản trị viên",
+    "timestamp": "2026-09-05T14:32:49.308Z"
+  },
+  {
+    "id": "569f3b34-3603-4927-9dc8-78561886e333",
+    "mssv": "20249999",
+    "userName": "Sinh Viên Mới Auto",
+    "type": "reward",
+    "actionKey": "initial_signup",
+    "amount": 20,
+    "balanceAfter": 120,
+    "reason": "Cấp 100 điểm khởi tạo khi kích hoạt tài khoản mượn thẻ Lab",
+    "evidence": "",
+    "createdBy": "system",
+    "createdByName": "Hệ thống tự động",
+    "timestamp": "2026-09-05T14:32:13.646Z"
+  },
+  {
+    "id": "cbf5fe01-5ed0-4fec-8e36-22f0a335c30f",
+    "mssv": "20249999",
+    "userName": "Sinh Viên Mới Auto",
+    "type": "reward",
+    "actionKey": "admin_adjust",
+    "amount": 0,
+    "balanceAfter": 120,
+    "reason": "Hỗ trợ trực ca Lab ban sáng",
+    "evidence": "Biên bản bàn giao ca trực ngày 05/09",
+    "createdBy": "admin-default",
+    "createdByName": "Quản trị viên",
+    "timestamp": "2026-09-05T14:32:13.653Z"
+  }
+]

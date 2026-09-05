@@ -52,6 +52,7 @@ export const Equipment = sequelize.define('Equipment', {
   minThreshold: { type: DataTypes.INTEGER, defaultValue: 0 },
   usedHours: { type: DataTypes.INTEGER, defaultValue: 0 },
   lifespanHours: { type: DataTypes.INTEGER, defaultValue: 0 },
+  requiredLevel: { type: DataTypes.INTEGER, defaultValue: 1 }, // 1: Cơ bản (>=80đ), 2: Trung cấp (101-150đ), 3: Chuyên sâu (>150đ)
   instances: { type: DataTypes.TEXT, defaultValue: '[]' }
 }, { tableName: 'equipment', timestamps: false });
 
@@ -70,7 +71,22 @@ export const Borrow = sequelize.define('Borrow', {
   borrowNotes: { type: DataTypes.TEXT },
   returnNotes: { type: DataTypes.TEXT },
   finalCondition: { type: DataTypes.TEXT },
-  instanceIds: { type: DataTypes.TEXT, defaultValue: '[]' }
+  instanceIds: { type: DataTypes.TEXT, defaultValue: '[]' },
+  // Các trường phục vụ cơ chế xử lý sinh viên ngoài CLB
+  borrowerType: { type: DataTypes.TEXT, defaultValue: 'internal' }, // 'internal' | 'external_guest'
+  guaranteeMethod: { type: DataTypes.TEXT, defaultValue: null }, // 'sponsor' | 'deposit_money' | 'deposit_id_card' | 'deposit_student_card' | 'in_lab_only'
+  sponsorMssv: { type: DataTypes.TEXT, defaultValue: null },
+  sponsorName: { type: DataTypes.TEXT, defaultValue: null },
+  sponsorPhone: { type: DataTypes.TEXT, defaultValue: null },
+  guestPhone: { type: DataTypes.TEXT, defaultValue: null },
+  guestFaculty: { type: DataTypes.TEXT, defaultValue: null },
+  identityCardNumber: { type: DataTypes.TEXT, defaultValue: null },
+  depositAmount: { type: DataTypes.REAL, defaultValue: 0 },
+  depositType: { type: DataTypes.TEXT, defaultValue: null },
+  depositNotes: { type: DataTypes.TEXT, defaultValue: null },
+  identityProof: { type: DataTypes.TEXT, defaultValue: null },
+  guestCashFine: { type: DataTypes.REAL, defaultValue: 0 },
+  depositRefundStatus: { type: DataTypes.TEXT, defaultValue: null }
 }, { tableName: 'borrows', timestamps: false });
 
 // 4. Bảng Schedule (Lịch trực)
@@ -177,6 +193,7 @@ export const Catalog = sequelize.define('Catalog', {
   assetType: { type: DataTypes.TEXT, defaultValue: 'Thiết bị' },
   unit: { type: DataTypes.TEXT, defaultValue: 'Cái' },
   lifespanHours: { type: DataTypes.INTEGER, defaultValue: 0 },
+  requiredLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
   description: { type: DataTypes.TEXT }
 }, { tableName: 'equipment_catalog', timestamps: false });
 
@@ -241,11 +258,119 @@ export const Waitlist = sequelize.define('Waitlist', {
   fulfilledDate: { type: DataTypes.TEXT }
 }, { tableName: 'waitlist', timestamps: false });
 
+// 18. Bảng PointTransaction (Lịch sử biến động điểm tín nhiệm minh bạch)
+export const PointTransaction = sequelize.define('PointTransaction', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  mssv: { type: DataTypes.TEXT, allowNull: false },
+  userName: { type: DataTypes.TEXT, allowNull: false },
+  type: { type: DataTypes.TEXT, allowNull: false }, // 'reward' | 'penalty'
+  actionKey: { type: DataTypes.TEXT },
+  amount: { type: DataTypes.INTEGER, allowNull: false },
+  balanceAfter: { type: DataTypes.INTEGER, defaultValue: 100 },
+  reason: { type: DataTypes.TEXT, allowNull: false },
+  evidence: { type: DataTypes.TEXT }, // Link ảnh chụp / log vi phạm / mã biên bản
+  createdBy: { type: DataTypes.TEXT },
+  createdByName: { type: DataTypes.TEXT },
+  timestamp: { type: DataTypes.TEXT, allowNull: false }
+}, { tableName: 'point_transactions', timestamps: false });
+
+// 19. Bảng BountyTask (Nhiệm vụ phục hồi điểm tín nhiệm cho sinh viên)
+export const BountyTask = sequelize.define('BountyTask', {
+  id: { type: DataTypes.TEXT, primaryKey: true },
+  title: { type: DataTypes.TEXT, allowNull: false },
+  description: { type: DataTypes.TEXT },
+  points: { type: DataTypes.INTEGER, defaultValue: 10 },
+  taskType: { type: DataTypes.TEXT, defaultValue: 'makeup_shift' }, // 'makeup_shift' | 'cleanup' | 'tech_doc' | 'other'
+  status: { type: DataTypes.TEXT, defaultValue: 'open' }, // 'open' | 'claimed' | 'completed'
+  claimedBy: { type: DataTypes.TEXT },
+  claimedByName: { type: DataTypes.TEXT },
+  claimedDate: { type: DataTypes.TEXT },
+  completedDate: { type: DataTypes.TEXT },
+  approvedBy: { type: DataTypes.TEXT }
+}, { tableName: 'bounty_tasks', timestamps: false });
+
 // ==========================================
 // ĐỒNG BỘ & SEED DỮ LIỆU TỪ JSON CŨ SANG SQLITE
 // ==========================================
 export async function syncDatabase() {
   await sequelize.sync();
+  
+  // Kiểm tra và tự động thêm cột mới nếu chưa có trong bảng cũ (SQLite migration)
+  try {
+    const [columns] = await sequelize.query("PRAGMA table_info(equipment);");
+    const hasRequiredLevel = columns.some(c => c.name === 'requiredLevel');
+    if (!hasRequiredLevel) {
+      await sequelize.query("ALTER TABLE equipment ADD COLUMN requiredLevel INTEGER DEFAULT 1;");
+      console.log('Migrated equipment table: added requiredLevel column.');
+    }
+  } catch (e) {
+    console.log('Migration note for equipment:', e.message);
+  }
+
+  try {
+    const [columns] = await sequelize.query("PRAGMA table_info(equipment_catalog);");
+    const hasRequiredLevel = columns.some(c => c.name === 'requiredLevel');
+    if (!hasRequiredLevel) {
+      await sequelize.query("ALTER TABLE equipment_catalog ADD COLUMN requiredLevel INTEGER DEFAULT 1;");
+      console.log('Migrated equipment_catalog table: added requiredLevel column.');
+    }
+  } catch (e) {
+    console.log('Migration note for equipment_catalog:', e.message);
+  }
+
+  try {
+    const [columns] = await sequelize.query("PRAGMA table_info(borrows);");
+    const colNames = columns.map(c => c.name);
+    if (!colNames.includes('instanceIds')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN instanceIds TEXT DEFAULT '[]';");
+    }
+    if (!colNames.includes('borrowerType')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN borrowerType TEXT DEFAULT 'internal';");
+    }
+    if (!colNames.includes('guaranteeMethod')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN guaranteeMethod TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('sponsorMssv')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN sponsorMssv TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('sponsorName')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN sponsorName TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('sponsorPhone')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN sponsorPhone TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('guestPhone')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN guestPhone TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('guestFaculty')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN guestFaculty TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('identityCardNumber')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN identityCardNumber TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('depositAmount')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN depositAmount REAL DEFAULT 0;");
+    }
+    if (!colNames.includes('depositType')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN depositType TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('depositNotes')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN depositNotes TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('identityProof')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN identityProof TEXT DEFAULT NULL;");
+    }
+    if (!colNames.includes('guestCashFine')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN guestCashFine REAL DEFAULT 0;");
+    }
+    if (!colNames.includes('depositRefundStatus')) {
+      await sequelize.query("ALTER TABLE borrows ADD COLUMN depositRefundStatus TEXT DEFAULT NULL;");
+    }
+    console.log('Migrated borrows table: verified all guest & guarantee columns.');
+  } catch (e) {
+    console.log('Migration note for borrows:', e.message);
+  }
+
   console.log('Database SQLite & tables synced successfully.');
 
   const seedIfEmpty = async (Model, fileName, defaultData = []) => {
@@ -383,7 +508,14 @@ export async function syncDatabase() {
     { key: 'slot_evening_1_start', value: '16:00' },
     { key: 'slot_evening_1_end', value: '18:00' },
     { key: 'slot_evening_2_start', value: '18:00' },
-    { key: 'slot_evening_2_end', value: '20:00' }
+    { key: 'slot_evening_2_end', value: '20:00' },
+    { key: 'defaultScore', value: '100' },
+    { key: 'borrowLockThreshold', value: '80' },
+    { key: 'level1MinScore', value: '80' },
+    { key: 'level2MinScore', value: '101' },
+    { key: 'level3MinScore', value: '151' },
+    { key: 'weeklyPointCap', value: '20' },
+    { key: 'guestCleanupDays', value: '120' }
   ]);
 
   await reloadCacheFromDb();
@@ -431,7 +563,9 @@ const collectionToModelMap = {
   settings: SystemSetting,
   categories: Category,
   audit_logs: AuditLog,
-  waitlist: Waitlist
+  waitlist: Waitlist,
+  point_transactions: PointTransaction,
+  bounty_tasks: BountyTask
 };
 
 function getModelByCollectionName(colName) {

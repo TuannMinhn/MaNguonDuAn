@@ -103,5 +103,258 @@
     "metadata": null,
     "success": true,
     "createdAt": "2026-09-03T20:00:14.585Z"
+  },
+  {
+    "id": "331d8e72-7cd5-4065-b400-f92f5b6400a3",
+    "actorUserId": null,
+    "actorMssv": null,
+    "actorName": "System",
+    "actorRole": "system",
+    "action": "BORROW",
+    "targetType": "borrow_ticket",
+    "targetId": "816d5e97-3c58-4429-be5f-ca991f3ecbb8",
+    "oldValue": null,
+    "newValue": {
+      "equipmentId": "eq-mrbve89uzqvmqo9y17n",
+      "equipmentName": "Máy hiện sóng Rigol DS1054Z (4 kênh, 50MHz)",
+      "equipmentCode": "MEA-01",
+      "borrowerMssv": "20220003",
+      "borrowerName": "Lê Văn C",
+      "qty": 9,
+      "status": "Đã đặt trước",
+      "isConsumable": false
+    },
+    "metadata": {
+      "initialCondition": "Tốt / Hoạt động bình thường",
+      "expectedReturnDate": "2026-09-06T10:00:00.000Z"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T12:25:44.918Z"
+  },
+  {
+    "id": "eee6957a-ad1a-4f9c-962c-d6ac23d8bb09",
+    "actorUserId": "admin-root",
+    "actorMssv": "ADMIN",
+    "actorName": "Quản trị viên Lab",
+    "actorRole": "admin",
+    "action": "UPDATE",
+    "targetType": "rfid_card",
+    "targetId": "rc1",
+    "oldValue": {
+      "status": "active"
+    },
+    "newValue": {
+      "status": "inactive"
+    },
+    "metadata": {
+      "cardId": "CARD-001"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T13:56:00.625Z"
+  },
+  {
+    "id": "3f93af8e-8eea-4927-9ec4-b5cc2fdc5a6e",
+    "actorUserId": "admin-root",
+    "actorMssv": "ADMIN",
+    "actorName": "Quản trị viên Lab",
+    "actorRole": "admin",
+    "action": "UPDATE",
+    "targetType": "rfid_card",
+    "targetId": "rc1",
+    "oldValue": {
+      "status": "inactive"
+    },
+    "newValue": {
+      "status": "active"
+    },
+    "metadata": {
+      "cardId": "CARD-001"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T13:56:01.023Z"
+  },
+  {
+    "id": "5d315c3b-414b-4fd0-a140-12d091283593",
+    "actorUserId": "admin-default",
+    "actorMssv": null,
+    "actorName": "Quản trị viên",
+    "actorRole": "manager",
+    "action": "UPDATE",
+    "targetType": "user_points",
+    "targetId": "50f01ef4-1d7a-40a9-b6e1-5eba20223d64",
+    "oldValue": null,
+    "newValue": {
+      "points": 120
+    },
+    "metadata": {
+      "amount": 10,
+      "reason": "Hỗ trợ trực ca Lab ban sáng",
+      "evidence": "Biên bản bàn giao ca trực ngày 05/09",
+      "transactionId": "cbf5fe01-5ed0-4fec-8e36-22f0a335c30f"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T14:32:13.654Z"
+  },
+  {
+    "id": "6bbcc27b-0ff4-47ee-886a-02c441a34d86",
+    "actorUserId": "admin-default",
+    "actorMssv": null,
+    "actorName": "Quản trị viên",
+    "actorRole": "manager",
+    "action": "UPDATE",
+    "targetType": "user_points",
+    "targetId": "50f01ef4-1d7a-40a9-b6e1-5eba20223d64",
+    "oldValue": null,
+    "newValue": {
+      "points": 130
+    },
+    "metadata": {
+      "amount": 10,
+      "reason": "Hỗ trợ trực ca Lab ban sáng",
+      "evidence": "Biên bản bàn giao ca trực ngày 05/09",
+      "transactionId": "66d57949-5c5c-4b79-822a-b3a92dcdd79a"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T14:32:49.310Z"
+  },
+  {
+    "id": "a0e78016-e9ef-4a1b-a905-2dce2974038e",
+    "actorUserId": null,
+    "actorMssv": null,
+    "actorName": "System",
+    "actorRole": "system",
+    "action": "BORROW",
+    "targetType": "borrow_ticket",
+    "targetId": "b0352403-0eab-4dd6-95c5-a54f37013984",
+    "oldValue": null,
+    "newValue": {
+      "equipmentId": "eq-mrbve89up0k3ggggci9",
+      "equipmentName": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+      "equipmentCode": "MOD-03",
+      "borrowerMssv": "20249999",
+      "borrowerName": "Lê Văn Khách",
+      "qty": 1,
+      "status": "Đã đặt trước",
+      "isConsumable": false,
+      "borrowerType": "external_guest",
+      "guaranteeMethod": "sponsor",
+      "sponsorMssv": "20220004"
+    },
+    "metadata": {
+      "initialCondition": "Tốt",
+      "expectedReturnDate": "2026-09-12T14:52:45.111Z"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T14:52:45.116Z"
+  },
+  {
+    "id": "7fcdd25a-bcc6-4d0d-9a69-fde0a1eadbd7",
+    "actorUserId": null,
+    "actorMssv": null,
+    "actorName": "System",
+    "actorRole": "system",
+    "action": "BORROW",
+    "targetType": "borrow_ticket",
+    "targetId": "b41b621d-dc6c-403d-ba6c-0bef87725b88",
+    "oldValue": null,
+    "newValue": {
+      "equipmentId": "eq-mrbve89up0k3ggggci9",
+      "equipmentName": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+      "equipmentCode": "MOD-03",
+      "borrowerMssv": "20249001",
+      "borrowerName": "Nguyễn Văn Khách 1",
+      "qty": 1,
+      "status": "Đã đặt trước",
+      "isConsumable": false,
+      "borrowerType": "external_guest",
+      "guaranteeMethod": "sponsor",
+      "sponsorMssv": "20210001"
+    },
+    "metadata": {
+      "initialCondition": "Tốt",
+      "expectedReturnDate": "2026-09-12T14:52:45.125Z"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T14:52:45.129Z"
+  },
+  {
+    "id": "9165bb3f-7e3b-4b9f-9005-b4fa5d955314",
+    "actorUserId": null,
+    "actorMssv": null,
+    "actorName": "System",
+    "actorRole": "system",
+    "action": "BORROW",
+    "targetType": "borrow_ticket",
+    "targetId": "17e7a937-42a3-45ed-89d0-8af1c42fc4cc",
+    "oldValue": null,
+    "newValue": {
+      "equipmentId": "eq-mrbve89up0k3ggggci9",
+      "equipmentName": "Module viễn thông SIM7600 4G LTE (Gửi tin nhắn, gọi điện, data Internet)",
+      "equipmentCode": "MOD-03",
+      "borrowerMssv": "20249004",
+      "borrowerName": "Hoàng Văn Khách 4",
+      "qty": 1,
+      "status": "Đã đặt trước",
+      "isConsumable": false,
+      "borrowerType": "external_guest",
+      "guaranteeMethod": "deposit_money",
+      "sponsorMssv": null
+    },
+    "metadata": {
+      "initialCondition": "Tốt",
+      "expectedReturnDate": "2026-09-12T14:52:45.157Z"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T14:52:45.162Z"
+  },
+  {
+    "id": "7e0ee255-0580-4732-8aeb-3b434fb5f9bb",
+    "actorUserId": "admin-default",
+    "actorMssv": null,
+    "actorName": "Quản trị viên",
+    "actorRole": "manager",
+    "action": "CREATE",
+    "targetType": "room_booking_bulk",
+    "targetId": null,
+    "oldValue": null,
+    "newValue": {
+      "bookedCount": 2,
+      "representativeMssv": "20210001",
+      "representativeName": "Trần Hoàng Nam",
+      "slots": [
+        {
+          "date": "2026-09-06",
+          "slotId": "morning_1"
+        },
+        {
+          "date": "2026-09-06",
+          "slotId": "morning_2"
+        }
+      ]
+    },
+    "metadata": {
+      "failedCount": 0,
+      "purpose": "Sử dụng chung"
+    },
+    "success": true,
+    "createdAt": "2026-09-05T14:56:46.648Z"
+  },
+  {
+    "id": "f772941d-e440-45e2-a94f-92ead655d44e",
+    "actorUserId": "admin-default",
+    "actorMssv": null,
+    "actorName": "Quản trị viên",
+    "actorRole": "manager",
+    "action": "MARK_ALL_READ",
+    "targetType": "notification",
+    "targetId": "batch",
+    "oldValue": null,
+    "newValue": {
+      "read": true,
+      "updatedCount": 7
+    },
+    "metadata": null,
+    "success": true,
+    "createdAt": "2026-09-05T14:59:46.347Z"
   }
 ]

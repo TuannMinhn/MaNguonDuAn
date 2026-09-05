@@ -1323,10 +1323,19 @@ export default function Equipment({ activeTab = 'list', pageParams = {} }) {
       align: 'left',
       cell: (row) => {
         const isConsumable = row.assetType === 'Linh kiện tiêu hao' || row.assetType === 'Vật tư tiêu hao';
+        const lvl = Number(row.requiredLevel) || 1;
+        let lvlBadge = { text: '🟢 Cấp 1', color: 'var(--accent-green)', bg: 'rgba(16, 185, 129, 0.12)' };
+        if (lvl === 2) lvlBadge = { text: '🔵 Cấp 2', color: 'var(--accent-blue)', bg: 'rgba(59, 130, 246, 0.12)' };
+        if (lvl === 3) lvlBadge = { text: '🟣 Cấp 3', color: 'var(--accent-purple)', bg: 'rgba(139, 92, 246, 0.12)' };
+
         return (
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.35 }}>{row.name}</div>
             <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', marginTop: '0.25rem', fontSize: '0.76rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.7rem', padding: '1px 5px', borderRadius: '4px', fontWeight: '600', color: lvlBadge.color, background: lvlBadge.bg }}>
+                {lvlBadge.text}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
               <span style={{ color: 'var(--text-muted)' }}>{row.category || 'Khác'}</span>
               <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
               <span style={{ color: 'var(--text-secondary)' }}>
@@ -1459,20 +1468,43 @@ export default function Equipment({ activeTab = 'list', pageParams = {} }) {
       header: 'Thiết bị / Người mượn',
       width: '35%',
       sortable: true,
-      cell: (ticket) => (
-        <div>
-          <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.9rem' }}>{ticket.equipmentName}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', marginTop: '0.15rem' }}>
-            <span>Mã: <strong style={{ color: '#a78bfa' }}>{ticket.equipmentCode}</strong></span>
-            <span>·</span>
-            <span>SL: <strong>{ticket.qty}</strong></span>
+      cell: (ticket) => {
+        const isGuest = ticket.borrowerType === 'external_guest';
+        return (
+          <div>
+            <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.9rem' }}>{ticket.equipmentName}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', marginTop: '0.15rem' }}>
+              <span>Mã: <strong style={{ color: '#a78bfa' }}>{ticket.equipmentCode}</strong></span>
+              <span>·</span>
+              <span>SL: <strong>{ticket.qty}</strong></span>
+            </div>
+            <div style={{ marginTop: '0.45rem', borderTop: '1px dashed rgba(255,255,255,0.06)', paddingTop: '0.35rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: '500', color: isGuest ? 'var(--accent-purple)' : 'var(--accent-blue)', fontSize: '0.85rem' }}>{ticket.borrowerName}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>(MSSV: {ticket.mssv})</span>
+                {isGuest && (
+                  <span style={{ fontSize: '0.68rem', padding: '1px 5px', borderRadius: '4px', background: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-purple)', fontWeight: '600', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                    Khách ngoài CLB
+                  </span>
+                )}
+              </div>
+              {isGuest && (
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                  {ticket.guaranteeMethod === 'sponsor' ? (
+                    <span style={{ color: 'var(--accent-blue)' }}>🛡️ Bảo lãnh: <strong>{ticket.sponsorName || ticket.sponsorMssv}</strong></span>
+                  ) : ticket.guaranteeMethod === 'deposit_money' ? (
+                    <span style={{ color: 'var(--accent-amber)' }}>💵 Ký quỹ: <strong>{Number(ticket.depositAmount || 0).toLocaleString('vi-VN')}đ</strong></span>
+                  ) : ticket.guaranteeMethod?.includes('deposit') ? (
+                    <span style={{ color: 'var(--accent-amber)' }}>🪪 Giữ Thẻ SV / CCCD</span>
+                  ) : (
+                    <span style={{ color: 'var(--accent-green)' }}>🏢 Dùng tại chỗ Lab</span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-          <div style={{ marginTop: '0.45rem', borderTop: '1px dashed rgba(255,255,255,0.06)', paddingTop: '0.35rem' }}>
-            <span style={{ fontWeight: '500', color: 'var(--accent-blue)', fontSize: '0.85rem' }}>{ticket.borrowerName}</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '0.4rem' }}>(MSSV: {ticket.mssv})</span>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       accessorKey: 'expectedReturnDate',

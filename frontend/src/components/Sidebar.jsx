@@ -114,7 +114,7 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole, setUser
     { id: 'student-equipment',    label: 'Kho thiết bị',     icon: Boxes,           roles: ['student'] },
     { id: 'room-booking-parent',  label: 'Phòng Lab',        icon: DoorOpen,        isParent: 'room',                 roles: ['admin', 'student'], moduleKey: 'enableRoomBooking' },
     { id: 'rfid-management',      label: 'Thẻ RFID',         icon: ShieldCheck,     roles: ['admin'], moduleKey: 'enableRFID' },
-    { id: 'notifications-center', label: 'Thông báo',        icon: Bell,            roles: ['admin', 'student'] },
+    { id: 'notifications-center', label: 'Thông báo',        icon: Bell,            roles: ['admin'] },
     { id: 'kiosk',                label: 'Kiosk',            icon: DoorOpen,        roles: ['admin'], moduleKey: 'enableKiosk' },
     { id: 'settings',             label: 'Cài đặt',          icon: Settings,        roles: ['admin'] },
   ];

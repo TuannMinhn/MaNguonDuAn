@@ -138,7 +138,7 @@ function App() {
         return modules.enableKiosk ? <Kiosk /> : <Dashboard />;
       case 'notifications-center':
       case 'notifications':
-        return <NotificationsCenter onNavigate={navigateTo} userRole={userRole} />;
+        return userRole === 'admin' ? <NotificationsCenter onNavigate={navigateTo} userRole={userRole} /> : <StudentEquipment />;
       case 'settings':
         return <Settings />;
       default:

@@ -214,7 +214,36 @@ const DEFAULT_SETTINGS = {
   notifyBorrowEquipment: 'true',
   notifyReturnEquipment: 'true',
   notifyRoomBooking: 'true',
-  notifyMaintenanceAlert: 'true'
+  notifyMaintenanceAlert: 'true',
+  // Cấu hình Điểm Tín Nhiệm & Phân Cấp Thiết Bị (Access Control List)
+  defaultScore: 100,
+  borrowLockThreshold: 80,
+  level1MinScore: 80,
+  level2MinScore: 101,
+  level3MinScore: 151,
+  weeklyPointCap: 20,
+  guestCleanupDays: 120,
+  // Cấu hình Chế độ thực thi Quy tắc Điểm (Tự động vs Giáo viên duyệt)
+  rule_mode_return_ontime: 'auto',       // Trả thiết bị đúng hạn & nguyên vẹn (+2đ)
+  rule_mode_checkin_ontime: 'auto',      // Check-in ca trực đúng giờ (+3đ)
+  rule_mode_late_return: 'auto',         // Trả thiết bị trễ hạn (-5đ/ngày)
+  rule_mode_lab_cleanup: 'manual',       // Hỗ trợ dọn dẹp vệ sinh Lab (+5đ)
+  rule_mode_tech_support: 'manual',      // Hỗ trợ kỹ thuật / Sửa chữa (+10đ)
+  rule_mode_doc_contribution: 'manual',  // Đóng góp tài liệu / code (+10đ)
+  rule_mode_bounty_task: 'manual',       // Nhiệm vụ phục hồi điểm (+15đ)
+  rule_mode_report_bug: 'manual',        // Báo cáo lỗi thiết bị sớm (+3đ)
+  rule_mode_noshow_shift: 'manual',      // Bỏ ca trực không phép (-15đ)
+  rule_mode_dirty_accessories: 'manual', // Trả đồ bẩn / thiếu phụ kiện (-10đ)
+  rule_mode_damage_loss: 'manual',       // Làm hỏng / mất thiết bị (-40đ)
+  rule_mode_misuse: 'manual',            // Dùng thiết bị sai mục đích (-20đ)
+  rule_mode_share_account: 'manual',     // Cho mượn ké tài khoản (-20đ)
+  // Cấu hình Chính sách Sinh viên ngoài CLB (Guest Policy)
+  enableGuestBorrowing: 'true',
+  allowMemberSponsor: 'true',
+  maxActiveGuaranteesPerMember: 1,
+  sponsorMinScore: 80,
+  allowGuestDeposit: 'true',
+  guestOverdueFinePerDay: 15000
 };
 
 function getSystemSetting(key) {
@@ -654,40 +683,293 @@ app.delete('/api/members/:id', authenticateToken, authorizeRoles('manager', 'sup
   res.json({ message: 'Xóa thành viên thành công' });
 });
 
+// Helper: Ghi nhận biến động điểm tín nhiệm minh bạch có Transaction Log & kiểm tra Trần/Sàn
+function recordPointTransaction(user, amount, type, actionKey, reason, evidence, actorReq) {
+  const users = readCollection('users', []);
+  const userIdx = users.findIndex(u => u.mssv === user.mssv || u.id === user.id);
+  if (userIdx === -1) return null;
+
+  const pointTransactions = readCollection('point_transactions', []);
+  const oldPoints = users[userIdx].points !== undefined ? Number(users[userIdx].points) : 100;
+  
+  // Kiểm tra trần điểm cộng tuần (+20đ tối đa/tuần theo quy tắc chống lạm phát)
+  const weeklyCap = Number(getSystemSetting('weeklyPointCap') || 20);
+  let finalAmount = Number(amount);
+  
+  if (type === 'reward' || finalAmount > 0) {
+    const now = new Date();
+    const lastReset = users[userIdx].lastWeekResetDate ? new Date(users[userIdx].lastWeekResetDate) : null;
+    const isNewWeek = !lastReset || (now - lastReset) > 7 * 24 * 60 * 60 * 1000;
+    if (isNewWeek) {
+      users[userIdx].weeklyEarnedPoints = 0;
+      users[userIdx].lastWeekResetDate = now.toISOString();
+    }
+    
+    const currentWeekly = users[userIdx].weeklyEarnedPoints || 0;
+    if (currentWeekly + finalAmount > weeklyCap) {
+      finalAmount = Math.max(0, weeklyCap - currentWeekly);
+    }
+    users[userIdx].weeklyEarnedPoints = (users[userIdx].weeklyEarnedPoints || 0) + finalAmount;
+  }
+  
+  // Nguyên tắc sàn điểm (Floor Limit: Không âm dưới 0đ)
+  const newPoints = Math.max(0, oldPoints + finalAmount);
+  users[userIdx].points = newPoints;
+  writeCollection('users', users);
+
+  const tx = {
+    id: uuidv4(),
+    mssv: user.mssv,
+    userName: user.name,
+    type: finalAmount >= 0 ? 'reward' : 'penalty',
+    actionKey: actionKey || 'custom',
+    amount: finalAmount,
+    balanceAfter: newPoints,
+    reason: reason || 'Điều chỉnh điểm tín nhiệm',
+    evidence: evidence || '',
+    createdBy: actorReq?.user?.id || 'system',
+    createdByName: actorReq?.user?.name || (actorReq?.user?.username ? actorReq.user.username : 'Hệ thống tự động'),
+    timestamp: new Date().toISOString()
+  };
+  pointTransactions.unshift(tx);
+  writeCollection('point_transactions', pointTransactions);
+
+  return { user: users[userIdx], transaction: tx };
+}
+
 app.post('/api/members/:id/points', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
-  const { amount, reason } = req.body; // e.g. amount: 10 hoặc -5
+  const { amount, reason, evidence, actionKey } = req.body; // e.g. amount: 10 hoặc -5
 
   if (amount === undefined || isNaN(amount)) {
     return res.status(400).json({ error: 'Số điểm không hợp lệ' });
   }
 
+  if (!reason || !String(reason).trim()) {
+    return res.status(400).json({ error: 'Bắt buộc phải cung cấp lý do điều chỉnh điểm để minh bạch đối soát' });
+  }
+
   const users = readCollection('users');
-  const index = users.findIndex(u => u.id === id);
-  if (index === -1) {
+  const user = users.find(u => u.id === id || u.mssv === id);
+  if (!user) {
     return res.status(404).json({ error: 'Không tìm thấy thành viên' });
   }
 
-  const oldPoints = users[index].points;
-  users[index].points = Math.max(0, users[index].points + Number(amount));
-  writeCollection('users', users);
+  const type = Number(amount) >= 0 ? 'reward' : 'penalty';
+  const result = recordPointTransaction(user, Number(amount), type, actionKey || 'admin_adjust', reason, evidence, req);
+
+  if (!result) {
+    return res.status(500).json({ error: 'Lỗi ghi nhận điểm tín nhiệm' });
+  }
 
   // Ghi nhận Audit Log
   logAuditEvent(req, {
     action: 'UPDATE',
     targetType: 'user_points',
     targetId: id,
-    oldValue: { points: oldPoints },
-    newValue: { points: users[index].points },
+    newValue: { points: result.user.points },
     metadata: {
       amount: Number(amount),
-      reason: reason || ''
+      reason,
+      evidence: evidence || '',
+      transactionId: result.transaction.id
     },
     success: true
   });
 
-  const { passwordHash: _, ...safeMember } = users[index];
-  res.json(safeMember);
+  const { passwordHash: _, ...safeMember } = result.user;
+  res.json({ member: safeMember, transaction: result.transaction });
+});
+
+// Lấy lịch sử biến động điểm tín nhiệm (Transaction Log)
+app.get('/api/point-transactions', (req, res) => {
+  const { mssv } = req.query;
+  let txs = readCollection('point_transactions', []);
+  if (mssv) {
+    txs = txs.filter(t => t.mssv === mssv);
+  }
+  res.json(txs);
+});
+
+// Tự động Sign-up khi quẹt thẻ RFID lần đầu (cấp 100 điểm khởi tạo)
+app.post('/api/rfid/scan-auto-signup', (req, res) => {
+  const { cardId, mssv, name, email } = req.body;
+  if (!cardId || !mssv) {
+    return res.status(400).json({ error: 'Vui lòng cung cấp Card ID và MSSV' });
+  }
+
+  const users = readCollection('users', []);
+  const rfidCards = readCollection('rfid_cards', []);
+  const defaultScore = Number(getSystemSetting('defaultScore') || 100);
+
+  let user = users.find(u => u.mssv === mssv);
+  let isNew = false;
+
+  if (!user) {
+    isNew = true;
+    user = {
+      id: uuidv4(),
+      mssv: String(mssv).trim(),
+      name: name ? String(name).trim() : `Sinh viên ${mssv}`,
+      email: email ? String(email).trim() : `${String(mssv).toLowerCase()}@lhu.edu.vn`,
+      role: 'Sinh viên',
+      points: defaultScore,
+      active: true,
+      accountStatus: 'active',
+      semesterCleanupDate: new Date().toISOString()
+    };
+    users.push(user);
+    writeCollection('users', users);
+
+    // Ghi nhận Transaction khởi tạo 100đ
+    recordPointTransaction(user, defaultScore, 'reward', 'initial_signup', 'Cấp 100 điểm khởi tạo khi kích hoạt tài khoản mượn thẻ Lab', '', req);
+  }
+
+  // Liên kết thẻ RFID
+  let card = rfidCards.find(c => c.cardId === cardId);
+  if (!card) {
+    card = {
+      id: uuidv4(),
+      cardId,
+      mssv: user.mssv,
+      userName: user.name,
+      status: 'active',
+      registeredDate: new Date().toISOString(),
+      lastUsed: new Date().toISOString(),
+      usageCount: 1
+    };
+    rfidCards.push(card);
+  } else {
+    card.mssv = user.mssv;
+    card.userName = user.name;
+    card.lastUsed = new Date().toISOString();
+    card.usageCount = (card.usageCount || 0) + 1;
+  }
+  writeCollection('rfid_cards', rfidCards);
+
+  res.json({ message: isNew ? 'Tự động kích hoạt tài khoản sinh viên mới thành công' : 'Nhận diện thẻ thành công', user, card, isNew });
+});
+
+// Tự động dọn dẹp sinh viên vãng lai sau 1 học kỳ
+app.post('/api/members/cleanup-guests', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
+  const cleanupDays = Number(getSystemSetting('guestCleanupDays') || 120);
+  const cutoffTime = Date.now() - cleanupDays * 24 * 60 * 60 * 1000;
+
+  const users = readCollection('users', []);
+  const borrows = readCollection('borrows', []);
+
+  const isProtectedRole = (role = '') => {
+    const r = role.toLowerCase();
+    return r.includes('chủ nhiệm') || r.includes('trưởng ban') || r.includes('quản lý kho') || r.includes('cộng tác viên') || r.includes('nghiên cứu') || r.includes('clb');
+  };
+
+  const toKeep = [];
+  const removed = [];
+
+  users.forEach(u => {
+    if (isProtectedRole(u.role)) {
+      toKeep.push(u);
+    } else {
+      const hasActiveBorrow = borrows.some(b => b.mssv === u.mssv && (b.status === 'Đang mượn' || b.status === 'Đã đặt trước'));
+      const createdAt = u.semesterCleanupDate ? new Date(u.semesterCleanupDate).getTime() : 0;
+      
+      if (hasActiveBorrow || (createdAt > cutoffTime)) {
+        toKeep.push(u);
+      } else {
+        removed.push(u);
+      }
+    }
+  });
+
+  writeCollection('users', toKeep);
+
+  res.json({
+    message: `Đã dọn dẹp ${removed.length} sinh viên vãng lai hết hạn học kỳ (${cleanupDays} ngày)`,
+    cleanedCount: removed.length,
+    remainingCount: toKeep.length,
+    removed
+  });
+});
+
+// ==========================================
+// API NHIỆM VỤ PHỤC HỒI ĐIỂM (BOUNTY TASKS)
+// ==========================================
+
+app.get('/api/bounty-tasks', (req, res) => {
+  const tasks = readCollection('bounty_tasks', []);
+  res.json(tasks);
+});
+
+app.post('/api/bounty-tasks', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
+  const { title, description, points, taskType } = req.body;
+  if (!title) return res.status(400).json({ error: 'Tiêu đề nhiệm vụ không được để trống' });
+
+  const tasks = readCollection('bounty_tasks', []);
+  const newTask = {
+    id: uuidv4(),
+    title,
+    description: description || '',
+    points: Number(points) || 10,
+    taskType: taskType || 'makeup_shift',
+    status: 'open',
+    claimedBy: null,
+    claimedByName: null,
+    claimedDate: null,
+    completedDate: null,
+    approvedBy: null
+  };
+  tasks.unshift(newTask);
+  writeCollection('bounty_tasks', tasks);
+  res.status(201).json(newTask);
+});
+
+app.post('/api/bounty-tasks/:id/claim', (req, res) => {
+  const { id } = req.params;
+  const { mssv, userName } = req.body;
+  if (!mssv) return res.status(400).json({ error: 'Thiếu MSSV người nhận nhiệm vụ' });
+
+  const tasks = readCollection('bounty_tasks', []);
+  const task = tasks.find(t => t.id === id);
+  if (!task) return res.status(404).json({ error: 'Không tìm thấy nhiệm vụ' });
+  if (task.status !== 'open') return res.status(400).json({ error: 'Nhiệm vụ này đã được nhận hoặc đã hoàn thành' });
+
+  task.status = 'claimed';
+  task.claimedBy = mssv;
+  task.claimedByName = userName || mssv;
+  task.claimedDate = new Date().toISOString();
+  writeCollection('bounty_tasks', tasks);
+
+  res.json({ message: 'Nhận nhiệm vụ phục hồi điểm thành công', task });
+});
+
+app.post('/api/bounty-tasks/:id/complete', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
+  const { id } = req.params;
+  const tasks = readCollection('bounty_tasks', []);
+  const task = tasks.find(t => t.id === id);
+  if (!task) return res.status(404).json({ error: 'Không tìm thấy nhiệm vụ' });
+
+  task.status = 'completed';
+  task.completedDate = new Date().toISOString();
+  task.approvedBy = req.user?.name || (req.user?.username ? req.user.username : 'Admin');
+  writeCollection('bounty_tasks', tasks);
+
+  if (task.claimedBy) {
+    const users = readCollection('users', []);
+    const user = users.find(u => u.mssv === task.claimedBy);
+    if (user) {
+      recordPointTransaction(
+        user,
+        task.points,
+        'reward',
+        'bounty_task',
+        `Hoàn thành nhiệm vụ phục hồi điểm: "${task.title}"`,
+        `Phê duyệt bởi ${task.approvedBy}`,
+        req
+      );
+    }
+  }
+
+  res.json({ message: 'Xác nhận hoàn thành nhiệm vụ và cộng điểm thành công', task });
 });
 
 
@@ -867,6 +1149,10 @@ app.get('/api/equipment', (req, res) => {
   // Tính toán lại borrowedQty thực tế theo các phiếu đang hoạt động (Đang mượn hoặc Đã đặt trước)
   let changed = false;
   equipment.forEach(eq => {
+    if (eq.requiredLevel === undefined) {
+      eq.requiredLevel = 1;
+      changed = true;
+    }
     const isConsumable = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
     if (!isConsumable) {
       const activeBorrows = borrows.filter(b => b.equipmentId === eq.id && (b.status === 'Đang mượn' || b.status === 'Đã đặt trước'));
@@ -882,11 +1168,40 @@ app.get('/api/equipment', (req, res) => {
     writeCollection('equipment', equipment);
   }
 
+  // Lọc theo cấp độ điểm tín nhiệm của sinh viên
+  const { studentMssv, userPoints, hideInaccessible } = req.query;
+  if (studentMssv || userPoints !== undefined) {
+    let pts = 100;
+    if (studentMssv) {
+      const users = readCollection('users', []);
+      const u = users.find(usr => usr.mssv === studentMssv);
+      pts = u ? Number(u.points !== undefined ? u.points : 100) : 100;
+    } else {
+      pts = Number(userPoints);
+    }
+
+    const lockThreshold = Number(getSystemSetting('borrowLockThreshold') || 80);
+    const lvl2Min = Number(getSystemSetting('level2MinScore') || 101);
+    const lvl3Min = Number(getSystemSetting('level3MinScore') || 151);
+
+    if (hideInaccessible === 'true') {
+      if (pts < lockThreshold) {
+        return res.json([]); // Điểm < 80 bị khóa quyền mượn, không hiển thị đồ mượn
+      }
+      return res.json(equipment.filter(eq => {
+        const lvl = Number(eq.requiredLevel) || 1;
+        if (lvl === 3) return pts >= lvl3Min;
+        if (lvl === 2) return pts >= lvl2Min;
+        return pts >= lockThreshold;
+      }));
+    }
+  }
+
   res.json(equipment);
 });
 
 app.post('/api/equipment', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
-  const { name, code, totalQty, location, category, assetType, unit, minThreshold, maxQty } = req.body;
+  const { name, code, totalQty, location, category, assetType, unit, minThreshold, maxQty, requiredLevel } = req.body;
   if (!name || !code || totalQty === undefined) {
     return res.status(400).json({ error: 'Vui lòng điền đủ Tên, Mã thiết bị và Số lượng' });
   }
@@ -909,6 +1224,7 @@ app.post('/api/equipment', authenticateToken, authorizeRoles('manager', 'super_a
     category: category || 'Khác',
     assetType: assetType || 'Thiết bị',
     unit: unit || 'Cái',
+    requiredLevel: requiredLevel !== undefined ? Number(requiredLevel) : 1,
     minThreshold: minThreshold !== undefined ? Number(minThreshold) : (getSystemSetting('defaultLowStockThreshold') || 0)
   };
 
@@ -930,7 +1246,7 @@ app.post('/api/equipment/import', authenticateToken, authorizeRoles('manager', '
   const errors = [];
 
   items.forEach((item, idx) => {
-    const { name, code, totalQty, location, category, assetType, unit, minThreshold, maxQty } = item;
+    const { name, code, totalQty, location, category, assetType, unit, minThreshold, maxQty, requiredLevel } = item;
     
     if (!name || !code) {
       failedCount++;
@@ -957,6 +1273,7 @@ app.post('/api/equipment/import', authenticateToken, authorizeRoles('manager', '
       category: category || 'Khác',
       assetType: assetType || 'Thiết bị',
       unit: unit || 'Cái',
+      requiredLevel: requiredLevel !== undefined ? Number(requiredLevel) : 1,
       minThreshold: minThreshold !== undefined ? Number(minThreshold) : (getSystemSetting('defaultLowStockThreshold') || 0)
     };
 
@@ -977,7 +1294,7 @@ app.post('/api/equipment/import', authenticateToken, authorizeRoles('manager', '
 
 app.put('/api/equipment/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
-  const { name, code, totalQty, location, status, category, assetType, unit, minThreshold, maxQty } = req.body;
+  const { name, code, totalQty, location, status, category, assetType, unit, minThreshold, maxQty, requiredLevel } = req.body;
 
   const equipment = readCollection('equipment');
   const index = equipment.findIndex(e => e.id === id);
@@ -1003,6 +1320,7 @@ app.put('/api/equipment/:id', authenticateToken, authorizeRoles('manager', 'supe
     category: category !== undefined ? category : current.category || 'Khác',
     assetType: assetType !== undefined ? assetType : current.assetType || 'Thiết bị',
     unit: unit !== undefined ? unit : current.unit || 'Cái',
+    requiredLevel: requiredLevel !== undefined ? Number(requiredLevel) : (current.requiredLevel || 1),
     minThreshold: minThreshold !== undefined ? Number(minThreshold) : (current.minThreshold !== undefined ? current.minThreshold : (getSystemSetting('defaultLowStockThreshold') || 0))
   };
 
@@ -1029,24 +1347,131 @@ app.delete('/api/equipment/:id', authenticateToken, authorizeRoles('manager', 's
 
 // Mượn thiết bị
 app.post('/api/equipment/:id/borrow', (req, res) => {
-  const { id } = req.params;
-  const { qty, expectedReturnDate, initialCondition, borrowNotes, cardId, selectedInstanceIds } = req.body;
+  const { 
+    id 
+  } = req.params;
+  const { 
+    qty, expectedReturnDate, initialCondition, borrowNotes, cardId, selectedInstanceIds,
+    borrowerType, guestName, guestMssv, guestPhone, guestFaculty, identityCardNumber, identityProof,
+    guaranteeMethod, sponsorMssv, depositAmount, depositType, depositNotes
+  } = req.body;
 
-  // Lấy MSSV từ req.body.mssv hoặc từ req.user nếu có
-  let targetMssv = req.body.mssv ? String(req.body.mssv).trim() : (req.user?.mssv || null);
+  const isGuest = borrowerType === 'external_guest';
+
+  // Lấy MSSV từ req.body.mssv / guestMssv hoặc từ req.user nếu có
+  let targetMssv = isGuest 
+    ? (guestMssv ? String(guestMssv).trim() : (req.body.mssv ? String(req.body.mssv).trim() : null))
+    : (req.body.mssv ? String(req.body.mssv).trim() : (req.user?.mssv || null));
 
   if (!targetMssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Số lượng mượn không hợp lệ' });
   }
 
-  // Tìm thành viên trong users hoặc members
   const users = readCollection('users');
   const members = readCollection('members');
-  const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
+  const borrows = readCollection('borrows');
+  const equipment = readCollection('equipment');
+  const eqIndex = equipment.findIndex(e => e.id === id);
+  if (eqIndex === -1) {
+    return res.status(404).json({ error: 'Không tìm thấy thiết bị cần mượn' });
+  }
 
-  const user = findPerson(targetMssv);
-  if (!user) {
-    return res.status(404).json({ error: 'Thành viên mượn thiết bị không tồn tại trên hệ thống' });
+  const eq = equipment[eqIndex];
+  const isConsumable = eq.assetType === 'Linh kiện tiêu hao' || (eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư')));
+
+  let borrowerDisplayName = '';
+  let validatedSponsor = null;
+
+  if (isGuest) {
+    // 0. Kiểm tra quyền bật mượn cho khách
+    if (getSystemSetting('enableGuestBorrowing') === 'false') {
+      return res.status(403).json({ error: 'Hệ thống hiện đang tắt chính sách mượn thiết bị dành cho sinh viên ngoài CLB.' });
+    }
+
+    borrowerDisplayName = guestName ? String(guestName).trim() : (req.body.borrowerName || `Sinh viên ngoài CLB (${targetMssv})`);
+    const selectedGuarantee = guaranteeMethod || 'sponsor';
+
+    if (selectedGuarantee === 'sponsor') {
+      // Phương án A: Bảo lãnh qua Thành viên CLB
+      if (getSystemSetting('allowMemberSponsor') === 'false') {
+        return res.status(400).json({ error: 'Hình thức bảo lãnh qua thành viên hiện đang tạm đóng.' });
+      }
+      if (!sponsorMssv || !String(sponsorMssv).trim()) {
+        return res.status(400).json({ error: 'Phương án Bảo lãnh yêu cầu cung cấp MSSV của thành viên CLB đứng ra bảo lãnh.' });
+      }
+      const cleanSponsorMssv = String(sponsorMssv).trim();
+      const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
+      const sponsor = findPerson(cleanSponsorMssv);
+      if (!sponsor) {
+        return res.status(400).json({ error: `Không tìm thấy thành viên bảo lãnh có MSSV ${cleanSponsorMssv} trong danh sách CLB.` });
+      }
+
+      const sponsorMinScore = Number(getSystemSetting('sponsorMinScore') || 80);
+      const sponsorPts = Number(sponsor.points !== undefined ? sponsor.points : 100);
+      if (sponsorPts < sponsorMinScore) {
+        return res.status(400).json({
+          error: `Thành viên bảo lãnh (${sponsor.name} - ${sponsor.mssv}) chỉ có ${sponsorPts} điểm tín nhiệm (yêu cầu tối thiểu ${sponsorMinScore}đ để đủ điều kiện bảo lãnh).`
+        });
+      }
+
+      // Ràng buộc 1 đơn bảo lãnh tại một thời điểm
+      const maxGuarantees = Number(getSystemSetting('maxActiveGuaranteesPerMember') || 1);
+      const activeGuarantees = borrows.filter(b => b.sponsorMssv === cleanSponsorMssv && (b.status === 'Đang mượn' || b.status === 'Đã đặt trước'));
+      if (activeGuarantees.length >= maxGuarantees) {
+        return res.status(400).json({
+          error: `Thành viên bảo lãnh (${sponsor.name}) hiện đang đứng bảo lãnh cho ${activeGuarantees.length} đơn mượn khác chưa hoàn tất. Mỗi thành viên chỉ được bảo lãnh tối đa ${maxGuarantees} đơn cùng lúc để tránh rủi ro.`
+        });
+      }
+
+      validatedSponsor = sponsor;
+    } else if (selectedGuarantee === 'deposit_money' || selectedGuarantee === 'deposit_id_card' || selectedGuarantee === 'deposit_student_card') {
+      // Phương án B: Ký quỹ tiền / Giữ Thẻ SV / CCCD gốc
+      if (getSystemSetting('allowGuestDeposit') === 'false') {
+        return res.status(400).json({ error: 'Hình thức ký quỹ đặt cọc hiện đang tạm đóng.' });
+      }
+    } else if (selectedGuarantee === 'in_lab_only') {
+      // Phương án C: Sử dụng tại chỗ trong Lab
+      const requiredLvl = Number(eq.requiredLevel) || 1;
+      if (requiredLvl > 1 && !isConsumable) {
+        return res.status(403).json({
+          error: `Sinh viên ngoài CLB mượn sử dụng tại chỗ chỉ áp dụng cho linh kiện tiêu hao hoặc thiết bị Cấp 1. Thiết bị "${eq.name}" thuộc Cấp ${requiredLvl}, vui lòng chọn Phương án Bảo lãnh (A) hoặc Ký quỹ (B).`
+        });
+      }
+    }
+  } else {
+    // Thành viên CLB nội bộ:
+    const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
+    const user = findPerson(targetMssv);
+    if (!user) {
+      return res.status(404).json({ error: 'Thành viên mượn thiết bị không tồn tại trên hệ thống' });
+    }
+    borrowerDisplayName = user.name;
+
+    // 1. Kiểm tra ngưỡng khóa quyền mượn (< 80 điểm)
+    const lockThreshold = Number(getSystemSetting('borrowLockThreshold') || 80);
+    const userPts = Number(user.points !== undefined ? user.points : 100);
+    if (userPts < lockThreshold) {
+      return res.status(403).json({
+        error: `Tài khoản (${user.name} - ${user.mssv}) bị tạm khóa quyền mượn do điểm tín nhiệm dưới ${lockThreshold} điểm (Hiện tại: ${userPts} điểm). Vui lòng hoàn thành "Nhiệm vụ phục hồi điểm" để mở lại quyền mượn.`
+      });
+    }
+
+    // 2. Kiểm tra phân cấp thiết bị
+    const requiredLvl = Number(eq.requiredLevel) || 1;
+    const lvl2Min = Number(getSystemSetting('level2MinScore') || 101);
+    const lvl3Min = Number(getSystemSetting('level3MinScore') || 151);
+
+    if (requiredLvl === 2 && userPts < lvl2Min) {
+      return res.status(403).json({
+        error: `Thiết bị Cấp 2 (Trung cấp) yêu cầu từ ${lvl2Min} điểm tín nhiệm trở lên (Hiện tại bạn có ${userPts} điểm).`
+      });
+    }
+
+    if (requiredLvl === 3 && userPts < lvl3Min) {
+      return res.status(403).json({
+        error: `Thiết bị Cấp 3 (Chuyên sâu) yêu cầu từ ${lvl3Min} điểm tín nhiệm trở lên (Hiện tại bạn có ${userPts} điểm).`
+      });
+    }
   }
 
   // Kiểm tra thời gian hẹn nhận nếu là Đặt trước (không quét thẻ tại quầy)
@@ -1057,7 +1482,6 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
     const expireHours = expireHoursSetting !== undefined ? Number(expireHoursSetting) : 2;
 
     if (!isNaN(scheduledTime.getTime())) {
-      // Nếu giờ hẹn nhận đã ở quá khứ
       if (now > scheduledTime) {
         const elapsedHours = (now - scheduledTime) / (1000 * 60 * 60);
         if (expireHours > 0 && elapsedHours >= expireHours) {
@@ -1069,19 +1493,10 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
     }
   }
 
-  const equipment = readCollection('equipment');
-  const eqIndex = equipment.findIndex(e => e.id === id);
-  if (eqIndex === -1) {
-    return res.status(404).json({ error: 'Không tìm thấy thiết bị cần mượn' });
-  }
-
-  const eq = equipment[eqIndex];
   const requestedQty = Number(qty);
 
   // Đảm bảo borrowedQty luôn có giá trị
   if (!eq.borrowedQty) eq.borrowedQty = 0;
-
-  const isConsumable = eq.assetType === 'Linh kiện tiêu hao' || (eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư')));
 
   if (isConsumable) {
     // Nếu là linh kiện tiêu hao, kiểm tra số lượng tồn kho trực tiếp
@@ -1107,7 +1522,7 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
           if (inst.status !== 'Sẵn sàng') return res.status(400).json({ error: 'Serial ' + inst.serialNumber + ' không ở trạng thái Sẵn sàng' });
 
           inst.status = cardId ? 'Đang mượn' : 'Đã đặt trước';
-          inst.borrowedBy = user.mssv;
+          inst.borrowedBy = targetMssv;
         }
       }
     }
@@ -1118,7 +1533,6 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
   writeCollection('equipment', equipment);
 
   // Tạo phiếu mượn / xuất kho
-  const borrows = readCollection('borrows');
   const borrowStatus = cardId ? (isConsumable ? 'Đã tiêu hao' : 'Đang mượn') : 'Đã đặt trước';
   const borrowDays = getSystemSetting('defaultBorrowDays') || 7;
   const fallbackReturnDate = new Date(Date.now() + borrowDays * 24 * 60 * 60 * 1000).toISOString();
@@ -1130,48 +1544,70 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
     } catch (e) {}
   }
 
+  let finalNotes = borrowNotes || '';
+  if (isGuest && guaranteeMethod === 'in_lab_only') {
+    finalNotes = '[DÙNG TẠI PHÒNG LAB - KHÔNG MANG RA NGOÀI] ' + finalNotes;
+  }
+
   const newBorrow = {
     id: uuidv4(),
     equipmentId: eq.id,
     equipmentName: eq.name,
     equipmentCode: eq.code,
-    mssv: user.mssv,
-    borrowerName: user.name,
+    mssv: targetMssv,
+    borrowerName: borrowerDisplayName,
     qty: requestedQty,
     borrowDate: finalBorrowDate,
     expectedReturnDate: isConsumable ? null : (expectedReturnDate || fallbackReturnDate),
     initialCondition: initialCondition || 'Tốt',
-    borrowNotes: borrowNotes || '',
+    borrowNotes: finalNotes,
     returnDate: (cardId && isConsumable) ? new Date().toISOString() : null,
-    returnMssv: (cardId && isConsumable) ? user.mssv : null,
-    returnerName: (cardId && isConsumable) ? user.name : null,
+    returnMssv: (cardId && isConsumable) ? targetMssv : null,
+    returnerName: (cardId && isConsumable) ? borrowerDisplayName : null,
     finalCondition: (cardId && isConsumable) ? 'Đã tiêu hao' : null,
     returnNotes: (cardId && isConsumable) ? 'Linh kiện tiêu hao xuất dùng trực tiếp (không thu hồi)' : null,
     status: borrowStatus,
     instanceIds: selectedInstanceIds || null,
-    instanceSerials: selectedInstanceIds && eq.instances ? selectedInstanceIds.map(id => eq.instances.find(i => i.id === id)?.serialNumber).filter(Boolean) : null
+    instanceSerials: selectedInstanceIds && eq.instances ? selectedInstanceIds.map(id => eq.instances.find(i => i.id === id)?.serialNumber).filter(Boolean) : null,
+    // Thông tin mở rộng cho khách ngoài CLB
+    borrowerType: isGuest ? 'external_guest' : 'internal',
+    guaranteeMethod: isGuest ? (guaranteeMethod || 'sponsor') : null,
+    sponsorMssv: validatedSponsor ? validatedSponsor.mssv : (sponsorMssv || null),
+    sponsorName: validatedSponsor ? validatedSponsor.name : null,
+    sponsorPhone: validatedSponsor ? (validatedSponsor.phone || '') : null,
+    guestPhone: isGuest ? (guestPhone || '') : null,
+    guestFaculty: isGuest ? (guestFaculty || '') : null,
+    identityCardNumber: isGuest ? (identityCardNumber || '') : null,
+    depositAmount: isGuest ? (Number(depositAmount) || 0) : 0,
+    depositType: isGuest ? (depositType || null) : null,
+    depositNotes: isGuest ? (depositNotes || null) : null,
+    identityProof: isGuest ? (identityProof || null) : null,
+    guestCashFine: 0,
+    depositRefundStatus: null
   };
   borrows.push(newBorrow);
   writeCollection('borrows', borrows);
 
   // Log RFID scan if applicable
   if (cardId) {
-    logRfidAction(cardId, user.mssv, user.name, isConsumable ? 'export' : 'borrow', 'equipment', true);
+    logRfidAction(cardId, targetMssv, borrowerDisplayName, isConsumable ? 'export' : 'borrow', 'equipment', true);
   }
 
   // Gửi thông báo cho Quản lý
   createNotification(
     'equipment_borrow',
-    isConsumable ? 'Xuất linh kiện' : 'Mượn thiết bị mới',
-    `${user.name} (${user.mssv}) vừa mượn/xuất ${requestedQty}x ${eq.name}`,
+    isGuest ? 'Khách ngoài CLB mượn thiết bị' : (isConsumable ? 'Xuất linh kiện' : 'Mượn thiết bị mới'),
+    `${borrowerDisplayName} (${targetMssv}${isGuest ? ' - Sinh viên ngoài CLB' : ''}) vừa ${isConsumable ? 'xuất' : 'mượn'} ${requestedQty}x ${eq.name}${validatedSponsor ? ` (Bảo lãnh bởi: ${validatedSponsor.name})` : ''}`,
     {
       borrowId: newBorrow.id,
       equipmentId: eq.id,
       equipmentName: eq.name,
       qty: requestedQty,
-      userName: user.name,
-      mssv: user.mssv,
-      date: newBorrow.borrowDate
+      userName: borrowerDisplayName,
+      mssv: targetMssv,
+      date: newBorrow.borrowDate,
+      isGuest,
+      guaranteeMethod: newBorrow.guaranteeMethod
     }
   );
 
@@ -1184,11 +1620,14 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
       equipmentId: eq.id,
       equipmentName: eq.name,
       equipmentCode: eq.code,
-      borrowerMssv: user.mssv,
-      borrowerName: user.name,
+      borrowerMssv: targetMssv,
+      borrowerName: borrowerDisplayName,
       qty: requestedQty,
       status: newBorrow.status,
-      isConsumable
+      isConsumable,
+      borrowerType: newBorrow.borrowerType,
+      guaranteeMethod: newBorrow.guaranteeMethod,
+      sponsorMssv: newBorrow.sponsorMssv
     },
     metadata: {
       initialCondition: newBorrow.initialCondition,
@@ -1203,9 +1642,17 @@ app.post('/api/equipment/:id/borrow', (req, res) => {
 // Đặt trước thiết bị (Online Reservation - Sinh viên & Khách đặt trực tiếp theo MSSV)
 app.post('/api/equipment/:id/reserve', (req, res) => {
   const { id } = req.params;
-  const { qty, expectedReturnDate } = req.body;
+  const { 
+    qty, expectedReturnDate,
+    borrowerType, guestName, guestMssv, guestPhone, guestFaculty, identityCardNumber, identityProof,
+    guaranteeMethod, sponsorMssv, depositAmount, depositType, depositNotes
+  } = req.body;
 
-  let targetMssv = req.body.mssv ? String(req.body.mssv).trim() : (req.user?.mssv || null);
+  const isGuest = borrowerType === 'external_guest';
+
+  let targetMssv = isGuest
+    ? (guestMssv ? String(guestMssv).trim() : (req.body.mssv ? String(req.body.mssv).trim() : null))
+    : (req.body.mssv ? String(req.body.mssv).trim() : (req.user?.mssv || null));
 
   if (!targetMssv || !qty || Number(qty) <= 0) {
     return res.status(400).json({ error: 'Thiếu MSSV hoặc Số lượng mượn không hợp lệ' });
@@ -1213,13 +1660,7 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
 
   const users = readCollection('users');
   const members = readCollection('members');
-  const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
-
-  const user = findPerson(targetMssv);
-  if (!user) {
-    return res.status(404).json({ error: 'MSSV không tồn tại trên hệ thống' });
-  }
-
+  const borrows = readCollection('borrows');
   const equipment = readCollection('equipment');
   const eqIndex = equipment.findIndex(e => e.id === id);
   if (eqIndex === -1) {
@@ -1228,9 +1669,68 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
 
   const eq = equipment[eqIndex];
   const requestedQty = Number(qty);
+  const isConsumable = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
+
+  let borrowerDisplayName = '';
+  let validatedSponsor = null;
+
+  if (isGuest) {
+    if (getSystemSetting('enableGuestBorrowing') === 'false') {
+      return res.status(403).json({ error: 'Hệ thống hiện đang tắt chính sách đặt mượn dành cho sinh viên ngoài CLB.' });
+    }
+
+    borrowerDisplayName = guestName ? String(guestName).trim() : (req.body.borrowerName || `Sinh viên ngoài CLB (${targetMssv})`);
+    const selectedGuarantee = guaranteeMethod || 'sponsor';
+
+    if (selectedGuarantee === 'sponsor') {
+      if (getSystemSetting('allowMemberSponsor') === 'false') {
+        return res.status(400).json({ error: 'Hình thức bảo lãnh qua thành viên hiện đang tạm đóng.' });
+      }
+      if (!sponsorMssv || !String(sponsorMssv).trim()) {
+        return res.status(400).json({ error: 'Phương án Bảo lãnh yêu cầu cung cấp MSSV của thành viên CLB đứng ra bảo lãnh.' });
+      }
+      const cleanSponsorMssv = String(sponsorMssv).trim();
+      const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
+      const sponsor = findPerson(cleanSponsorMssv);
+      if (!sponsor) {
+        return res.status(400).json({ error: `Không tìm thấy thành viên bảo lãnh có MSSV ${cleanSponsorMssv} trong danh sách CLB.` });
+      }
+
+      const sponsorMinScore = Number(getSystemSetting('sponsorMinScore') || 80);
+      const sponsorPts = Number(sponsor.points !== undefined ? sponsor.points : 100);
+      if (sponsorPts < sponsorMinScore) {
+        return res.status(400).json({
+          error: `Thành viên bảo lãnh (${sponsor.name} - ${sponsor.mssv}) chỉ có ${sponsorPts} điểm tín nhiệm (yêu cầu tối thiểu ${sponsorMinScore}đ để đủ điều kiện bảo lãnh).`
+        });
+      }
+
+      const maxGuarantees = Number(getSystemSetting('maxActiveGuaranteesPerMember') || 1);
+      const activeGuarantees = borrows.filter(b => b.sponsorMssv === cleanSponsorMssv && (b.status === 'Đang mượn' || b.status === 'Đã đặt trước'));
+      if (activeGuarantees.length >= maxGuarantees) {
+        return res.status(400).json({
+          error: `Thành viên bảo lãnh (${sponsor.name}) hiện đang đứng bảo lãnh cho ${activeGuarantees.length} đơn mượn khác chưa hoàn tất. Mỗi thành viên chỉ được bảo lãnh tối đa ${maxGuarantees} đơn cùng lúc để tránh rủi ro.`
+        });
+      }
+
+      validatedSponsor = sponsor;
+    } else if (selectedGuarantee === 'in_lab_only') {
+      const requiredLvl = Number(eq.requiredLevel) || 1;
+      if (requiredLvl > 1 && !isConsumable) {
+        return res.status(403).json({
+          error: `Sinh viên ngoài CLB mượn sử dụng tại chỗ chỉ áp dụng cho linh kiện tiêu hao hoặc thiết bị Cấp 1. Thiết bị "${eq.name}" thuộc Cấp ${requiredLvl}, vui lòng chọn Phương án Bảo lãnh (A) hoặc Ký quỹ (B).`
+        });
+      }
+    }
+  } else {
+    const findPerson = (m) => members.find(p => p.mssv === m) || users.find(u => u.mssv === m);
+    const user = findPerson(targetMssv);
+    if (!user) {
+      return res.status(404).json({ error: 'MSSV không tồn tại trên hệ thống' });
+    }
+    borrowerDisplayName = user.name;
+  }
 
   if (!eq.borrowedQty) eq.borrowedQty = 0;
-  const isConsumable = eq.assetType && (eq.assetType.toLowerCase().includes('linh kiện') || eq.assetType.toLowerCase().includes('vật tư'));
 
   if (isConsumable) {
     if (eq.totalQty < requestedQty) return res.status(400).json({ error: 'Tồn kho không đủ' });
@@ -1242,7 +1742,6 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
 
   writeCollection('equipment', equipment);
 
-  const borrows = readCollection('borrows');
   let finalBorrowDate = new Date().toISOString();
   if (req.body.borrowDate) {
     try {
@@ -1250,24 +1749,43 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
     } catch (e) {}
   }
 
+  let finalNotes = req.body.borrowNotes || 'Đặt trước qua hệ thống Online';
+  if (isGuest && guaranteeMethod === 'in_lab_only') {
+    finalNotes = '[DÙNG TẠI PHÒNG LAB - KHÔNG MANG RA NGOÀI] ' + finalNotes;
+  }
+
   const newBorrow = {
     id: uuidv4(),
     equipmentId: eq.id,
     equipmentName: eq.name,
     equipmentCode: eq.code,
-    mssv: user.mssv,
-    borrowerName: user.name,
+    mssv: targetMssv,
+    borrowerName: borrowerDisplayName,
     qty: requestedQty,
     borrowDate: finalBorrowDate,
     expectedReturnDate: isConsumable ? null : (expectedReturnDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()),
     initialCondition: 'Tốt',
-    borrowNotes: 'Đặt trước qua hệ thống Online',
+    borrowNotes: finalNotes,
     returnDate: null,
     returnMssv: null,
     returnerName: null,
     finalCondition: null,
     returnNotes: null,
-    status: 'Đã đặt trước'
+    status: 'Đã đặt trước',
+    borrowerType: isGuest ? 'external_guest' : 'internal',
+    guaranteeMethod: isGuest ? (guaranteeMethod || 'sponsor') : null,
+    sponsorMssv: validatedSponsor ? validatedSponsor.mssv : (sponsorMssv || null),
+    sponsorName: validatedSponsor ? validatedSponsor.name : null,
+    sponsorPhone: validatedSponsor ? (validatedSponsor.phone || '') : null,
+    guestPhone: isGuest ? (guestPhone || '') : null,
+    guestFaculty: isGuest ? (guestFaculty || '') : null,
+    identityCardNumber: isGuest ? (identityCardNumber || '') : null,
+    depositAmount: isGuest ? (Number(depositAmount) || 0) : 0,
+    depositType: isGuest ? (depositType || null) : null,
+    depositNotes: isGuest ? (depositNotes || null) : null,
+    identityProof: isGuest ? (identityProof || null) : null,
+    guestCashFine: 0,
+    depositRefundStatus: null
   };
   borrows.push(newBorrow);
   writeCollection('borrows', borrows);
@@ -1275,16 +1793,18 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
   // Gửi thông báo cho Quản lý
   createNotification(
     'equipment_reserve',
-    'Yêu cầu đặt trước thiết bị',
-    `${user.name} (${user.mssv}) đã đặt trước ${requestedQty}x ${eq.name}`,
+    isGuest ? 'Khách ngoài CLB đặt trước thiết bị' : 'Yêu cầu đặt trước thiết bị',
+    `${borrowerDisplayName} (${targetMssv}${isGuest ? ' - Khách ngoài CLB' : ''}) đã đặt trước ${requestedQty}x ${eq.name}${validatedSponsor ? ` (Bảo lãnh: ${validatedSponsor.name})` : ''}`,
     {
       borrowId: newBorrow.id,
       equipmentId: eq.id,
       equipmentName: eq.name,
       qty: requestedQty,
-      userName: user.name,
-      mssv: user.mssv,
-      date: newBorrow.borrowDate
+      userName: borrowerDisplayName,
+      mssv: targetMssv,
+      date: newBorrow.borrowDate,
+      isGuest,
+      guaranteeMethod: newBorrow.guaranteeMethod
     }
   );
 
@@ -1297,10 +1817,13 @@ app.post('/api/equipment/:id/reserve', (req, res) => {
       equipmentId: eq.id,
       equipmentName: eq.name,
       equipmentCode: eq.code,
-      borrowerMssv: user.mssv,
-      borrowerName: user.name,
+      borrowerMssv: targetMssv,
+      borrowerName: borrowerDisplayName,
       qty: requestedQty,
-      status: 'Đã đặt trước'
+      status: 'Đã đặt trước',
+      borrowerType: newBorrow.borrowerType,
+      guaranteeMethod: newBorrow.guaranteeMethod,
+      sponsorMssv: newBorrow.sponsorMssv
     },
     success: true
   });
@@ -1599,6 +2122,98 @@ app.post('/api/equipment/borrows/:borrowId/return', authenticateToken, authorize
       }
     );
   }
+
+  // Tự động cộng/trừ điểm tín nhiệm theo quy tắc chuẩn hóa
+  const isGuestBorrow = borrowTicket.borrowerType === 'external_guest';
+  const expectedDate = borrowTicket.expectedReturnDate ? new Date(borrowTicket.expectedReturnDate) : null;
+  const actualReturnDate = new Date();
+  const isLate = expectedDate && actualReturnDate > expectedDate;
+  const diffDays = isLate ? Math.ceil((actualReturnDate - expectedDate) / (1000 * 60 * 60 * 24)) : 0;
+
+  // Tính phạt tiền mặt dành cho khách ngoài CLB nếu trả trễ (Ví dụ: 15.000đ/ngày)
+  if (isGuestBorrow) {
+    const finePerDay = Number(getSystemSetting('guestOverdueFinePerDay') || 15000);
+    borrowTicket.guestCashFine = isLate ? diffDays * finePerDay : 0;
+
+    if (borrowTicket.depositAmount && borrowTicket.depositAmount > 0) {
+      if (isDamagedOrLost) {
+        borrowTicket.depositRefundStatus = 'Tạm giữ tiền cọc (Chờ Ban chủ nhiệm xử lý đền bù)';
+      } else if (borrowTicket.guestCashFine > 0) {
+        const remainingRefund = Math.max(0, borrowTicket.depositAmount - borrowTicket.guestCashFine);
+        borrowTicket.depositRefundStatus = `Khấu trừ ${borrowTicket.guestCashFine.toLocaleString('vi-VN')}đ phạt trễ, hoàn lại ${remainingRefund.toLocaleString('vi-VN')}đ`;
+      } else {
+        borrowTicket.depositRefundStatus = `Đã hoàn trả đủ tiền cọc: ${Number(borrowTicket.depositAmount).toLocaleString('vi-VN')} VNĐ`;
+      }
+    } else if (borrowTicket.guaranteeMethod === 'deposit_id_card' || borrowTicket.guaranteeMethod === 'deposit_student_card') {
+      borrowTicket.depositRefundStatus = isDamagedOrLost 
+        ? 'Tạm giữ Thẻ SV / CCCD gốc (Chờ xử lý đền bù)' 
+        : 'Đã hoàn trả lại Thẻ SV / CCCD gốc cho sinh viên';
+    }
+  }
+
+  // Xác định đối tượng chịu trách nhiệm điểm số: Nếu là khách có bảo lãnh -> tính điểm vào người bảo lãnh
+  let pointTargetUser = null;
+  let reasonPrefix = '';
+
+  if (isGuestBorrow && borrowTicket.guaranteeMethod === 'sponsor' && borrowTicket.sponsorMssv) {
+    pointTargetUser = users.find(u => u.mssv === borrowTicket.sponsorMssv);
+    reasonPrefix = `[Bảo lãnh SV ${borrowTicket.borrowerName} (${borrowTicket.mssv})] `;
+  } else if (!isGuestBorrow) {
+    pointTargetUser = users.find(u => u.mssv === borrowTicket.mssv);
+    reasonPrefix = '';
+  }
+
+  if (pointTargetUser) {
+    if (isLate) {
+      // Trả trễ hạn: Phạt lũy tiến (3 ngày đầu -5đ/ngày, từ ngày thứ 4: -10đ/ngày)
+      let penalty = 0;
+      if (diffDays <= 3) {
+        penalty = diffDays * 5;
+      } else {
+        penalty = (3 * 5) + ((diffDays - 3) * 10);
+      }
+      if (getSystemSetting('rule_mode_late_return') === 'auto') {
+        recordPointTransaction(
+          pointTargetUser,
+          -penalty,
+          'penalty',
+          'late_return',
+          `${reasonPrefix}Trả thiết bị "${borrowTicket.equipmentName}" trễ hạn ${diffDays} ngày (-${penalty}đ)`,
+          `Mã phiếu mượn: ${borrowTicket.id}`,
+          req
+        );
+      }
+    } else if (!isDamagedOrLost) {
+      // Trả đúng hạn, nguyên vẹn: +2 điểm thưởng
+      if (getSystemSetting('rule_mode_return_ontime') === 'auto') {
+        recordPointTransaction(
+          pointTargetUser,
+          2,
+          'reward',
+          'on_time_return',
+          `${reasonPrefix}Trả thiết bị "${borrowTicket.equipmentName}" đúng hạn, sạch sẽ, nguyên vẹn (+2đ)`,
+          `Mã phiếu mượn: ${borrowTicket.id}`,
+          req
+        );
+      }
+    } else if (isDamagedOrLost) {
+      // Trả thiết bị hỏng/mất: Trừ điểm theo mức độ
+      if (getSystemSetting('rule_mode_damage_loss') === 'auto') {
+        const penaltyAmount = finalCondition.includes('Hỏng hoàn toàn') ? 35 : 10;
+        recordPointTransaction(
+          pointTargetUser,
+          -penaltyAmount,
+          'penalty',
+          'damaged_return',
+          `${reasonPrefix}Trả thiết bị "${borrowTicket.equipmentName}" bị hỏng/mất (${finalCondition}) (-${penaltyAmount}đ)`,
+          `Mã phiếu mượn: ${borrowTicket.id}, Biên bản bảo trì: ${isDamagedOrLost ? 'Đã tạo' : ''}`,
+          req
+        );
+      }
+    }
+  }
+
+  writeCollection('borrows', borrows);
 
   // Log RFID scan if applicable
   if (cardId) {
@@ -2364,8 +2979,12 @@ app.post('/api/bookings/bulk', authenticateToken, (req, res) => {
       const targetBookingDate = new Date(bYear, bMonth - 1, bDay);
       targetBookingDate.setHours(0, 0, 0, 0);
 
-      if (targetBookingDate < today || targetBookingDate > maxBookingDate) {
-        failedSlots.push({ date, slotId, reason: `Ngoài phạm vi cho phép (${advanceDays} ngày)` });
+      if (targetBookingDate < today) {
+        failedSlots.push({ date, slotId, reason: 'Ca đăng ký đã trôi qua trong quá khứ' });
+        continue;
+      }
+      if (targetBookingDate > maxBookingDate) {
+        failedSlots.push({ date, slotId, reason: `Vượt quá giới hạn đặt trước tối đa ${advanceDays} ngày` });
         continue;
       }
     }
@@ -2373,7 +2992,7 @@ app.post('/api/bookings/bulk', authenticateToken, (req, res) => {
     // 2. Double booking check
     const isBooked = bookings.some(b => b.date === date && String(b.slotId) === String(slotId));
     if (isBooked) {
-      failedSlots.push({ date, slotId, reason: 'Trùng lịch' });
+      failedSlots.push({ date, slotId, reason: 'Khung giờ này đã được đặt bởi nhóm khác' });
       continue;
     }
 
@@ -2403,49 +3022,58 @@ app.post('/api/bookings/bulk', authenticateToken, (req, res) => {
     newBookings.push(newBooking);
   }
 
-  if (newBookings.length > 0) {
-    writeCollection('bookings', bookings);
-
-    // Log RFID scan if applicable
-    for (const [mssv, cardId] of Object.entries(scannedCards)) {
-      const person = findPerson(mssv);
-      if (person && cardId) {
-        const actionType = (mssv === representativeMssv) ? 'book_representative' : 'book_member';
-        logRfidAction(cardId, person.mssv, person.name, actionType, 'room_booking', true);
-      }
-    }
-
-    // Ghi nhận Audit Log
-    logAuditEvent(req, {
-      action: 'CREATE',
-      targetType: 'room_booking_bulk',
-      newValue: {
-        bookedCount: newBookings.length,
-        representativeMssv,
-        representativeName: repUser.name,
-        slots: newBookings.map(b => ({ date: b.date, slotId: b.slotId }))
-      },
-      metadata: {
-        failedCount: failedSlots.length,
-        purpose
-      },
-      success: true
+  if (newBookings.length === 0) {
+    const uniqueReasons = Array.from(new Set(failedSlots.map(s => s.reason))).join(', ');
+    return res.status(400).json({
+      success: false,
+      error: `Đăng ký không thành công (${failedSlots.length} ca thất bại): ${uniqueReasons}`,
+      bookedCount: 0,
+      failedCount: failedSlots.length,
+      failedSlots
     });
-
-    // Gửi thông báo cho Quản lý & các bên liên quan (Bulk Notification)
-    createNotification(
-      'room_booking_bulk',
-      'Đăng ký phòng (Nhiều buổi)',
-      `${repUser.name} (${repUser.mssv}) vừa đăng ký ${newBookings.length} buổi phòng Lab`,
-      {
-        mssv: repUser.mssv,
-        representativeName: repUser.name,
-        participantsCount: membersInfo.length,
-        members: membersInfo,
-        slots: newBookings.map(b => ({ date: b.date, slotId: b.slotId }))
-      }
-    );
   }
+
+  writeCollection('bookings', bookings);
+
+  // Log RFID scan if applicable
+  for (const [mssv, cardId] of Object.entries(scannedCards)) {
+    const person = findPerson(mssv);
+    if (person && cardId) {
+      const actionType = (mssv === representativeMssv) ? 'book_representative' : 'book_member';
+      logRfidAction(cardId, person.mssv, person.name, actionType, 'room_booking', true);
+    }
+  }
+
+  // Ghi nhận Audit Log
+  logAuditEvent(req, {
+    action: 'CREATE',
+    targetType: 'room_booking_bulk',
+    newValue: {
+      bookedCount: newBookings.length,
+      representativeMssv,
+      representativeName: repUser.name,
+      slots: newBookings.map(b => ({ date: b.date, slotId: b.slotId }))
+    },
+    metadata: {
+      failedCount: failedSlots.length,
+      purpose
+    },
+    success: true
+  });
+
+  // Gửi thông báo cho Quản lý & các bên liên quan (Bulk Notification)
+  createNotification(
+    'room_booking_bulk',
+    'Đăng ký phòng (Nhiều buổi)',
+    `${repUser.name} (${repUser.mssv}) vừa đăng ký ${newBookings.length} buổi phòng Lab`,
+    {
+      mssv: repUser.mssv,
+      representativeName: repUser.name,
+      participantsCount: membersInfo.length,
+      members: membersInfo,
+      slots: newBookings.map(b => ({ date: b.date, slotId: b.slotId }))
+    }
+  );
 
   res.status(201).json({
     success: true,
@@ -3742,7 +4370,7 @@ app.get('/api/settings/catalog', (req, res) => {
 });
 
 app.post('/api/settings/catalog', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
-  const { name, codePrefix, category, assetType, unit, lifespanHours, description } = req.body;
+  const { name, codePrefix, category, assetType, unit, lifespanHours, requiredLevel, description } = req.body;
   if (!name || !codePrefix) {
     return res.status(400).json({ error: 'Vui lòng điền đủ Tên và Mã thiết bị (Prefix)' });
   }
@@ -3760,6 +4388,7 @@ app.post('/api/settings/catalog', authenticateToken, authorizeRoles('manager', '
     assetType: assetType || 'Thiết bị',
     unit: unit || 'Cái',
     lifespanHours: lifespanHours ? Number(lifespanHours) : 10000,
+    requiredLevel: requiredLevel ? Number(requiredLevel) : 1,
     description: description || ''
   };
 
@@ -3780,7 +4409,7 @@ app.post('/api/settings/catalog', authenticateToken, authorizeRoles('manager', '
 
 app.put('/api/settings/catalog/:id', authenticateToken, authorizeRoles('manager', 'super_admin'), (req, res) => {
   const { id } = req.params;
-  const { name, codePrefix, category, assetType, unit, lifespanHours, description } = req.body;
+  const { name, codePrefix, category, assetType, unit, lifespanHours, requiredLevel, description } = req.body;
   
   const catalog = readCollection('equipment_catalog');
   const index = catalog.findIndex(c => c.id === id);
@@ -3798,6 +4427,7 @@ app.put('/api/settings/catalog/:id', authenticateToken, authorizeRoles('manager'
     assetType: assetType || catalog[index].assetType,
     unit: unit || catalog[index].unit,
     lifespanHours: lifespanHours ? Number(lifespanHours) : catalog[index].lifespanHours,
+    requiredLevel: requiredLevel !== undefined ? Number(requiredLevel) : (catalog[index].requiredLevel || 1),
     description: description !== undefined ? description : catalog[index].description
   };
 

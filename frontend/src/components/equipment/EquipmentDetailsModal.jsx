@@ -234,8 +234,55 @@ const EquipmentDetailsModal = ({
         {/* Chi tiết người mượn & bàn giao mượn */}
         <div style={{ borderBottom: isReturned ? '1px solid var(--border-table)' : 'none', paddingBottom: isReturned ? '0.8rem' : 0 }}>
           <h4 style={{ color: 'var(--accent-green)', marginBottom: '0.45rem', fontSize: '0.95rem' }}>BÀN GIAO LÚC MƯỢN</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <div>Người mượn / nhận: <strong>{selectedBorrowDetail.borrowerName}</strong> (MSSV: {selectedBorrowDetail.mssv})</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span>Người mượn / nhận: <strong>{selectedBorrowDetail.borrowerName}</strong> (MSSV: {selectedBorrowDetail.mssv})</span>
+              {selectedBorrowDetail.borrowerType === 'external_guest' && (
+                <span style={{ fontSize: '0.72rem', background: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-purple)', border: '1px solid rgba(168, 85, 247, 0.3)', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
+                  Sinh viên ngoài CLB
+                </span>
+              )}
+            </div>
+
+            {/* Thông tin sinh viên ngoài CLB & Hình thức đảm bảo */}
+            {selectedBorrowDetail.borrowerType === 'external_guest' && (
+              <div style={{ background: 'rgba(168, 85, 247, 0.06)', border: '1px solid rgba(168, 85, 247, 0.2)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.82rem', marginTop: '0.2rem' }}>
+                <div style={{ fontWeight: '700', color: 'var(--accent-purple)', marginBottom: '0.35rem' }}>
+                  📋 HỒ SƠ ĐẢM BẢO & TRÁCH NHIỆM KHÁCH NGOÀI CLB:
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
+                  {selectedBorrowDetail.guestPhone && <div>SĐT liên hệ: <strong>{selectedBorrowDetail.guestPhone}</strong></div>}
+                  {selectedBorrowDetail.guestFaculty && <div>Khoa / Trường: <strong>{selectedBorrowDetail.guestFaculty}</strong></div>}
+                  {selectedBorrowDetail.identityCardNumber && <div>Số CCCD / Thẻ SV: <strong>{selectedBorrowDetail.identityCardNumber}</strong></div>}
+                </div>
+
+                <div style={{ marginTop: '0.45rem', paddingTop: '0.35rem', borderTop: '1px dashed rgba(168, 85, 247, 0.2)' }}>
+                  {selectedBorrowDetail.guaranteeMethod === 'sponsor' ? (
+                    <div style={{ color: 'var(--accent-blue)' }}>
+                      🛡️ <strong>Phương án A (Bảo lãnh):</strong> Thành viên bảo lãnh: <strong>{selectedBorrowDetail.sponsorName || 'N/A'}</strong> (MSSV: {selectedBorrowDetail.sponsorMssv})
+                      {selectedBorrowDetail.sponsorPhone ? ` - SĐT: ${selectedBorrowDetail.sponsorPhone}` : ''}
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        * Điểm số và trách nhiệm đền bù được tính trực tiếp lên tài khoản của thành viên bảo lãnh.
+                      </div>
+                    </div>
+                  ) : selectedBorrowDetail.guaranteeMethod === 'deposit_money' ? (
+                    <div style={{ color: 'var(--accent-amber)' }}>
+                      💵 <strong>Phương án B (Ký quỹ tiền mặt):</strong> Đặt cọc <strong>{Number(selectedBorrowDetail.depositAmount || 0).toLocaleString('vi-VN')} VNĐ</strong>
+                      {selectedBorrowDetail.depositNotes ? ` (Ghi chú: ${selectedBorrowDetail.depositNotes})` : ''}
+                    </div>
+                  ) : selectedBorrowDetail.guaranteeMethod === 'deposit_id_card' || selectedBorrowDetail.guaranteeMethod === 'deposit_student_card' ? (
+                    <div style={{ color: 'var(--accent-amber)' }}>
+                      🪪 <strong>Phương án B (Giữ giấy tờ gốc):</strong> Giữ Thẻ SV / CCCD gốc tại Ban chủ nhiệm
+                    </div>
+                  ) : (
+                    <div style={{ color: 'var(--accent-green)' }}>
+                      🏢 <strong>Phương án C (Dùng tại chỗ):</strong> Chỉ sử dụng trong phòng Lab dưới sự giám sát của trực ca
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div>Tình trạng thiết bị: <span style={{ color: 'var(--accent-amber)', fontWeight: 'bold' }}>{selectedBorrowDetail.initialCondition}</span></div>
             <div>Ghi chú lúc mượn: <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>{selectedBorrowDetail.borrowNotes || '(Không có ghi chú thêm)'}</span></div>
           </div>
@@ -248,6 +295,16 @@ const EquipmentDetailsModal = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <div>Người thực hiện trả: <strong>{selectedBorrowDetail.returnerName || 'N/A'}</strong> (MSSV: {selectedBorrowDetail.returnMssv || 'N/A'})</div>
               <div>Tình trạng lúc trả: <span style={{ color: 'var(--accent-green)', fontWeight: 'bold' }}>{selectedBorrowDetail.finalCondition || 'Tốt'}</span></div>
+              {selectedBorrowDetail.guestCashFine > 0 && (
+                <div style={{ color: 'var(--accent-red)', fontWeight: '600' }}>
+                  Phạt tiền mặt trễ hạn: {Number(selectedBorrowDetail.guestCashFine).toLocaleString('vi-VN')} VNĐ (Theo quy định quỹ CLB)
+                </div>
+              )}
+              {selectedBorrowDetail.depositRefundStatus && (
+                <div style={{ color: 'var(--accent-blue)', fontWeight: '500' }}>
+                  Xử lý tiền cọc / giấy tờ: {selectedBorrowDetail.depositRefundStatus}
+                </div>
+              )}
               <div>Ghi chú hoàn trả: <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>{selectedBorrowDetail.returnNotes || '(Không có ghi chú thêm)'}</span></div>
             </div>
           </div>

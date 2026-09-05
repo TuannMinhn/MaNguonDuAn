@@ -70,6 +70,28 @@ function avatarColor(str = '') {
   return colors[Math.abs(h) % colors.length];
 }
 
+function isSlotInPast(date, slotId) {
+  if (!date) return false;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const slotDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  
+  if (slotDate < today) return true;
+  if (slotDate > today) return false;
+  
+  // Same day: check end hour
+  let endHour = 9;
+  if (slotId === 'morning_1') endHour = 9;
+  else if (slotId === 'morning_2') endHour = 11;
+  else if (slotId === 'afternoon_1') endHour = 14;
+  else if (slotId === 'afternoon_2') endHour = 16;
+  else if (slotId === 'evening_1') endHour = 18;
+  else if (slotId === 'evening_2') endHour = 20;
+  
+  const slotEndTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, 0, 0);
+  return now >= slotEndTime;
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function RoomBooking({ userRole }) {
   const [weekStart, setWeekStart] = useState(getWeekStart());
@@ -183,9 +205,14 @@ export default function RoomBooking({ userRole }) {
 
   const toggleSlot = React.useCallback((dayKey, slotId) => {
     if (getBooking(dayKey, slotId)) return;
+    const date = dayDates[dayKey];
+    if (isSlotInPast(date, slotId)) {
+      setErrorMsg('Ca phòng này đã trôi qua trong quá khứ, không thể đăng ký mới.');
+      return;
+    }
     const key = `${dayKey}|${slotId}`;
     setSelected(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; });
-  }, [getBooking]);
+  }, [getBooking, dayDates]);
 
   // ── Open picker: seed temp state from confirmed ───────────────────────────
   const openPicker = () => {
@@ -255,12 +282,22 @@ export default function RoomBooking({ userRole }) {
       });
       const data = await res.json();
       
-      if (res.ok) {
-        setSuccessMsg(data.bookedCount > 0 ? `✓ Đăng ký thành công ${data.bookedCount} buổi${data.failedCount > 0 ? `, ${data.failedCount} buổi bị trùng` : ''}!` : `${data.failedCount} buổi đã được đặt bởi nhóm khác.`);
-        setSelected(new Set()); setShowRegModal(false); resetModal(); 
+      if (res.ok && data.bookedCount > 0) {
+        if (data.failedCount > 0) {
+          const failReasons = data.failedSlots?.map(f => `${f.slotId}: ${f.reason}`).join(', ');
+          setSuccessMsg(`✓ Đăng ký thành công ${data.bookedCount} buổi! (${data.failedCount} buổi không thành công: ${failReasons})`);
+        } else {
+          setSuccessMsg(`✓ Đăng ký thành công ${data.bookedCount} buổi phòng Lab!`);
+        }
+        setSelected(new Set()); 
+        setShowRegModal(false); 
+        resetModal(); 
         setRefreshKey(prev => prev + 1);
       } else {
-        setErrorMsg(data.error || 'Có lỗi xảy ra khi đăng ký');
+        const errorMsgText = data.error || (data.failedSlots && data.failedSlots.length > 0 
+          ? `Không thể đăng ký: ${data.failedSlots.map(s => s.reason).filter((v, i, a) => a.indexOf(v) === i).join(', ')}`
+          : 'Đăng ký phòng không thành công');
+        setErrorMsg(errorMsgText);
       }
     } catch { 
       setErrorMsg('Lỗi kết nối server');
@@ -443,8 +480,9 @@ export default function RoomBooking({ userRole }) {
                         {session.slots.map(slot => {
                           const booking = getBooking(day.key, slot.id);
                           const sel = selected.has(`${day.key}|${slot.id}`);
+                          const isPast = isSlotInPast(dayDates[day.key], slot.id);
                           return (
-                            <SlotCell key={slot.id} slot={slot} session={session} booking={booking} selected={sel} userRole={userRole}
+                            <SlotCell key={slot.id} slot={slot} session={session} booking={booking} selected={sel} userRole={userRole} isPast={isPast}
                               onToggle={() => toggleSlot(day.key, slot.id)}
                               onCancel={() => { setCancelTarget(booking); setCancelMssv(''); setErrorMsg(''); setShowCancelModal(true); }}
                               onViewDetails={() => { setDetailsTarget(booking); setShowDetailsModal(true); }}
@@ -877,30 +915,44 @@ export default function RoomBooking({ userRole }) {
 }
 
 // ─── SlotCell ─────────────────────────────────────────────────────────────────
-function SlotCell({ slot, session, booking, selected, onToggle, onCancel, onViewDetails, userRole }) {
+function SlotCell({ slot, session, booking, selected, onToggle, onCancel, onViewDetails, userRole, isPast }) {
   const booked = !!booking;
-  const bg     = booked ? 'rgba(239,68,68,0.08)' : selected ? 'rgba(59,130,246,0.18)' : session.bgColor;
-  const border = booked ? '1px solid rgba(239,68,68,0.3)' : selected ? '2px solid var(--accent-blue)' : `1px solid ${session.borderColor}`;
+  const bg     = booked 
+    ? 'rgba(239,68,68,0.08)' 
+    : isPast 
+      ? 'rgba(255,255,255,0.02)' 
+      : selected 
+        ? 'rgba(59,130,246,0.18)' 
+        : session.bgColor;
+  const border = booked 
+    ? '1px solid rgba(239,68,68,0.3)' 
+    : isPast 
+      ? '1px dashed rgba(255,255,255,0.1)' 
+      : selected 
+        ? '2px solid var(--accent-blue)' 
+        : `1px solid ${session.borderColor}`;
 
   return (
-    <div onClick={!booked ? onToggle : undefined}
+    <div onClick={!booked && !isPast ? onToggle : undefined}
       style={{ 
         background: bg, 
         border, 
         borderRadius: 'var(--radius-md)', 
         padding: '0.6rem 0.75rem', 
-        cursor: booked ? 'default' : 'pointer', 
+        cursor: booked ? 'default' : isPast ? 'not-allowed' : 'pointer', 
         userSelect: 'none',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.35rem'
+        gap: '0.35rem',
+        opacity: isPast && !booked ? 0.6 : 1,
+        transition: 'all 0.15s ease'
       }}>
 
       {/* Hàng 1: nhãn giờ */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-          <Clock size={12} style={{ color: booked ? 'var(--accent-red)' : session.color, flexShrink: 0 }} />
-          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: booked ? 'var(--accent-red)' : session.color }}>{slot.label}</span>
+          <Clock size={12} style={{ color: booked ? 'var(--accent-red)' : isPast ? 'var(--text-muted)' : session.color, flexShrink: 0 }} />
+          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: booked ? 'var(--accent-red)' : isPast ? 'var(--text-muted)' : session.color }}>{slot.label}</span>
         </div>
         {selected && !booked && (
           <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--accent-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -954,6 +1006,10 @@ function SlotCell({ slot, session, booking, selected, onToggle, onCancel, onView
               ⚪ Đã trả phòng
             </div>
           )}
+        </div>
+      ) : isPast ? (
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>⏳ Ca đã qua</span>
         </div>
       ) : (
         <div style={{ fontSize: '0.8rem', color: selected ? 'var(--accent-blue)' : 'var(--text-muted)', fontStyle: selected ? 'normal' : 'italic', fontWeight: selected ? '600' : 'normal' }}>
